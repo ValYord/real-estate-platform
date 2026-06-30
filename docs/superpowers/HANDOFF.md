@@ -8,6 +8,17 @@ We built **"agency"** — an autonomous multi-agent software team — from scrat
 it now runs on the user's **Claude Max subscription**. Next concrete action: the **first live run**
 (scaffold the real-estate product through the full PR→CI→review→gated-merge flow).
 
+## Update (2026-07-01) — review rigor + project rules
+Before the first live build we hardened the review and adapted it to our stack
+(spec/plan in `docs/superpowers/{specs,plans}/2026-07-01-review-rigor-adaptation*`):
+- Agency review (stack-agnostic): shared instruction now carries a **high-signal
+  flag-only / do-NOT-flag contract**; the `conventions` reviewer **MUST read** the root +
+  per-changed-dir `CLAUDE.md` (and `docs/adr/` if present), enforcing only path-scoped rules.
+  Agency `master`: `pytest` 91 passed/1 skipped, ruff + mypy green.
+- Real-estate repo: added root **`CLAUDE.md`** (Next.js15/Supabase/PostGIS Reviewer Checklist) —
+  pushed to `origin/main`. The agency reviewer reads it from the local workspace at review time.
+NEXT ACTION below (first live scaffold run) is unchanged and still pending.
+
 ## Two separate things
 1. **The agency (the tool)** — code at `~/agency/` (own git repo, branch `master`, NOT on GitHub).
    Python 3.12 in a uv venv at `~/agency/.venv`. ~89 tests, ruff + mypy --strict all green.
