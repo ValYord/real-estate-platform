@@ -1,0 +1,40 @@
+{
+  "nav": {
+    "buy": "Купить",
+    "sell": "Продать",
+    "rent": "Аренда",
+    "mortgage": "Ипотека",
+    "findAgent": "Найти агента",
+    "newsGuides": "Новости"
+  },
+  "header": {
+    "logo": "RE Platform",
+    "postProperty": "Разместить объект",
+    "signIn": "Войти",
+    "favorites": "Избранное",
+    "notifications": "Уведомления",
+    "openMenu": "Открыть меню",
+    "closeMenu": "Закрыть меню",
+    "language": "Язык",
+    "currency": "Валюта"
+  },
+  "lang": {
+    "hy": "HY",
+    "ru": "RU",
+    "en": "EN"
+  },
+  "currency": {
+    "amd": "AMD",
+    "usd": "USD",
+    "eur": "EUR",
+    "rub": "RUB"
+  },
+  "footer": {
+    "copyright": "Все права защищены",
+    "company": "Компания",
+    "buyerSeller": "Покупатель / Продавец",
+    "resources": "Ресурсы",
+    "legal": "Правовая информация",
+    "contact": "Контакты"
+  }
+}
