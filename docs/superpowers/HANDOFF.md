@@ -58,8 +58,10 @@ no human intermediation. Decomposed into sub-projects, built in dependency order
   (≤3 attempts: logs → Developer → push → re-check), then **parks** (PR open + `shipper/park`
   event) and continues. Spec/plan `2026-07-01-ci-self-heal-loop*`; ADR-008; agency `master`
   97 passed/1 skipped, ruff+mypy green. This unblocks unattended operation.
-- **#1 Autonomous planner — TODO.** PM decomposes the whole product into a prioritized backlog
-  (today I hand-craft each task via `talk`).
+- **#1 Autonomous planner — DONE.** `agency plan --target N` tops up the backlog to N pending
+  tasks (idempotent, dedup, priority order, small/CI-scoped), reusing the engine + `create_task`
+  tool with a `PLANNER_SYSTEM` prompt. Spec/plan `2026-07-01-autonomous-planner*`; ADR-009;
+  agency `master` 102 passed/1 skipped, ruff+mypy green. Not yet exercised live.
 - **#2 Doc-gap agent — TODO.** Agent finds doc gaps and writes the missing documentation.
 - **#4 Scheduler — TODO.** Daily cron runs `run --deliver` for ~5 tasks. Needs valid
   `CLAUDE_CODE_OAUTH_TOKEN` unattended.
