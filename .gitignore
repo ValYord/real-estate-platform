@@ -16,3 +16,7 @@ coverage/
 .turbo/
 agency.db
 *.db
+
+# Next.js build artifacts — regenerated on every build, must not be committed
+next-env.d.ts
+*.tsbuildinfo
