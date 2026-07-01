@@ -50,7 +50,22 @@ boundary, 006 agent-sdk-subscription, 007 autonomous-delivery (all in `~/agency/
 - Verified working: a live PM gap-analysis already ran on the Max subscription (read docs + web
   research with real citations; off-plan "New Developments" flagged as the #1 gap for Yerevan).
 
-## NEXT ACTION — first live build (scaffold, through delivery)
+## FIRST LIVE BUILD — DONE (2026-07-01)
+The first autonomous build shipped to `main`. Full pipeline ran on the Max subscription:
+Designer -> Developer -> QA (success) -> branch -> **PR #1** -> CI. The gated merge correctly
+**blocked** on a CI failure (PR left open), we fixed it, and **PR #1 squash-merged to `main`**
+(commit `1c788cb`, "Scaffold minimal Next.js 15 app + CI"). ~29k tokens for the agent run.
+- **Root cause of the CI failure:** the Developer generated `package-lock.json` on this macOS
+  machine; CI (Linux, Node 20 / npm 10.8.2) rejected it under `npm ci` (native-dep hoisting:
+  picomatch/tinyglobby). Fix committed to the PR: `.github/workflows/ci.yml` uses `npm install`
+  instead of `npm ci`. Lessons recorded in `<workspace>/KNOWN_MISTAKES.md`.
+- **Observations for agency improvement:** (1) no CI-failure feedback loop — a red CI does not
+  re-engage the Developer (only QA does); (2) Developer over-delivered vs the trimmed task
+  (kept next-intl/zustand/etc. + committed `tsconfig.tsbuildinfo`, a build artifact).
+- **Follow-ups still open:** branch protection on `main` (now that CI exists); restore strict
+  `npm ci` with a Linux-generated lockfile; `.gitignore` the tsbuildinfo/next-env artifacts.
+
+## NEXT ACTION — first live build (scaffold, through delivery)  [COMPLETED — see above]
 1. `gh auth switch --user ValYord` + export the token (above).
 2. `agency ... talk` → ask PM to create ONE scaffold task that ALSO adds `.github/workflows/ci.yml`
    (install + lint + test + build on PRs), then `exit`. (Full prompt is in the chat / Plan 6 "First live run".)
