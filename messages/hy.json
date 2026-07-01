@@ -1,0 +1,40 @@
+{
+  "nav": {
+    "buy": "Գնել",
+    "sell": "Վաճառել",
+    "rent": "Վարձ",
+    "mortgage": "Հիփոթեք",
+    "findAgent": "Գտնել գործակալ",
+    "newsGuides": "Նորություններ"
+  },
+  "header": {
+    "logo": "RE Platform",
+    "postProperty": "Ավելացնել գույք",
+    "signIn": "Մուտք",
+    "favorites": "Ընտրյալներ",
+    "notifications": "Ծանուցումներ",
+    "openMenu": "Բացել ընտրացանկը",
+    "closeMenu": "Փակել ընտրացանկը",
+    "language": "Լեզու",
+    "currency": "Արժույթ"
+  },
+  "lang": {
+    "hy": "HY",
+    "ru": "RU",
+    "en": "EN"
+  },
+  "currency": {
+    "amd": "AMD",
+    "usd": "USD",
+    "eur": "EUR",
+    "rub": "RUB"
+  },
+  "footer": {
+    "copyright": "Բոլոր իրավունքները պաշտպանված են",
+    "company": "Ընկերություն",
+    "buyerSeller": "Գնորդ / Վաճառող",
+    "resources": "Ռեսուրսներ",
+    "legal": "Իրավական",
+    "contact": "Կապ"
+  }
+}

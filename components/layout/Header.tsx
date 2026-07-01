@@ -1,19 +1,29 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import Link from 'next/link'
 import { Menu, X, Heart, Bell, ChevronDown } from 'lucide-react'
+import { useTranslations, useLocale } from 'next-intl'
+import { Link, useRouter, usePathname } from '@/i18n/navigation'
+import { LOCALES, type Locale } from '@/lib/locale'
+import CurrencySwitcher from '@/components/layout/CurrencySwitcher'
 import { cn } from '@/lib/utils'
 
-type Lang = 'HY' | 'RU' | 'EN'
-type Cur = 'AMD' | 'USD' | 'EUR' | 'RUB'
+// ─── Nav data ────────────────────────────────────────────────────────────────
 
 type MegaMenuItem = { label: string; href: string }
-type NavItem = { label: string; items: MegaMenuItem[] }
 
-const NAV_ITEMS: NavItem[] = [
+/** Keys that exist in the 'nav' translation namespace. */
+type NavKey = 'buy' | 'sell' | 'rent' | 'mortgage' | 'findAgent' | 'newsGuides'
+
+type NavItemConfig = {
+  /** Translation key inside the 'nav' namespace. */
+  key: NavKey
+  items: MegaMenuItem[]
+}
+
+const NAV_ITEMS: NavItemConfig[] = [
   {
-    label: 'Buy',
+    key: 'buy',
     items: [
       { label: 'Properties for sale', href: '/search?deal=sale' },
       { label: 'New construction', href: '/search?type=new_construction' },
@@ -24,7 +34,7 @@ const NAV_ITEMS: NavItem[] = [
     ],
   },
   {
-    label: 'Sell',
+    key: 'sell',
     items: [
       { label: "What's my home worth", href: '/home-value' },
       { label: 'Selling tools', href: '/guides?category=seller' },
@@ -33,7 +43,7 @@ const NAV_ITEMS: NavItem[] = [
     ],
   },
   {
-    label: 'Rent',
+    key: 'rent',
     items: [
       { label: 'Apartments for rent', href: '/search?deal=rent' },
       { label: 'Renter tools', href: '/guides?category=renter' },
@@ -42,7 +52,7 @@ const NAV_ITEMS: NavItem[] = [
     ],
   },
   {
-    label: 'Mortgage',
+    key: 'mortgage',
     items: [
       { label: 'Calculators', href: '/mortgage/calculators' },
       { label: 'Rates', href: '/mortgage/rates' },
@@ -51,7 +61,7 @@ const NAV_ITEMS: NavItem[] = [
     ],
   },
   {
-    label: 'Find an Agent',
+    key: 'findAgent',
     items: [
       { label: 'Find an agent', href: '/agents' },
       { label: 'Compare agents', href: '/agents/compare' },
@@ -60,7 +70,7 @@ const NAV_ITEMS: NavItem[] = [
     ],
   },
   {
-    label: 'News & Guides',
+    key: 'newsGuides',
     items: [
       { label: 'News', href: '/news' },
       { label: 'Insights', href: '/news/insights' },
@@ -70,15 +80,19 @@ const NAV_ITEMS: NavItem[] = [
   },
 ]
 
-const LANGUAGES: Lang[] = ['HY', 'RU', 'EN']
-const CURRENCIES: Cur[] = ['AMD', 'USD', 'EUR', 'RUB']
+// ─── Component ───────────────────────────────────────────────────────────────
 
 export default function Header() {
+  const tNav = useTranslations('nav')
+  const tHeader = useTranslations('header')
+
+  const locale = useLocale() as Locale
+  const router = useRouter()
+  const pathname = usePathname()
+
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [openMenu, setOpenMenu] = useState<string | null>(null)
-  const [language, setLanguage] = useState<Lang>('EN')
-  const [currency, setCurrency] = useState<Cur>('AMD')
   const menuTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Track scroll position to switch header background
@@ -100,12 +114,14 @@ export default function Header() {
   // Prevent body scroll when drawer is open
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? 'hidden' : ''
-    return () => { document.body.style.overflow = '' }
+    return () => {
+      document.body.style.overflow = ''
+    }
   }, [mobileOpen])
 
-  const openDropdown = (label: string) => {
+  const openDropdown = (key: string) => {
     if (menuTimerRef.current) clearTimeout(menuTimerRef.current)
-    setOpenMenu(label)
+    setOpenMenu(key)
   }
 
   const closeDropdown = () => {
@@ -114,6 +130,11 @@ export default function Header() {
 
   const cancelClose = () => {
     if (menuTimerRef.current) clearTimeout(menuTimerRef.current)
+  }
+
+  /** Switch to a different locale while keeping the current pathname. */
+  const handleLocaleSwitch = (nextLocale: Locale) => {
+    router.replace(pathname, { locale: nextLocale })
   }
 
   return (
@@ -135,47 +156,45 @@ export default function Header() {
               scrolled ? 'text-primary' : 'text-white',
             )}
           >
-            RE Platform
+            {tHeader('logo')}
           </Link>
 
           {/* Center: Desktop navigation */}
-          <nav
-            className="hidden lg:flex items-center gap-0.5"
-            aria-label="Main navigation"
-          >
+          <nav className="hidden lg:flex items-center gap-0.5" aria-label="Main navigation">
             {NAV_ITEMS.map((item) => (
               <div
-                key={item.label}
+                key={item.key}
                 className="relative"
-                onMouseEnter={() => openDropdown(item.label)}
+                onMouseEnter={() => openDropdown(item.key)}
                 onMouseLeave={closeDropdown}
               >
                 <button
                   className={cn(
-                    'flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+                    'flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
                     scrolled
                       ? 'text-gray-700 hover:text-primary hover:bg-gray-100'
                       : 'text-white/90 hover:text-white hover:bg-white/10',
-                    openMenu === item.label &&
+                    openMenu === item.key &&
                       (scrolled ? 'text-primary bg-gray-100' : 'text-white bg-white/10'),
                   )}
                   aria-haspopup="true"
-                  aria-expanded={openMenu === item.label}
-                  onFocus={() => openDropdown(item.label)}
+                  aria-expanded={openMenu === item.key}
+                  onFocus={() => openDropdown(item.key)}
                   onBlur={closeDropdown}
                 >
-                  {item.label}
+                  {tNav(item.key)}
                   <ChevronDown
                     aria-hidden="true"
                     className={cn(
                       'w-3.5 h-3.5 transition-transform duration-150',
-                      openMenu === item.label ? 'rotate-180' : '',
+                      openMenu === item.key ? 'rotate-180' : '',
                     )}
                   />
                 </button>
 
                 {/* Mega-menu dropdown */}
-                {openMenu === item.label && (
+                {openMenu === item.key && (
                   <div
                     className="absolute top-full left-0 mt-1 w-52 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50"
                     role="menu"
@@ -204,7 +223,7 @@ export default function Header() {
             {/* Favorites */}
             <Link
               href="/favorites"
-              aria-label="Favorites"
+              aria-label={tHeader('favorites')}
               className={cn(
                 'p-2 rounded-lg transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
                 scrolled
@@ -218,7 +237,7 @@ export default function Header() {
             {/* Notifications */}
             <Link
               href="/notifications"
-              aria-label="Notifications"
+              aria-label={tHeader('notifications')}
               className={cn(
                 'p-2 rounded-lg transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
                 scrolled
@@ -232,102 +251,76 @@ export default function Header() {
             {/* Separator */}
             <div
               aria-hidden="true"
-              className={cn(
-                'w-px h-5 mx-1',
-                scrolled ? 'bg-gray-200' : 'bg-white/20',
-              )}
+              className={cn('w-px h-5 mx-1', scrolled ? 'bg-gray-200' : 'bg-white/20')}
             />
 
             {/* Language switcher */}
             <div
               role="group"
-              aria-label="Language"
+              aria-label={tHeader('language')}
               className={cn(
                 'flex items-center rounded-lg overflow-hidden border text-xs font-medium',
                 scrolled ? 'border-gray-200' : 'border-white/30',
               )}
             >
-              {LANGUAGES.map((lang) => (
+              {LOCALES.map((loc) => (
                 <button
-                  key={lang}
-                  onClick={() => setLanguage(lang)}
-                  aria-pressed={language === lang}
-                  aria-label={`Switch language to ${lang}`}
+                  key={loc}
+                  onClick={() => handleLocaleSwitch(loc)}
+                  aria-pressed={locale === loc}
+                  aria-label={`Switch language to ${loc.toUpperCase()}`}
                   className={cn(
-                    'px-2 py-1.5 transition-colors duration-100 focus-visible:outline-none focus-visible:ring-inset focus-visible:ring-2 focus-visible:ring-primary',
-                    language === lang
+                    'px-2 py-1.5 transition-colors duration-100',
+                    'focus-visible:outline-none focus-visible:ring-inset focus-visible:ring-2 focus-visible:ring-primary',
+                    locale === loc
                       ? 'bg-primary text-white'
                       : scrolled
                         ? 'text-gray-600 hover:bg-gray-100'
                         : 'text-white/80 hover:bg-white/10',
                   )}
                 >
-                  {lang}
+                  {loc.toUpperCase()}
                 </button>
               ))}
             </div>
 
             {/* Currency switcher */}
-            <div
-              role="group"
-              aria-label="Currency"
-              className={cn(
-                'flex items-center rounded-lg overflow-hidden border text-xs font-medium',
-                scrolled ? 'border-gray-200' : 'border-white/30',
-              )}
-            >
-              {CURRENCIES.map((cur) => (
-                <button
-                  key={cur}
-                  onClick={() => setCurrency(cur)}
-                  aria-pressed={currency === cur}
-                  aria-label={`Switch currency to ${cur}`}
-                  className={cn(
-                    'px-2 py-1.5 transition-colors duration-100 focus-visible:outline-none focus-visible:ring-inset focus-visible:ring-2 focus-visible:ring-primary',
-                    currency === cur
-                      ? 'bg-primary text-white'
-                      : scrolled
-                        ? 'text-gray-600 hover:bg-gray-100'
-                        : 'text-white/80 hover:bg-white/10',
-                  )}
-                >
-                  {cur}
-                </button>
-              ))}
-            </div>
+            <CurrencySwitcher variant="header" scrolled={scrolled} />
 
             {/* Post a property */}
             <Link
               href="/sell/new"
               className="ml-1 px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             >
-              Post a property
+              {tHeader('postProperty')}
             </Link>
 
             {/* Sign in */}
             <Link
               href="/auth/login"
               className={cn(
-                'px-4 py-2 text-sm font-medium rounded-lg border transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+                'px-4 py-2 text-sm font-medium rounded-lg border transition-colors duration-150',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
                 scrolled
                   ? 'text-gray-700 border-gray-300 hover:bg-gray-50'
                   : 'text-white border-white/40 hover:bg-white/10',
               )}
             >
-              Sign in
+              {tHeader('signIn')}
             </Link>
           </div>
 
           {/* Mobile: hamburger */}
           <button
             className={cn(
-              'lg:hidden p-2 rounded-lg transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+              'lg:hidden p-2 rounded-lg transition-colors duration-150',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
               scrolled
                 ? 'text-gray-700 hover:bg-gray-100'
                 : 'text-white hover:bg-white/10',
             )}
             onClick={() => setMobileOpen(true)}
-            aria-label="Open navigation menu"
+            aria-label={tHeader('openMenu')}
             aria-expanded={mobileOpen}
             aria-controls="mobile-drawer"
           >
@@ -359,10 +352,10 @@ export default function Header() {
       >
         {/* Drawer header */}
         <div className="flex items-center justify-between px-4 h-16 border-b border-gray-100 flex-shrink-0">
-          <span className="text-lg font-bold text-primary">RE Platform</span>
+          <span className="text-lg font-bold text-primary">{tHeader('logo')}</span>
           <button
             onClick={() => setMobileOpen(false)}
-            aria-label="Close navigation menu"
+            aria-label={tHeader('closeMenu')}
             className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
             <X className="w-5 h-5" aria-hidden="true" />
@@ -373,9 +366,9 @@ export default function Header() {
         <div className="flex-1 overflow-y-auto">
           <nav aria-label="Mobile navigation" className="py-2">
             {NAV_ITEMS.map((item) => (
-              <div key={item.label}>
+              <div key={item.key}>
                 <p className="px-4 pt-4 pb-1 text-[11px] font-semibold text-gray-400 uppercase tracking-widest">
-                  {item.label}
+                  {tNav(item.key)}
                 </p>
                 {item.items.map((link) => (
                   <Link
@@ -396,23 +389,27 @@ export default function Header() {
             {/* Language */}
             <div>
               <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-2">
-                Language
+                {tHeader('language')}
               </p>
               <div className="flex gap-2">
-                {LANGUAGES.map((lang) => (
+                {LOCALES.map((loc) => (
                   <button
-                    key={lang}
-                    onClick={() => setLanguage(lang)}
-                    aria-pressed={language === lang}
-                    aria-label={`Switch language to ${lang}`}
+                    key={loc}
+                    onClick={() => {
+                      handleLocaleSwitch(loc)
+                      setMobileOpen(false)
+                    }}
+                    aria-pressed={locale === loc}
+                    aria-label={`Switch language to ${loc.toUpperCase()}`}
                     className={cn(
-                      'px-3 py-1.5 text-sm rounded-lg border font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
-                      language === lang
+                      'px-3 py-1.5 text-sm rounded-lg border font-medium transition-colors',
+                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+                      locale === loc
                         ? 'bg-primary text-white border-primary'
                         : 'text-gray-600 border-gray-200 hover:bg-gray-50',
                     )}
                   >
-                    {lang}
+                    {loc.toUpperCase()}
                   </button>
                 ))}
               </div>
@@ -421,26 +418,9 @@ export default function Header() {
             {/* Currency */}
             <div>
               <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-2">
-                Currency
+                {tHeader('currency')}
               </p>
-              <div className="flex flex-wrap gap-2">
-                {CURRENCIES.map((cur) => (
-                  <button
-                    key={cur}
-                    onClick={() => setCurrency(cur)}
-                    aria-pressed={currency === cur}
-                    aria-label={`Switch currency to ${cur}`}
-                    className={cn(
-                      'px-3 py-1.5 text-sm rounded-lg border font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
-                      currency === cur
-                        ? 'bg-primary text-white border-primary'
-                        : 'text-gray-600 border-gray-200 hover:bg-gray-50',
-                    )}
-                  >
-                    {cur}
-                  </button>
-                ))}
-              </div>
+              <CurrencySwitcher variant="drawer" />
             </div>
 
             {/* CTA buttons */}
@@ -450,14 +430,14 @@ export default function Header() {
                 className="block w-full text-center px-4 py-2.5 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                 onClick={() => setMobileOpen(false)}
               >
-                Post a property
+                {tHeader('postProperty')}
               </Link>
               <Link
                 href="/auth/login"
                 className="block w-full text-center px-4 py-2.5 text-gray-700 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                 onClick={() => setMobileOpen(false)}
               >
-                Sign in
+                {tHeader('signIn')}
               </Link>
               <div className="flex justify-center gap-6 pt-2">
                 <Link
@@ -466,7 +446,7 @@ export default function Header() {
                   onClick={() => setMobileOpen(false)}
                 >
                   <Heart className="w-4 h-4" aria-hidden="true" />
-                  Favorites
+                  {tHeader('favorites')}
                 </Link>
                 <Link
                   href="/notifications"
@@ -474,7 +454,7 @@ export default function Header() {
                   onClick={() => setMobileOpen(false)}
                 >
                   <Bell className="w-4 h-4" aria-hidden="true" />
-                  Notifications
+                  {tHeader('notifications')}
                 </Link>
               </div>
             </div>

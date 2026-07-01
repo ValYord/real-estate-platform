@@ -1,0 +1,40 @@
+{
+  "nav": {
+    "buy": "Buy",
+    "sell": "Sell",
+    "rent": "Rent",
+    "mortgage": "Mortgage",
+    "findAgent": "Find an Agent",
+    "newsGuides": "News & Guides"
+  },
+  "header": {
+    "logo": "RE Platform",
+    "postProperty": "Post a property",
+    "signIn": "Sign in",
+    "favorites": "Favorites",
+    "notifications": "Notifications",
+    "openMenu": "Open navigation menu",
+    "closeMenu": "Close navigation menu",
+    "language": "Language",
+    "currency": "Currency"
+  },
+  "lang": {
+    "hy": "HY",
+    "ru": "RU",
+    "en": "EN"
+  },
+  "currency": {
+    "amd": "AMD",
+    "usd": "USD",
+    "eur": "EUR",
+    "rub": "RUB"
+  },
+  "footer": {
+    "copyright": "All rights reserved",
+    "company": "Company",
+    "buyerSeller": "Buyer / Seller",
+    "resources": "Resources",
+    "legal": "Legal",
+    "contact": "Contact"
+  }
+}
