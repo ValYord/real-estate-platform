@@ -50,6 +50,27 @@ boundary, 006 agent-sdk-subscription, 007 autonomous-delivery (all in `~/agency/
 - Verified working: a live PM gap-analysis already ran on the Max subscription (read docs + web
   research with real citations; off-plan "New Developments" flagged as the #1 gap for Yerevan).
 
+## LIVE VALIDATION RUN (2026-07-01) — planner + self-heal proven
+Ran `agency plan --target 5` (planner's first live use) → a 5-task backlog (#3 i18n, #4 Supabase
+schema+RLS, #5 Auth, #6 Search+Map, #7 Property). Then `run --deliver`. Outcomes:
+- **4 product tasks shipped + auto-merged**: Scaffold (PR#1), Home (PR#3), i18n (PR#4),
+  Supabase (PR#5, includes migrations + RLS + real vitest tests). Tasks #5–#7 remain in the
+  backlog (#5 Auth was `in_design` when we stopped; #6, #7 `new`).
+- **CI self-heal proven live**: PR#5's CI failed → CiHealer fixed → CI green → merged.
+- **Robustness fix proven**: agents intermittently hit the SDK max-turns limit and RAISED,
+  which used to crash the whole run. Fixed so it's contained (`SdkEngine.run` → is_error reply;
+  `Orchestrator.step` wraps runner → Outcome.ERROR). Agents now retry and recover; the run
+  never dies. (agency commit `3fadab4`.)
+- **Tuning**: default `max_turns` raised 40→80 (agency `7ec7c9e`) — 40 was too low, causing
+  rabbit-hole churn (wasteful retries, slow runs). Follow-up ideas: make `--max-turns`
+  configurable (currently `AgentRequest.max_turns` default overrides the engine's); tighten
+  agent prompts; the planner slightly over-scoped #6/#7 (page-level) — planner dedup/scoping
+  could be stricter (a #1 refinement).
+- Agency master gate after all fixes: 105 passed/1 skipped, ruff + mypy green.
+
+**Next:** re-run `run --deliver` to finish #5–#7 (faster now with max_turns=80), then top up the
+backlog with `agency plan` again. Watch PRs on `ValYord/real-estate-platform`.
+
 ## AUTONOMOUS-TEAM ROADMAP (2026-07-01)
 Goal: a continuously self-running agent team that plans its own backlog from `docs/en/`,
 runs ~5 tasks/day on a schedule, and progresses through all phases with mandatory CI —
