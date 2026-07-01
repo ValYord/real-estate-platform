@@ -1,0 +1,25 @@
+{
+  "common": {
+    "search": "Search",
+    "buy": "Buy",
+    "rent": "Rent",
+    "sell": "Sell",
+    "signIn": "Sign in",
+    "register": "Register",
+    "agents": "Agents",
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "favorites": "Favorites",
+    "messages": "Messages",
+    "signOut": "Sign out"
+  },
+  "nav": {
+    "buy": "Buy",
+    "rent": "Rent",
+    "sell": "Sell",
+    "agents": "Agents"
+  },
+  "footer": {
+    "copyright": "All rights reserved"
+  }
+}
