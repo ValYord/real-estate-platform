@@ -50,6 +50,22 @@ boundary, 006 agent-sdk-subscription, 007 autonomous-delivery (all in `~/agency/
 - Verified working: a live PM gap-analysis already ran on the Max subscription (read docs + web
   research with real citations; off-plan "New Developments" flagged as the #1 gap for Yerevan).
 
+## AUTONOMOUS-TEAM ROADMAP (2026-07-01)
+Goal: a continuously self-running agent team that plans its own backlog from `docs/en/`,
+runs ~5 tasks/day on a schedule, and progresses through all phases with mandatory CI —
+no human intermediation. Decomposed into sub-projects, built in dependency order:
+- **#3 CI self-heal loop — DONE.** On CI failure, `Shipper` runs a bounded `CiHealer`
+  (≤3 attempts: logs → Developer → push → re-check), then **parks** (PR open + `shipper/park`
+  event) and continues. Spec/plan `2026-07-01-ci-self-heal-loop*`; ADR-008; agency `master`
+  97 passed/1 skipped, ruff+mypy green. This unblocks unattended operation.
+- **#1 Autonomous planner — TODO.** PM decomposes the whole product into a prioritized backlog
+  (today I hand-craft each task via `talk`).
+- **#2 Doc-gap agent — TODO.** Agent finds doc gaps and writes the missing documentation.
+- **#4 Scheduler — TODO.** Daily cron runs `run --deliver` for ~5 tasks. Needs valid
+  `CLAUDE_CODE_OAUTH_TOKEN` unattended.
+- **#5 Unattended safety — TODO (important).** ADR-005 bash is unsandboxed; unattended daily
+  runs want a container/VM sandbox + token-longevity + budget/rate-limit handling.
+
 ## FIRST LIVE BUILD — DONE (2026-07-01)
 The first autonomous build shipped to `main`. Full pipeline ran on the Max subscription:
 Designer -> Developer -> QA (success) -> branch -> **PR #1** -> CI. The gated merge correctly
