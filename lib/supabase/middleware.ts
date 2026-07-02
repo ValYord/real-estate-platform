@@ -2,26 +2,25 @@ import { createServerClient } from '@supabase/ssr'
 import type { CookieOptions } from '@supabase/ssr'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import type { User } from '@supabase/supabase-js'
 import type { Database } from '@/types/database'
 
 /**
  * Refreshes the Supabase auth session on every request and propagates the
  * updated session cookies to the response.
  *
+ * Also returns the authenticated user (or null) so the middleware can make
+ * routing decisions (e.g. redirect unauthenticated users from protected pages)
+ * without a second network round-trip.
+ *
  * Call this at the TOP of `middleware.ts`, BEFORE any i18n or routing logic,
  * so that Server Components always receive a fresh session.
- *
- * @example
- * // middleware.ts
- * import { updateSession } from '@/lib/supabase/middleware'
- * export async function middleware(request: NextRequest) {
- *   const sessionResponse = await updateSession(request)
- *   // … run i18n middleware, copy sessionResponse cookies to final response
- * }
  */
-export async function updateSession(request: NextRequest): Promise<NextResponse> {
-  // Start with a pass-through response; the cookie setter may replace this
-  // with a new NextResponse when it needs to propagate Set-Cookie headers.
+export async function updateSession(request: NextRequest): Promise<{
+  response: NextResponse
+  user: User | null
+}> {
+  // Start with a pass-through response; the cookie setter may replace this.
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient<Database>(
@@ -50,8 +49,10 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
   )
 
   // Calling getUser() triggers a token refresh if the access token is expired.
-  // The result is intentionally unused here; auth gates belong in page/route code.
-  await supabase.auth.getUser()
+  // We capture the user here to avoid a second network call in the middleware.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  return supabaseResponse
+  return { response: supabaseResponse, user }
 }
