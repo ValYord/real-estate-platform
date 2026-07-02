@@ -36,5 +36,32 @@
     "resources": "Ռեսուրսներ",
     "legal": "Իրավական",
     "contact": "Կապ"
+  },
+  "search": {
+    "title": "Որոնել գույք",
+    "filterBar": {
+      "buy": "Գնել",
+      "rent": "Վարձ",
+      "price": "Գին",
+      "beds": "Սենյակ",
+      "more": "Ավելին",
+      "sort": "Դասակարգ",
+      "saveSearch": "Պահպանել",
+      "anyBeds": "Ցանկացած",
+      "applyPrice": "Կիրառել"
+    },
+    "results": {
+      "properties": "գույք",
+      "forSale": "վաճառքի",
+      "forRent": "վարձակալության",
+      "in": "–ում",
+      "clearAll": "Մաքրել բոլորը",
+      "nothingFound": "Ոչինչ չի գտնվել",
+      "loadingMap": "Քարտեզը բեռնվում է…"
+    },
+    "map": {
+      "searchThisArea": "Որոնել այս տարածքում",
+      "unavailable": "Քարտեզն անհասանելի է"
+    }
   }
 }

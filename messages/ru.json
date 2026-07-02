@@ -36,5 +36,32 @@
     "resources": "Ресурсы",
     "legal": "Правовая информация",
     "contact": "Контакты"
+  },
+  "search": {
+    "title": "Поиск недвижимости",
+    "filterBar": {
+      "buy": "Купить",
+      "rent": "Аренда",
+      "price": "Цена",
+      "beds": "Спальни",
+      "more": "Ещё",
+      "sort": "Сортировка",
+      "saveSearch": "Сохранить поиск",
+      "anyBeds": "Любые",
+      "applyPrice": "Применить"
+    },
+    "results": {
+      "properties": "объектов",
+      "forSale": "на продажу",
+      "forRent": "в аренду",
+      "in": "в",
+      "clearAll": "Очистить все",
+      "nothingFound": "Ничего не найдено",
+      "loadingMap": "Загрузка карты…"
+    },
+    "map": {
+      "searchThisArea": "Искать в этом районе",
+      "unavailable": "Карта недоступна"
+    }
   }
 }

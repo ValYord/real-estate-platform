@@ -36,5 +36,32 @@
     "resources": "Resources",
     "legal": "Legal",
     "contact": "Contact"
+  },
+  "search": {
+    "title": "Search properties",
+    "filterBar": {
+      "buy": "Buy",
+      "rent": "Rent",
+      "price": "Price",
+      "beds": "Beds",
+      "more": "More",
+      "sort": "Sort",
+      "saveSearch": "Save search",
+      "anyBeds": "Any",
+      "applyPrice": "Apply"
+    },
+    "results": {
+      "properties": "properties",
+      "forSale": "for sale",
+      "forRent": "for rent",
+      "in": "in",
+      "clearAll": "Clear all",
+      "nothingFound": "Nothing found",
+      "loadingMap": "Loading map…"
+    },
+    "map": {
+      "searchThisArea": "Search this area",
+      "unavailable": "Map unavailable"
+    }
   }
 }
