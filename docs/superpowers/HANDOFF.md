@@ -91,16 +91,15 @@ no human intermediation. Decomposed into sub-projects, built in dependency order
   added a bounded retry-if-no-progress loop (`_MAX_PLAN_ATTEMPTS=3`, stop on enough-pending or 2 dry
   attempts) plus a retry nudge so a retry differs from the first attempt. Spec/plan
   `2026-07-03-planner-reliability*`; agency `master` 116 passed/1 skipped, ruff+mypy green.
-- **#1b Planner turn-burn — OPEN (root cause found).** Even after the hardening + retry, a
-  sandboxed `plan --target 3` still created 0 (the retry loop DID fire — 2 attempts — proving the
-  loop works; the agent made 0 create_task calls both times). Isolated precisely: the MCP
-  `create_task` tool WORKS in-container (a direct "call create_task with title=X" created a task
-  that persisted), and a simple max_turns=6 query creates instantly. Real cause: the planner prompt
-  tells the agent to "Read the product docs under docs/en/" (26 pages) — it burns its turns reading
-  files and never reaches create_task. **Next fix (own spec):** stop making the planner read all 26
-  docs — inject the page list (filenames/titles from `docs/en/pages/`) + done-task titles directly
-  into the prompt so it picks the next pages and calls create_task immediately. (On the host it
-  created 5 once by reading fewer files / luck; not reliable.)
+- **#1b Planner turn-burn — DONE + verified.** Fixed: `read_page_index` injects a cheap page
+  roadmap (each `docs/en/pages/*.md` heading) into the prompt with "do NOT read them all", so the
+  agent calls create_task immediately instead of reading 26 files. Spec/plan
+  `2026-07-03-planner-page-index*`; ADR-009 note; agency `master` 118 passed/1 skipped, ruff+mypy
+  green. **Verified end-to-end in the sandbox:** `run-sandbox.sh plan --target 3` now creates 3
+  tasks — the next undone Phase-1 pages (04 Listing Wizard, 06 Dashboard, 07 Favorites), deduped
+  against the 7 done. The full autonomous loop (plan → deliver → CI self-heal → gated merge) is now
+  reliable end-to-end inside the container. (Those 3 tasks are queued in `~/agency-state/agency.db`
+  for the next `run --deliver` / scheduled cycle.)
 - **#2 Doc-gap agent — TODO.** Agent finds doc gaps and writes the missing documentation.
 - **#4a Local scheduler — DONE.** `agency cycle` (pause-check → PID lock → plan → deliver →
   summary) + a macOS LaunchAgent at 10:00 & 23:00 (two ~5-task batches/day). Kill switch:
