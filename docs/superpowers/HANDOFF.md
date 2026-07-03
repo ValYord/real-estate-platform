@@ -53,9 +53,11 @@ boundary, 006 agent-sdk-subscription, 007 autonomous-delivery (all in `~/agency/
 ## LIVE VALIDATION RUN (2026-07-01) — planner + self-heal proven
 Ran `agency plan --target 5` (planner's first live use) → a 5-task backlog (#3 i18n, #4 Supabase
 schema+RLS, #5 Auth, #6 Search+Map, #7 Property). Then `run --deliver`. Outcomes:
-- **4 product tasks shipped + auto-merged**: Scaffold (PR#1), Home (PR#3), i18n (PR#4),
-  Supabase (PR#5, includes migrations + RLS + real vitest tests). Tasks #5–#7 remain in the
-  backlog (#5 Auth was `in_design` when we stopped; #6, #7 `new`).
+- **ALL 7 backlog tasks shipped + auto-merged (8 PRs, 0 parked, ~441k tokens).** After the
+  max_turns bump the re-run flew through the rest: Scaffold (PR#1), gitignore (PR#2), Home
+  (PR#3), i18n (PR#4), Supabase+RLS+vitest (PR#5), Auth (PR#6), Search+Map/Mapbox (PR#7),
+  Property SSR+JSON-LD (PR#8). The entire Phase-1 MVP page set + data foundation was built
+  autonomously (planner → design → dev → QA → PR → CI → self-heal → merge).
 - **CI self-heal proven live**: PR#5's CI failed → CiHealer fixed → CI green → merged.
 - **Robustness fix proven**: agents intermittently hit the SDK max-turns limit and RAISED,
   which used to crash the whole run. Fixed so it's contained (`SdkEngine.run` → is_error reply;
@@ -68,8 +70,11 @@ schema+RLS, #5 Auth, #6 Search+Map, #7 Property). Then `run --deliver`. Outcomes
   could be stricter (a #1 refinement).
 - Agency master gate after all fixes: 105 passed/1 skipped, ruff + mypy green.
 
-**Next:** re-run `run --deliver` to finish #5–#7 (faster now with max_turns=80), then top up the
-backlog with `agency plan` again. Watch PRs on `ValYord/real-estate-platform`.
+**Next:** the backlog is empty (all 7 done). Run `agency plan --target 5` to generate the next
+slice (Phase-1 continues: Dashboard, Favorites, Saved searches, Messages, Settings, Listing
+wizard, plus deepening the pages already stubbed), then `run --deliver`. Or build the remaining
+autonomous-team roadmap (#2 doc-gap, #4 scheduler, #5 safety) for hands-off daily operation.
+Verify the merged product locally: `cd ~/real-estate-campony && npm install && npm run dev`.
 
 ## AUTONOMOUS-TEAM ROADMAP (2026-07-01)
 Goal: a continuously self-running agent team that plans its own backlog from `docs/en/`,
