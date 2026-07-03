@@ -89,8 +89,14 @@ no human intermediation. Decomposed into sub-projects, built in dependency order
   tool with a `PLANNER_SYSTEM` prompt. Spec/plan `2026-07-01-autonomous-planner*`; ADR-009;
   agency `master` 102 passed/1 skipped, ruff+mypy green. Not yet exercised live.
 - **#2 Doc-gap agent — TODO.** Agent finds doc gaps and writes the missing documentation.
-- **#4 Scheduler — TODO.** Daily cron runs `run --deliver` for ~5 tasks. Needs valid
-  `CLAUDE_CODE_OAUTH_TOKEN` unattended.
+- **#4a Local scheduler — DONE.** `agency cycle` (pause-check → PID lock → plan → deliver →
+  summary) + a macOS LaunchAgent at 10:00 & 23:00 (two ~5-task batches/day). Kill switch:
+  `touch ~/.agency-paused`. Spec/plan `2026-07-03-local-scheduler*`; ADR-010; agency `master`
+  110 passed/1 skipped, ruff+mypy green. **Install (once, on the Mac):** see
+  `~/agency/scripts/README.md` — write `~/.agency-token`, `cp` the plist to
+  `~/Library/LaunchAgents/`, `launchctl load` it. Runs only while the Mac is awake+online.
+- **#4b Cloud deploy — TODO.** Off-machine (VM/container) so it's computer-independent; needs
+  host + token + gh/git + secrets. Depends on #5 (sandbox).
 - **#5 Unattended safety — TODO (important).** ADR-005 bash is unsandboxed; unattended daily
   runs want a container/VM sandbox + token-longevity + budget/rate-limit handling.
 
