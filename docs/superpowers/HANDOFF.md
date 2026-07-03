@@ -144,8 +144,12 @@ no human intermediation. Decomposed into sub-projects, built in dependency order
     --budget 100000 --max-steps 6` (proves headless token auth + git push from the container). See
     `~/agency/docker/README.md`. If headless auth fails in-container, fall back to mounting the host
     Claude config.
-  - **#5b Token longevity — TODO.** Detect/refresh an expired `claude setup-token` so unattended
-    runs don't silently die.
+  - **#5b Token longevity — DONE.** `SdkEngine` classifies auth/token-expired errors
+    (`is_auth_error`), fails fast (no backoff), sets `auth_failed`, and logs a loud actionable
+    message; `run_cycle` writes a `~/.agency-token-expired` marker on auth failure and skips cycles
+    while it exists (the user refreshes the token + `rm`s the marker). No auto-refresh (setup-token
+    is interactive). Spec/plan `2026-07-03-token-longevity*`; ADR-014; agency `master` 126 passed/1
+    skipped, ruff+mypy green. (Recovery documented in scripts/README.md + docker/README.md.)
 
 ## FIRST LIVE BUILD — DONE (2026-07-01)
 The first autonomous build shipped to `main`. Full pipeline ran on the Max subscription:
