@@ -103,7 +103,16 @@ no human intermediation. Decomposed into sub-projects, built in dependency order
     success") and retries with exponential backoff (10/30/90/270s, 4 retries, injectable sleep);
     non-retryable (max-turns) fails fast. Spec/plan `2026-07-03-rate-limit-backoff*`; ADR-011;
     agency `master` 114 passed/1 skipped, ruff+mypy green.
-  - **#5a Sandbox — DONE (build verified; token-auth pending user).** `docker/Dockerfile`
+  - **#5a Sandbox — DONE + verified end-to-end.** Fixed a real bug found during verification:
+    the Claude CLI refuses `--dangerously-skip-permissions` (bypassPermissions) as root, so the
+    image now runs as a non-root `agent` user (agency `master` `d84b1d7`). Verified in-container:
+    headless Claude auth, SDK query (control protocol), create_task→state-db persist to host, and
+    **git push + gh with a repo-scoped fine-grained PAT**. Known follow-up (NOT sandbox): the
+    planner is flaky — it sometimes creates 0 tasks (2 of 3 sandboxed runs), so a `cycle` did no
+    work; a #1 refinement (force create_task / retry-if-zero / structured output) is needed for
+    reliable unattended planning. User set up `~/.agency-token` + `~/.agency-gh-token` (repo-scoped
+    PAT — consider rotating it, it was pasted in chat) and `~/agency-state/agency.db` (seeded from
+    the host db so the planner dedups against the 7 done tasks). Original: `docker/Dockerfile`
     (python:3.12-slim + Node20/npm/gh/git + agency; Linux Claude CLI verified ELF in-container),
     `docker/run-sandbox.sh` (mounts ONLY `/workspace` + `/state`, creds via env), `entrypoint.sh`
     (safe.directory + `gh auth setup-git`). The #4a scheduler now calls the sandbox. Spec/plan
