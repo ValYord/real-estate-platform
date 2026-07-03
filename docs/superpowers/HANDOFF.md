@@ -100,7 +100,14 @@ no human intermediation. Decomposed into sub-projects, built in dependency order
   against the 7 done. The full autonomous loop (plan → deliver → CI self-heal → gated merge) is now
   reliable end-to-end inside the container. (Those 3 tasks are queued in `~/agency-state/agency.db`
   for the next `run --deliver` / scheduled cycle.)
-- **#2 Doc-gap agent — TODO.** Agent finds doc gaps and writes the missing documentation.
+- **#2 Doc-gap agent — DONE.** `agency doc-gap --count N` — a Write-enabled research agent
+  (`DocGapper`, `DOCGAP_SYSTEM`) that researches the market (Zillow/Redfin/Idealista + Yerevan) +
+  reads our docs (via the reused `read_page_index`), then writes N new `docs/en/pages/NN-*.md` for
+  missing features (which the planner then turns into build tasks). Spec/plan
+  `2026-07-03-doc-gap-agent*`; ADR-013; agency `master` 122 passed/1 skipped, ruff+mypy green.
+  Single-shot (no retry — add the #1 retry pattern if it proves flaky at writing). **Verify (user):**
+  `agency --workspace ~/real-estate-campony doc-gap --count 1` (or sandboxed) writes one new page to
+  review. Written pages are drafts, not auto-merged.
 - **#4a Local scheduler — DONE.** `agency cycle` (pause-check → PID lock → plan → deliver →
   summary) + a macOS LaunchAgent at 10:00 & 23:00 (two ~5-task batches/day). Kill switch:
   `touch ~/.agency-paused`. Spec/plan `2026-07-03-local-scheduler*`; ADR-010; agency `master`
