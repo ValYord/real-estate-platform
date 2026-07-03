@@ -84,10 +84,13 @@ no human intermediation. Decomposed into sub-projects, built in dependency order
   (≤3 attempts: logs → Developer → push → re-check), then **parks** (PR open + `shipper/park`
   event) and continues. Spec/plan `2026-07-01-ci-self-heal-loop*`; ADR-008; agency `master`
   97 passed/1 skipped, ruff+mypy green. This unblocks unattended operation.
-- **#1 Autonomous planner — DONE.** `agency plan --target N` tops up the backlog to N pending
-  tasks (idempotent, dedup, priority order, small/CI-scoped), reusing the engine + `create_task`
-  tool with a `PLANNER_SYSTEM` prompt. Spec/plan `2026-07-01-autonomous-planner*`; ADR-009;
-  agency `master` 102 passed/1 skipped, ruff+mypy green. Not yet exercised live.
+- **#1 Autonomous planner — DONE + reliability-hardened.** `agency plan --target N` tops up the
+  backlog to N pending tasks (idempotent, dedup, priority order, small/CI-scoped). Original spec/plan
+  `2026-07-01-autonomous-planner*`; ADR-009. **Reliability fix (2026-07-03)** after the sandbox run
+  showed the planner sometimes created 0 tasks: hardened the prompts to force `create_task` calls,
+  added a bounded retry-if-no-progress loop (`_MAX_PLAN_ATTEMPTS=3`, stop on enough-pending or 2 dry
+  attempts) plus a retry nudge so a retry differs from the first attempt. Spec/plan
+  `2026-07-03-planner-reliability*`; agency `master` 116 passed/1 skipped, ruff+mypy green.
 - **#2 Doc-gap agent — TODO.** Agent finds doc gaps and writes the missing documentation.
 - **#4a Local scheduler — DONE.** `agency cycle` (pause-check → PID lock → plan → deliver →
   summary) + a macOS LaunchAgent at 10:00 & 23:00 (two ~5-task batches/day). Kill switch:
