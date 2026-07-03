@@ -76,6 +76,13 @@ wizard, plus deepening the pages already stubbed), then `run --deliver`. Or buil
 autonomous-team roadmap (#2 doc-gap, #4 scheduler, #5 safety) for hands-off daily operation.
 Verify the merged product locally: `cd ~/real-estate-campony && npm install && npm run dev`.
 
+## Fix (2026-07-03) — per-run token budget
+`--budget` was checked against `total_tokens()` (lifetime sum of ALL events), so a persistent or
+seeded DB whose history exceeded the budget made every `run`/`cycle` no-op immediately (`token
+budget reached; stopping` after ~1 step). Fixed: the orchestrator baselines the total at run start
+and caps tokens spent THIS run (agency `master` `adfa225`). Scheduler `--budget 500000` now means
+500k per cycle. Rebuild `agency-sandbox` after this (done).
+
 ## AUTONOMOUS-TEAM ROADMAP (2026-07-01)
 Goal: a continuously self-running agent team that plans its own backlog from `docs/en/`,
 runs ~5 tasks/day on a schedule, and progresses through all phases with mandatory CI —
