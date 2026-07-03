@@ -103,9 +103,17 @@ no human intermediation. Decomposed into sub-projects, built in dependency order
     success") and retries with exponential backoff (10/30/90/270s, 4 retries, injectable sleep);
     non-retryable (max-turns) fails fast. Spec/plan `2026-07-03-rate-limit-backoff*`; ADR-011;
     agency `master` 114 passed/1 skipped, ruff+mypy green.
-  - **#5a Sandbox — TODO.** Run the agency in a container (workspace-only mount, repo-scoped
-    fine-grained token) to contain agent-bash mistakes/injection (ADR-005). Partial by nature
-    (network+creds inherently remain); composes with #4b cloud.
+  - **#5a Sandbox — DONE (build verified; token-auth pending user).** `docker/Dockerfile`
+    (python:3.12-slim + Node20/npm/gh/git + agency; Linux Claude CLI verified ELF in-container),
+    `docker/run-sandbox.sh` (mounts ONLY `/workspace` + `/state`, creds via env), `entrypoint.sh`
+    (safe.directory + `gh auth setup-git`). The #4a scheduler now calls the sandbox. Spec/plan
+    `2026-07-03-sandbox*`; ADR-012; agency `master` 114 passed/1 skipped, ruff+mypy green.
+    **User's remaining step:** create `~/.agency-token` + `~/.agency-gh-token` (a fine-grained PAT
+    scoped to `ValYord/real-estate-platform`), then verify end-to-end:
+    `~/agency/docker/run-sandbox.sh plan --target 1 && ~/agency/docker/run-sandbox.sh run --deliver
+    --budget 100000 --max-steps 6` (proves headless token auth + git push from the container). See
+    `~/agency/docker/README.md`. If headless auth fails in-container, fall back to mounting the host
+    Claude config.
   - **#5b Token longevity — TODO.** Detect/refresh an expired `claude setup-token` so unattended
     runs don't silently die.
 
