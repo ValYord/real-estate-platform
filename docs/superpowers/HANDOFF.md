@@ -97,8 +97,17 @@ no human intermediation. Decomposed into sub-projects, built in dependency order
   `~/Library/LaunchAgents/`, `launchctl load` it. Runs only while the Mac is awake+online.
 - **#4b Cloud deploy — TODO.** Off-machine (VM/container) so it's computer-independent; needs
   host + token + gh/git + secrets. Depends on #5 (sandbox).
-- **#5 Unattended safety — TODO (important).** ADR-005 bash is unsandboxed; unattended daily
-  runs want a container/VM sandbox + token-longevity + budget/rate-limit handling.
+- **#5 Unattended safety — decomposed into 5a/5b/5c:**
+  - **#5c Rate-limit backoff — DONE.** `SdkEngine.run` classifies transient/rate-limit errors
+    (`is_retryable_error`: overloaded/rate-limit/429/timeout + the observed "error result:
+    success") and retries with exponential backoff (10/30/90/270s, 4 retries, injectable sleep);
+    non-retryable (max-turns) fails fast. Spec/plan `2026-07-03-rate-limit-backoff*`; ADR-011;
+    agency `master` 114 passed/1 skipped, ruff+mypy green.
+  - **#5a Sandbox — TODO.** Run the agency in a container (workspace-only mount, repo-scoped
+    fine-grained token) to contain agent-bash mistakes/injection (ADR-005). Partial by nature
+    (network+creds inherently remain); composes with #4b cloud.
+  - **#5b Token longevity — TODO.** Detect/refresh an expired `claude setup-token` so unattended
+    runs don't silently die.
 
 ## FIRST LIVE BUILD — DONE (2026-07-01)
 The first autonomous build shipped to `main`. Full pipeline ran on the Max subscription:
