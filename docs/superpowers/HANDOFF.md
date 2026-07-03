@@ -105,9 +105,11 @@ no human intermediation. Decomposed into sub-projects, built in dependency order
   reads our docs (via the reused `read_page_index`), then writes N new `docs/en/pages/NN-*.md` for
   missing features (which the planner then turns into build tasks). Spec/plan
   `2026-07-03-doc-gap-agent*`; ADR-013; agency `master` 122 passed/1 skipped, ruff+mypy green.
-  Single-shot (no retry — add the #1 retry pattern if it proves flaky at writing). **Verify (user):**
-  `agency --workspace ~/real-estate-campony doc-gap --count 1` (or sandboxed) writes one new page to
-  review. Written pages are drafts, not auto-merged.
+  Single-shot (no retry — add the #1 retry pattern if it proves flaky at writing). **Verified
+  end-to-end (sandboxed):** `run-sandbox.sh doc-gap --count 1` researched competitors + the Yerevan
+  market and wrote a 498-line `docs/en/pages/27-schedule-tour.md` (Tour scheduling, Phase 2, 13
+  citations) — reviewed and committed to `main`. Written pages are drafts for review, not
+  auto-merged. NB: rebuild `agency-sandbox` after any agency code change (the image bakes the source).
 - **#4a Local scheduler — DONE.** `agency cycle` (pause-check → PID lock → plan → deliver →
   summary) + a macOS LaunchAgent at 10:00 & 23:00 (two ~5-task batches/day). Kill switch:
   `touch ~/.agency-paused`. Spec/plan `2026-07-03-local-scheduler*`; ADR-010; agency `master`
