@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { ZodError } from 'zod'
+import { ZodError, z } from 'zod'
 import { createServerClient } from '@/lib/supabase/server'
 import { patchListingSchema } from '@/lib/listings/schemas'
 import type { ListingDraft } from '@/lib/listings/types'
+
+const statusOnlySchema = z.object({ status: z.enum(['active', 'archived']) })
 
 type RouteContext = { params: Promise<{ id: string }> }
 
@@ -184,6 +186,34 @@ export async function PATCH(
     return NextResponse.json({ error: 'invalid_json' }, { status: 400 })
   }
 
+  // Status-toggle shortcut (used by the dashboard Activate/Deactivate action)
+  if (body !== null && typeof body === 'object' && !Array.isArray(body)) {
+    const bodyObj = body as Record<string, unknown>
+    const keys = Object.keys(bodyObj)
+    if (keys.length === 1 && keys[0] === 'status') {
+      const statusParsed = statusOnlySchema.safeParse(body)
+      if (!statusParsed.success) {
+        return NextResponse.json({ error: 'validation', fields: { status: 'Must be active or archived' } }, { status: 422 })
+      }
+      const toggleResult = await supabase
+        .from('properties')
+        .update({ status: statusParsed.data.status, updated_at: new Date().toISOString() } as unknown as never)
+        .eq('id', id)
+        .eq('owner_id', user.id)
+        .select('id, status')
+        .single()
+
+      const toggleRow = toggleResult.data as unknown as { id: string; status: string } | null
+      if (toggleResult.error || !toggleRow) {
+        if (toggleResult.error?.code === 'PGRST116') {
+          return NextResponse.json({ error: 'not_found' }, { status: 404 })
+        }
+        return NextResponse.json({ error: 'db_error' }, { status: 500 })
+      }
+      return NextResponse.json({ id: toggleRow.id, status: toggleRow.status })
+    }
+  }
+
   let parsed: ReturnType<typeof patchListingSchema.parse>
   try {
     parsed = patchListingSchema.parse(body)
@@ -261,4 +291,41 @@ export async function PATCH(
     status: row.status,
     savedAt: row.updated_at,
   })
+}
+
+/**
+ * DELETE /api/listings/[id]
+ * Deletes the listing. Ownership enforced via RLS (owner_id = auth.uid()).
+ * Returns 200 { deleted: true } on success, 404 if not found or not owner.
+ */
+export async function DELETE(
+  _request: NextRequest,
+  { params }: RouteContext,
+): Promise<NextResponse> {
+  const { id } = await params
+  const supabase = await createServerClient()
+
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser()
+
+  if (authError || !user) {
+    return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+  }
+
+  const { error } = await supabase
+    .from('properties')
+    .delete()
+    .eq('id', id)
+    .eq('owner_id', user.id)  // RLS: owner only
+
+  if (error) {
+    if (error.code === 'PGRST116') {
+      return NextResponse.json({ error: 'not_found' }, { status: 404 })
+    }
+    return NextResponse.json({ error: 'db_error' }, { status: 500 })
+  }
+
+  return NextResponse.json({ deleted: true })
 }
