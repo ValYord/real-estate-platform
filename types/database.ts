@@ -58,6 +58,10 @@ export interface Database {
           website: string | null
           created_at: string
           updated_at: string
+          phone_verified: boolean
+          agent_slug: string | null
+          agent_rating: number | null
+          agent_review_count: number
         }
         Insert: {
           id: string
@@ -70,6 +74,10 @@ export interface Database {
           website?: string | null
           created_at?: string
           updated_at?: string
+          phone_verified?: boolean
+          agent_slug?: string | null
+          agent_rating?: number | null
+          agent_review_count?: number
         }
         Update: {
           id?: string
@@ -82,6 +90,10 @@ export interface Database {
           website?: string | null
           created_at?: string
           updated_at?: string
+          phone_verified?: boolean
+          agent_slug?: string | null
+          agent_rating?: number | null
+          agent_review_count?: number
         }
         Relationships: [
           {
@@ -141,6 +153,8 @@ export interface Database {
           created_at: string
           updated_at: string
           listed_at: string | null
+          views_count: number
+          expires_at: string | null
         }
         Insert: {
           id?: string
@@ -187,6 +201,8 @@ export interface Database {
           created_at?: string
           updated_at?: string
           listed_at?: string | null
+          views_count?: number
+          expires_at?: string | null
         }
         Update: {
           id?: string
@@ -233,6 +249,8 @@ export interface Database {
           created_at?: string
           updated_at?: string
           listed_at?: string | null
+          views_count?: number
+          expires_at?: string | null
         }
         Relationships: [
           {
