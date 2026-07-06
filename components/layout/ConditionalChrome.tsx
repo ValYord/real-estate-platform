@@ -14,10 +14,11 @@ import Footer from './Footer'
  */
 export default function ConditionalChrome({ children }: { children: ReactNode }) {
   const pathname = usePathname()
-  // Match /[locale]/auth/... paths
+  // Match /[locale]/auth/... paths and wizard pages (/sell/new, /listing/*/edit)
   const isAuthPage = /\/auth\//i.test(pathname) || pathname.endsWith('/auth')
+  const isWizardPage = /\/sell\/new/.test(pathname) || /\/listing\/[^/]+\/edit/.test(pathname)
 
-  if (isAuthPage) return <>{children}</>
+  if (isAuthPage || isWizardPage) return <>{children}</>
 
   return (
     <>

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
 import { notFound } from 'next/navigation'
 import { getMockPropertyDetail } from '@/lib/property/mockData'
 import { safeLocale } from '@/lib/locale'
@@ -16,6 +17,7 @@ import SimilarProperties from '@/components/property/SimilarProperties'
 import RecentlyViewed from '@/components/property/RecentlyViewed'
 import MobileBottomBar from '@/components/property/MobileBottomBar'
 import PropertyViewTracker from '@/components/property/PropertyViewTracker'
+import PublishedToast from '@/components/property/PublishedToast'
 import type { PropertyDetail } from '@/lib/property/types'
 import type { DetailRow } from '@/components/property/PropertyDetailsTable'
 
@@ -200,6 +202,11 @@ export default async function PropertyDetailPage({
 
   return (
     <>
+      {/* "Published 🎉" toast — shown when redirected from the listing wizard */}
+      <Suspense fallback={null}>
+        <PublishedToast />
+      </Suspense>
+
       {/* JSON-LD structured data */}
       <script
         type="application/ld+json"
