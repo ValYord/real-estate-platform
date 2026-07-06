@@ -304,18 +304,22 @@ export interface Database {
           id: string
           user_id: string
           property_id: string
+          /** Price of the property at the moment the favorite was saved. */
+          saved_price: number | null
           created_at: string
         }
         Insert: {
           id?: string
           user_id: string
           property_id: string
+          saved_price?: number | null
           created_at?: string
         }
         Update: {
           id?: string
           user_id?: string
           property_id?: string
+          saved_price?: number | null
           created_at?: string
         }
         Relationships: [

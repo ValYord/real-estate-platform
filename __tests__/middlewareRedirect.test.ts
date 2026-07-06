@@ -42,10 +42,6 @@ describe('isProtectedPath()', () => {
       expect(isProtectedPath('/hy/dashboard/settings')).toBe(true)
     })
 
-    it('protects /[locale]/favorites', () => {
-      expect(isProtectedPath('/hy/favorites')).toBe(true)
-    })
-
     it('protects /[locale]/messages', () => {
       expect(isProtectedPath('/ru/messages')).toBe(true)
     })
@@ -88,6 +84,12 @@ describe('isProtectedPath()', () => {
 
     it('allows /[locale]/property/[slug]', () => {
       expect(isProtectedPath('/hy/property/nice-apartment-yerevan')).toBe(false)
+    })
+
+    // /favorites is intentionally public at the middleware level — guests see
+    // a login-wall card rendered by the page itself (not a redirect).
+    it('allows /[locale]/favorites (login wall rendered in-page, not redirected)', () => {
+      expect(isProtectedPath('/hy/favorites')).toBe(false)
     })
   })
 })

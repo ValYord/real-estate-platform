@@ -15,6 +15,9 @@ export default function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const nextPath = safeNext(searchParams.get('next') ?? undefined)
+  // `fav` is set when a guest taps ♡ on a property card; after login we
+  // auto-save the property so the intent is not lost.
+  const pendingFav = searchParams.get('fav')
 
   const [serverError, setServerError] = useState<string | null>(null)
   const [unverified, setUnverified] = useState(false)
@@ -61,6 +64,18 @@ export default function LoginForm() {
       return
     }
 
+    // Auto-save the deferred favorite if the user was redirected here after
+    // tapping ♡ on a property card without being logged in.
+    if (pendingFav) {
+      // Fire-and-forget; a failure is non-critical — the user is already logged
+      // in and can manually re-tap ♡ on the property.
+      void fetch('/api/favorites', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ propertyId: pendingFav }),
+      })
+    }
+
     router.push(nextPath)
   }
 
@@ -97,7 +112,7 @@ export default function LoginForm() {
 
       <div className="mt-6 space-y-4">
         {/* Google OAuth */}
-        <GoogleButton next={nextPath} disabled={isSubmitting} />
+        <GoogleButton next={nextPath} fav={pendingFav ?? undefined} disabled={isSubmitting} />
 
         {/* Divider */}
         <div className="flex items-center gap-3">

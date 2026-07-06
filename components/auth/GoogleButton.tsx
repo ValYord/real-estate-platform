@@ -6,6 +6,8 @@ import { safeNext } from '@/lib/auth/safeNext'
 
 interface GoogleButtonProps {
   next?: string
+  /** propertyId to auto-save as a favorite after OAuth login completes. */
+  fav?: string
   disabled?: boolean
 }
 
@@ -43,8 +45,10 @@ function GoogleIcon() {
 /**
  * "Continue with Google" OAuth button.
  * Initiates Supabase Google OAuth with the ?next redirect preserved.
+ * Passes an optional `fav` property-id so the callback can auto-save after
+ * the OAuth session is established.
  */
-export default function GoogleButton({ next, disabled }: GoogleButtonProps) {
+export default function GoogleButton({ next, fav, disabled }: GoogleButtonProps) {
   const [loading, setLoading] = useState(false)
 
   const handleClick = async () => {
@@ -54,10 +58,15 @@ export default function GoogleButton({ next, disabled }: GoogleButtonProps) {
     const supabase = createClient()
     const safeRedirect = safeNext(next)
 
+    // Include fav param so the callback route can auto-save the pending favorite.
+    const callbackUrl = new URL(`${window.location.origin}/auth/callback`)
+    callbackUrl.searchParams.set('next', safeRedirect)
+    if (fav) callbackUrl.searchParams.set('fav', fav)
+
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(safeRedirect)}`,
+        redirectTo: callbackUrl.toString(),
       },
     })
     // The browser is redirected by Supabase; no need to setLoading(false).
