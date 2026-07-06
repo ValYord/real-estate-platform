@@ -22,6 +22,10 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get('code')
   const nextRaw = searchParams.get('next')
   const next = safeNext(nextRaw ?? undefined)
+  // `fav` is set when a guest tapped ♡ before logging in; we persist it after
+  // the OAuth session is established (admin client bypasses RLS here, same as
+  // the profile upsert below).
+  const pendingFav = searchParams.get('fav')
 
   // Determine locale from the URL (e.g. /hy/auth/callback → 'hy')
   const localeMatch = request.nextUrl.pathname.match(/^\/(hy|ru|en)/)
@@ -84,6 +88,22 @@ export async function GET(request: NextRequest) {
     role: 'user',
   })
   // If the row already exists (returning user), the insert error is safely ignored.
+
+  // Auto-save the deferred favorite (guest tapped ♡ before signing in via Google).
+  // A UUID regex guards against invalid/injected values before the DB call.
+  if (pendingFav && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(pendingFav)) {
+    const { data: prop } = await admin
+      .from('properties')
+      .select('price')
+      .eq('id', pendingFav)
+      .maybeSingle()
+    const savedPrice = (prop as { price: number } | null)?.price ?? null
+    // Upsert is idempotent; ignore errors (e.g., property deleted).
+    await admin.from('favorites').upsert(
+      { user_id: user.id, property_id: pendingFav, saved_price: savedPrice },
+      { onConflict: 'user_id,property_id' },
+    )
+  }
 
   return NextResponse.redirect(new URL(next, origin))
 }

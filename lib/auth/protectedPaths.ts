@@ -2,9 +2,10 @@
  * Paths that require an authenticated session (without locale prefix).
  * The middleware strips the locale and checks against this list.
  */
+// NOTE: /favorites is intentionally excluded — the page shows a login-wall
+// card for guests instead of redirecting. Auth is handled inside the page.
 const PROTECTED_PATHS = [
   '/dashboard',
-  '/favorites',
   '/messages',
   '/sell',
   '/listing',
