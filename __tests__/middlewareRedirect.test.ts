@@ -1,6 +1,15 @@
 import { describe, it, expect } from 'vitest'
 import { isProtectedPath, stripLocale } from '../lib/auth/protectedPaths'
 
+/**
+ * Determines which auth page to redirect to for a given path.
+ * /sell/new → /auth/register; all others → /auth/login.
+ */
+function resolveAuthPage(pathname: string): 'register' | 'login' {
+  const p = stripLocale(pathname)
+  return p === '/sell/new' || p.startsWith('/sell/new/') ? 'register' : 'login'
+}
+
 describe('stripLocale()', () => {
   it('strips /hy locale prefix', () => {
     expect(stripLocale('/hy/dashboard')).toBe('/dashboard')
@@ -46,6 +55,24 @@ describe('isProtectedPath()', () => {
     })
   })
 
+  describe('listing wizard routes require authentication', () => {
+    it('protects /[locale]/sell/new', () => {
+      expect(isProtectedPath('/hy/sell/new')).toBe(true)
+    })
+
+    it('protects /[locale]/sell (parent path)', () => {
+      expect(isProtectedPath('/ru/sell')).toBe(true)
+    })
+
+    it('protects /[locale]/listing/[id]/edit', () => {
+      expect(isProtectedPath('/en/listing/abc-123/edit')).toBe(true)
+    })
+
+    it('protects /[locale]/listing sub-paths', () => {
+      expect(isProtectedPath('/hy/listing/some-id/edit')).toBe(true)
+    })
+  })
+
   describe('paths that should be publicly accessible', () => {
     it('allows /[locale]/auth/login', () => {
       expect(isProtectedPath('/hy/auth/login')).toBe(false)
@@ -62,5 +89,26 @@ describe('isProtectedPath()', () => {
     it('allows /[locale]/property/[slug]', () => {
       expect(isProtectedPath('/hy/property/nice-apartment-yerevan')).toBe(false)
     })
+  })
+})
+
+// ── Auth redirect page selection ──────────────────────────────────────────────
+
+describe('auth redirect page for /sell/new', () => {
+  it('redirects /sell/new to /auth/register', () => {
+    expect(resolveAuthPage('/hy/sell/new')).toBe('register')
+  })
+
+  it('redirects /sell/new sub-paths to /auth/register', () => {
+    expect(resolveAuthPage('/en/sell/new/')).toBe('register')
+  })
+
+  it('redirects dashboard to /auth/login (not register)', () => {
+    expect(resolveAuthPage('/hy/dashboard')).toBe('login')
+  })
+
+  it('redirects /listing/[id]/edit to /auth/login', () => {
+    // Non-sell paths redirect to login, not register
+    expect(resolveAuthPage('/hy/listing/abc-123/edit')).toBe('login')
   })
 })

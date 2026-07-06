@@ -2,7 +2,13 @@
  * Paths that require an authenticated session (without locale prefix).
  * The middleware strips the locale and checks against this list.
  */
-const PROTECTED_PATHS = ['/dashboard', '/favorites', '/messages'] as const
+const PROTECTED_PATHS = [
+  '/dashboard',
+  '/favorites',
+  '/messages',
+  '/sell',
+  '/listing',
+] as const
 
 /**
  * Returns the pathname without the leading locale segment.

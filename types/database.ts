@@ -33,7 +33,7 @@ export type UserRole = 'user' | 'agent' | 'admin'
 export type UserTier = 'free' | 'pro' | 'premium'
 export type Currency = 'AMD' | 'USD' | 'EUR' | 'RUB'
 export type DealType = 'sale' | 'rent'
-export type PropertyType = 'apartment' | 'house' | 'commercial' | 'land' | 'garage'
+export type PropertyType = 'apartment' | 'house' | 'commercial' | 'land' | 'garage' | 'newdev'
 export type ListingStatus = 'active' | 'draft' | 'pending' | 'archived' | 'sold'
 export type MediaType = 'image' | 'video' | 'virtual_tour'
 
@@ -113,10 +113,29 @@ export interface Database {
           property_type: PropertyType
           deal_type: DealType
           status: ListingStatus
+          country: string
+          region: string | null
           city: string
           district: string | null
           address: string | null
+          lat: number | null
+          lng: number | null
+          hide_exact_address: boolean
           amenities: string[]
+          condition: string | null
+          heating: boolean
+          balcony: boolean
+          parking: boolean
+          elevator: boolean
+          negotiable: boolean
+          utilities_included: boolean
+          deposit: number | null
+          min_rent_term_months: number | null
+          contact_name: string | null
+          contact_phone: string | null
+          contact_preference: string | null
+          video_url: string | null
+          tour360_url: string | null
           /** PostGIS GEOGRAPHY(POINT, 4326) returned as GeoJSON string by Supabase REST */
           location: string | null
           created_at: string
@@ -141,10 +160,29 @@ export interface Database {
           property_type: PropertyType
           deal_type: DealType
           status?: ListingStatus
+          country?: string
+          region?: string | null
           city: string
           district?: string | null
           address?: string | null
+          lat?: number | null
+          lng?: number | null
+          hide_exact_address?: boolean
           amenities?: string[]
+          condition?: string | null
+          heating?: boolean
+          balcony?: boolean
+          parking?: boolean
+          elevator?: boolean
+          negotiable?: boolean
+          utilities_included?: boolean
+          deposit?: number | null
+          min_rent_term_months?: number | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          contact_preference?: string | null
+          video_url?: string | null
+          tour360_url?: string | null
           location?: string | null
           created_at?: string
           updated_at?: string
@@ -168,10 +206,29 @@ export interface Database {
           property_type?: PropertyType
           deal_type?: DealType
           status?: ListingStatus
+          country?: string
+          region?: string | null
           city?: string
           district?: string | null
           address?: string | null
+          lat?: number | null
+          lng?: number | null
+          hide_exact_address?: boolean
           amenities?: string[]
+          condition?: string | null
+          heating?: boolean
+          balcony?: boolean
+          parking?: boolean
+          elevator?: boolean
+          negotiable?: boolean
+          utilities_included?: boolean
+          deposit?: number | null
+          min_rent_term_months?: number | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          contact_preference?: string | null
+          video_url?: string | null
+          tour360_url?: string | null
           location?: string | null
           created_at?: string
           updated_at?: string

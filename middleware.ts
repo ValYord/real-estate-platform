@@ -34,7 +34,11 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   // Step 2: Protect authenticated routes.
   if (isProtectedPath(pathname) && !user) {
     const locale = extractLocale(pathname)
-    const loginUrl = new URL(`/${locale}/auth/login`, request.url)
+    // Send first-time listers to register; all other protected pages to login.
+    const pathWithoutLocaleForAuth = stripLocale(pathname)
+    const isNewListingPath = pathWithoutLocaleForAuth === '/sell/new' || pathWithoutLocaleForAuth.startsWith('/sell/new/')
+    const authPage = isNewListingPath ? 'register' : 'login'
+    const loginUrl = new URL(`/${locale}/auth/${authPage}`, request.url)
     // Preserve the original destination so we can redirect back after login.
     loginUrl.searchParams.set('next', pathname)
 
