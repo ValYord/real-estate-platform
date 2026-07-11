@@ -1,0 +1,77 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { ZodError } from 'zod'
+import { createServerClient } from '@/lib/supabase/server'
+import { conversationReportSchema } from '@/lib/messages/schemas'
+
+interface ConversationRow {
+  buyer_id: string
+  seller_id: string
+}
+
+/**
+ * POST /api/reports
+ *
+ * Body: { conversationId, reason, note? } — files a report for admin
+ * moderation (24-admin.md). Returns 202 Accepted.
+ *
+ * Auth: required. The caller must be a participant in the conversation.
+ */
+export async function POST(request: NextRequest): Promise<NextResponse> {
+  let body: unknown
+  try {
+    body = await request.json()
+  } catch {
+    return NextResponse.json({ error: 'invalid_json' }, { status: 400 })
+  }
+
+  let input: ReturnType<typeof conversationReportSchema.parse>
+  try {
+    input = conversationReportSchema.parse(body)
+  } catch (err) {
+    if (err instanceof ZodError) {
+      return NextResponse.json(
+        { error: 'validation_error', fields: err.flatten().fieldErrors },
+        { status: 422 },
+      )
+    }
+    return NextResponse.json({ error: 'bad_request' }, { status: 400 })
+  }
+
+  const supabase = await createServerClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return NextResponse.json({ error: 'auth_required' }, { status: 401 })
+  }
+
+  const convResult = await supabase
+    .from('conversations')
+    .select('buyer_id, seller_id')
+    .eq('id', input.conversationId)
+    .single()
+
+  const conversation = convResult.data as unknown as ConversationRow | null
+  if (convResult.error || !conversation) {
+    return NextResponse.json({ error: 'not_found' }, { status: 404 })
+  }
+  if (conversation.buyer_id !== user.id && conversation.seller_id !== user.id) {
+    return NextResponse.json({ error: 'forbidden' }, { status: 403 })
+  }
+
+  // See app/api/blocks/route.ts — same insert-typing workaround.
+  const { error } = await supabase.from('reports').insert({
+    reporter_id: user.id,
+    conversation_id: input.conversationId,
+    reason: input.reason,
+    note: input.note,
+  } as unknown as never)
+
+  if (error) {
+    return NextResponse.json({ error: 'server_error' }, { status: 500 })
+  }
+
+  return NextResponse.json({ message: 'Report received' }, { status: 202 })
+}

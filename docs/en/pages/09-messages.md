@@ -94,6 +94,19 @@ LIST view:                  THREAD view:
 | Send box | `sticky bottom-0 bg-white border-t p-3 flex gap-2 items-end` |
 | Textarea | `flex-1 resize-none rounded-xl border px-3 py-2 max-h-32` |
 | [Send] | `bg-primary text-white h-10 w-10 rounded-full` (icon) |
+| Modal overlay (Block / Report) | `fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4` |
+| Modal card | `bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 space-y-4` |
+| Modal primary action | `bg-primary text-white rounded-lg px-4 py-2 text-sm font-medium` |
+| Modal danger action (Block confirm) | `bg-red-600 text-white rounded-lg px-4 py-2 text-sm font-medium` |
+| Lightbox overlay | `fixed inset-0 z-[100] bg-black/95 flex items-center justify-center` |
+| Lightbox close | `absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 text-white` |
+| Empty-state icon badge | `w-16 h-16 rounded-full bg-gray-50` wrapping a `w-8 h-8 text-gray-300` icon |
+| No-thread-selected placeholder | `flex-1 flex flex-col items-center justify-center gap-3 text-gray-500` |
+| Skeleton row (loading list) | `w-12 h-12 rounded-lg bg-gray-100 animate-pulse` thumb + two `h-3 bg-gray-100 rounded animate-pulse` lines |
+
+> Guest redirects on this page use the site-wide auth query param, `?next=` (see
+> `middleware.ts` / `lib/auth/safeNext.ts`), the same as every other protected page —
+> not the `?redirect=` shorthand used elsewhere in this doc's prose.
 
 ---
 

@@ -345,24 +345,36 @@ export interface Database {
           property_id: string | null
           buyer_id: string
           seller_id: string
+          archived: boolean
+          muted: boolean
+          blocked_by: string | null
           created_at: string
           updated_at: string
+          last_message_at: string
         }
         Insert: {
           id?: string
           property_id?: string | null
           buyer_id: string
           seller_id: string
+          archived?: boolean
+          muted?: boolean
+          blocked_by?: string | null
           created_at?: string
           updated_at?: string
+          last_message_at?: string
         }
         Update: {
           id?: string
           property_id?: string | null
           buyer_id?: string
           seller_id?: string
+          archived?: boolean
+          muted?: boolean
+          blocked_by?: string | null
           created_at?: string
           updated_at?: string
+          last_message_at?: string
         }
         Relationships: [
           {
@@ -393,6 +405,7 @@ export interface Database {
           conversation_id: string
           sender_id: string
           body: string
+          attachments: Json
           is_read: boolean
           created_at: string
         }
@@ -401,6 +414,7 @@ export interface Database {
           conversation_id: string
           sender_id: string
           body: string
+          attachments?: Json
           is_read?: boolean
           created_at?: string
         }
@@ -409,6 +423,7 @@ export interface Database {
           conversation_id?: string
           sender_id?: string
           body?: string
+          attachments?: Json
           is_read?: boolean
           created_at?: string
         }
@@ -423,6 +438,87 @@ export interface Database {
             foreignKeyName: 'messages_sender_id_fkey'
             columns: ['sender_id']
             referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+
+      // ── blocks ───────────────────────────────────────────────────────────
+      blocks: {
+        Row: {
+          id: string
+          blocker_id: string
+          blocked_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          blocker_id: string
+          blocked_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          blocker_id?: string
+          blocked_id?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'blocks_blocker_id_fkey'
+            columns: ['blocker_id']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'blocks_blocked_id_fkey'
+            columns: ['blocked_id']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+
+      // ── reports ──────────────────────────────────────────────────────────
+      reports: {
+        Row: {
+          id: string
+          reporter_id: string
+          conversation_id: string | null
+          reason: string
+          note: string | null
+          status: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          reporter_id: string
+          conversation_id?: string | null
+          reason: string
+          note?: string | null
+          status?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          reporter_id?: string
+          conversation_id?: string | null
+          reason?: string
+          note?: string | null
+          status?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'reports_reporter_id_fkey'
+            columns: ['reporter_id']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'reports_conversation_id_fkey'
+            columns: ['conversation_id']
+            referencedRelation: 'conversations'
             referencedColumns: ['id']
           },
         ]
