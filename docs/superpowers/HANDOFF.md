@@ -76,6 +76,21 @@ wizard, plus deepening the pages already stubbed), then `run --deliver`. Or buil
 autonomous-team roadmap (#2 doc-gap, #4 scheduler, #5 safety) for hands-off daily operation.
 Verify the merged product locally: `cd ~/real-estate-campony && npm install && npm run dev`.
 
+## OPEN — TOP PRIORITY (2026-07-11): planner still flaky in scheduled cycles
+The scheduler is activated (LaunchAgent loaded, 10:00 & 23:00, sandboxed) and the on-demand path
+is fully proven — a manual `run-sandbox.sh plan --target 3` created 3 tasks and the sandboxed run
+built + merged them (PRs #9/#10/#11; the Listing Wizard, Dashboard, Favorites). BUT the **first
+real scheduled `cycle` planned 0** (`planned 0, ran 0 steps`, 8 min): the log shows NO backoff, NO
+auth error, NO max-turns — the planner made 2 clean engine calls (the retry loop's 2 dry attempts)
+and just **did not call create_task either time**. So page-index (#1b) reduced but did NOT fully fix
+the flakiness; a cycle can still do nothing. **Next session — make the planner reliably create
+tasks:** ideas — raise the planner's dry-retry ceiling (currently stops after 2 dry attempts) and/or
+`_MAX_PLAN_ATTEMPTS`; investigate why a call takes ~4 min yet creates nothing (is it silently
+throttled/looping without emitting a tool call?); consider forcing tool use more strongly or a
+smaller/sharper prompt; verify with `run-sandbox.sh plan --target 5` a few times to measure the
+hit rate. Until this is solid, `agency cycle` (and the daily schedule) is not dependably producing
+work. (Empty backlog now; pages 08–27 remain to build.)
+
 ## Fix (2026-07-03) — per-run token budget
 `--budget` was checked against `total_tokens()` (lifetime sum of ALL events), so a persistent or
 seeded DB whose history exceeded the budget made every `run`/`cycle` no-op immediately (`token
