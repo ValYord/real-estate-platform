@@ -57,7 +57,7 @@ const NAV_ITEMS: NavItemConfig[] = [
   {
     key: 'mortgage',
     items: [
-      { label: 'Calculators', href: '/mortgage/calculators' },
+      { label: 'Calculators', href: '/mortgage-calculators' },
       { label: 'Rates', href: '/mortgage/rates' },
       { label: 'Pre-approval', href: '/mortgage/pre-approval' },
       { label: 'Finance tips', href: '/guides?category=finance' },
