@@ -36,6 +36,8 @@ export type DealType = 'sale' | 'rent'
 export type PropertyType = 'apartment' | 'house' | 'commercial' | 'land' | 'garage' | 'newdev'
 export type ListingStatus = 'active' | 'draft' | 'pending' | 'archived' | 'sold'
 export type MediaType = 'image' | 'video' | 'virtual_tour'
+export type ContactSubject = 'general' | 'support' | 'partnership' | 'complaint'
+export type ContactMessageStatus = 'new' | 'read' | 'archived'
 
 // ---------------------------------------------------------------------------
 // Database shape (mirrors the Supabase generated-types structure so
@@ -564,6 +566,41 @@ export interface Database {
             referencedColumns: ['id']
           },
         ]
+      }
+
+      // ── contact_messages (Page 23 — /contact form) ─────────────────────────
+      contact_messages: {
+        Row: {
+          id: string
+          name: string
+          email: string
+          phone: string | null
+          subject: ContactSubject
+          body: string
+          status: ContactMessageStatus
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          email: string
+          phone?: string | null
+          subject: ContactSubject
+          body: string
+          status?: ContactMessageStatus
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          email?: string
+          phone?: string | null
+          subject?: ContactSubject
+          body?: string
+          status?: ContactMessageStatus
+          created_at?: string
+        }
+        Relationships: []
       }
     }
 

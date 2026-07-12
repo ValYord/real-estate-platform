@@ -1,0 +1,104 @@
+import type { Metadata } from 'next'
+import { getTranslations } from 'next-intl/server'
+import { BookOpen, ShieldCheck, FilePlus2, Search as SearchIcon, MessageCircle, CreditCard } from 'lucide-react'
+import { safeLocale } from '@/lib/locale'
+import { Link } from '@/i18n/navigation'
+import Breadcrumbs from '@/components/property/Breadcrumbs'
+import JsonLd from '@/components/static/JsonLd'
+import { buildStaticMetadata } from '@/lib/seo/metadata'
+import { breadcrumbListJsonLd } from '@/lib/seo/jsonLd'
+import HelpPageClient from '@/components/help/HelpPageClient'
+import type { SearchableArticle } from '@/lib/faq/filter'
+
+type PageParams = { locale: string }
+
+interface HelpCategory {
+  id: string
+  title: string
+  description: string
+  href: string
+}
+
+const CATEGORY_ICONS = [BookOpen, ShieldCheck, FilePlus2, SearchIcon, MessageCircle, CreditCard]
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<PageParams>
+}): Promise<Metadata> {
+  const { locale: rawLocale } = await params
+  const locale = safeLocale(rawLocale)
+  const t = await getTranslations({ locale, namespace: 'static.help' })
+  return buildStaticMetadata({
+    locale,
+    pathname: '/help',
+    title: t('metaTitle'),
+    description: t('metaDescription'),
+  })
+}
+
+export default async function HelpPage({ params }: { params: Promise<PageParams> }) {
+  const { locale: rawLocale } = await params
+  const locale = safeLocale(rawLocale)
+  const t = await getTranslations({ locale, namespace: 'static.help' })
+  const tCommon = await getTranslations({ locale, namespace: 'static.common' })
+
+  const categories = t.raw('categories') as HelpCategory[]
+  const popularArticles = t.raw('popularArticles') as SearchableArticle[]
+
+  const breadcrumbItems = [{ label: tCommon('home'), href: '/' }, { label: t('breadcrumb') }]
+
+  return (
+    <main className="max-w-4xl mx-auto px-4 py-6 sm:py-8">
+      <JsonLd data={breadcrumbListJsonLd(breadcrumbItems, locale)} />
+      <Breadcrumbs items={breadcrumbItems} />
+
+      <header className="mt-4">
+        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">{t('title')}</h1>
+        <p className="mt-2 text-gray-600">{t('subtitle')}</p>
+      </header>
+
+      <HelpPageClient popularArticles={popularArticles} />
+
+      {/* Categories */}
+      <section className="mt-10 border-t border-gray-200 pt-6">
+        <h2 className="text-xl font-semibold text-gray-900">{t('categoriesHeading')}</h2>
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {categories.map((category, index) => {
+            const Icon = CATEGORY_ICONS[index % CATEGORY_ICONS.length]
+            return (
+              <Link
+                key={category.id}
+                href={category.href}
+                className="block p-5 rounded-xl border border-gray-200 hover:border-primary hover:shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              >
+                <Icon className="w-8 h-8 text-primary" aria-hidden="true" />
+                <h3 className="mt-3 font-semibold text-gray-900">{category.title}</h3>
+                <p className="text-sm text-gray-500 mt-1">{category.description}</p>
+              </Link>
+            )
+          })}
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="mt-10 border-t border-gray-200 pt-6 pb-4 text-center">
+        <p className="font-medium text-gray-900">{t('stillNeedHelp')}</p>
+        <div className="mt-3 flex justify-center gap-3">
+          <Link
+            href="/contact"
+            className="h-11 px-4 rounded-lg bg-primary text-white font-medium flex items-center hover:bg-primary/90 transition-colors"
+          >
+            {t('ctaContact')}
+          </Link>
+          <Link
+            href="/faq"
+            className="h-11 px-4 rounded-lg border border-gray-300 text-gray-700 font-medium flex items-center hover:bg-gray-50 transition-colors"
+          >
+            {t('ctaFaq')}
+          </Link>
+        </div>
+      </section>
+    </main>
+  )
+}
