@@ -1,7 +1,7 @@
 import type { PropertyListItem, MapPin, PropertiesResponse } from './types'
 import type { Filters } from './filtersSchema'
 
-const SEED_PROPERTIES: PropertyListItem[] = [
+export const SEED_PROPERTIES: PropertyListItem[] = [
   {
     id: '1',
     slug: 'yerevan-arabkir-2-bedroom-apartment',

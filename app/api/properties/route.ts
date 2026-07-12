@@ -3,10 +3,21 @@ import { ZodError } from 'zod'
 import { filtersSchema, parseSearchParams } from '@/lib/search/filtersSchema'
 import { getMockPropertiesResponse } from '@/lib/search/mockData'
 import type { PropertiesResponse } from '@/lib/search/types'
+import { parseCompareIds } from '@/lib/compare/schemas'
+import { getMockPropertiesByIds } from '@/lib/compare/mockData'
+import { mapCompareRows, type CompareRow } from '@/lib/compare/mapCompareRow'
 
 const PAGE_SIZE = 20
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
+  // 0. Compare branch — `?ids=` selects a batch of properties by id for the
+  // /compare page. Handled before filter parsing so it never touches the
+  // unrelated filters validation path (see docs/design/25-compare-handoff.md §5.1).
+  const idsParam = request.nextUrl.searchParams.get('ids')
+  if (idsParam !== null) {
+    return getComparedProperties(idsParam)
+  }
+
   // 1. Parse & validate query params
   let filters: ReturnType<typeof filtersSchema.parse>
   try {
@@ -160,4 +171,44 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   // 3. Return mock data (development / no Supabase)
   const response = getMockPropertiesResponse(filters)
   return NextResponse.json(response)
+}
+
+/**
+ * `GET /api/properties?ids=1,2,3` — batch fetch for the compare page.
+ * `ids` is validated/deduped/capped by `parseCompareIds` before it ever
+ * reaches a Supabase query; an all-malformed input returns `{ items: [] }`
+ * with a 200, never a throw or a 400 (matches the "reject gracefully"
+ * acceptance criteria for the /compare page).
+ */
+async function getComparedProperties(idsParam: string): Promise<NextResponse> {
+  const ids = parseCompareIds(idsParam)
+  if (ids.length === 0) {
+    return NextResponse.json({ items: [] })
+  }
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+  if (supabaseUrl && supabaseKey && !supabaseUrl.includes('your-project-id')) {
+    try {
+      const { createClient } = await import('@supabase/supabase-js')
+      const supabase = createClient(supabaseUrl, supabaseKey)
+      const { data, error } = await supabase
+        .from('properties')
+        .select(
+          `id, slug, title, price, currency, deal_type, area_m2, rooms, bedrooms,
+           bathrooms, floor, floors_total, year_built, property_type, status,
+           city, district, amenities, property_media(url, sort_order)`,
+        )
+        .in('id', ids) // parameterized — supabase-js binds array values, no string concatenation
+
+      if (!error && data) {
+        return NextResponse.json({ items: mapCompareRows(data as CompareRow[], ids) })
+      }
+    } catch {
+      // Fall through to mock data below
+    }
+  }
+
+  return NextResponse.json({ items: getMockPropertiesByIds(ids) })
 }

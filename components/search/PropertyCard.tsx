@@ -6,6 +6,7 @@ import { Heart, ChevronLeft, ChevronRight, BedDouble, Bath, Maximize } from 'luc
 import { cn } from '@/lib/utils'
 import type { PropertyListItem } from '@/lib/search/types'
 import { Link } from '@/i18n/navigation'
+import { CompareCheckbox } from '@/components/compare/CompareCheckbox'
 
 interface PropertyCardProps {
   property: PropertyListItem
@@ -152,6 +153,9 @@ export function PropertyCard({ property, isHighlighted, onHover }: PropertyCardP
               fill={isFav ? 'currentColor' : 'none'}
             />
           </button>
+
+          {/* Compare checkbox */}
+          <CompareCheckbox propertyId={property.id} title={title} />
         </div>
 
         {/* Card body */}

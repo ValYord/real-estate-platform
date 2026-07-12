@@ -10,6 +10,7 @@ import { SearchMap } from './SearchMap'
 import { ResultsHeader } from './ResultsHeader'
 import SaveSearchModal from './SaveSearchModal'
 import SignInPromptModal from './SignInPromptModal'
+import { CompareBar } from '@/components/compare/CompareBar'
 import type { Filters } from '@/lib/search/filtersSchema'
 import { filtersToParams } from '@/lib/search/filtersSchema'
 import type { PropertiesResponse } from '@/lib/search/types'
@@ -198,6 +199,9 @@ export function SearchPageClient({
           )}
         </button>
       </div>
+
+      {/* Floating compare bar — appears once a property is selected via PropertyCard's checkbox */}
+      <CompareBar />
 
       {/* Save-search touch point — the one new piece of UI on this page */}
       {saveSearchModalOpen && (
