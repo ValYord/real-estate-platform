@@ -36,6 +36,8 @@ export type DealType = 'sale' | 'rent'
 export type PropertyType = 'apartment' | 'house' | 'commercial' | 'land' | 'garage' | 'newdev'
 export type ListingStatus = 'active' | 'draft' | 'pending' | 'archived' | 'sold'
 export type MediaType = 'image' | 'video' | 'virtual_tour'
+export type Locale = 'hy' | 'ru' | 'en'
+export type Theme = 'light' | 'dark' | 'system'
 
 // ---------------------------------------------------------------------------
 // Database shape (mirrors the Supabase generated-types structure so
@@ -62,6 +64,11 @@ export interface Database {
           agent_slug: string | null
           agent_rating: number | null
           agent_review_count: number
+          lang: Locale
+          currency: Currency
+          theme: Theme
+          notification_prefs: Json
+          privacy: Json
         }
         Insert: {
           id: string
@@ -78,6 +85,11 @@ export interface Database {
           agent_slug?: string | null
           agent_rating?: number | null
           agent_review_count?: number
+          lang?: Locale
+          currency?: Currency
+          theme?: Theme
+          notification_prefs?: Json
+          privacy?: Json
         }
         Update: {
           id?: string
@@ -94,6 +106,11 @@ export interface Database {
           agent_slug?: string | null
           agent_rating?: number | null
           agent_review_count?: number
+          lang?: Locale
+          currency?: Currency
+          theme?: Theme
+          notification_prefs?: Json
+          privacy?: Json
         }
         Relationships: [
           {

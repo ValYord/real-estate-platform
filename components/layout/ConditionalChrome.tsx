@@ -26,10 +26,12 @@ export default function ConditionalChrome({ children }: { children: ReactNode })
   const isDashboardPage = pathname.includes('/dashboard')
   // Messages (Page 09) is an app-like, full-height two-pane inbox — no footer.
   const isMessagesPage = /\/messages(\/|$)/.test(pathname)
+  // Settings (Page 21) is an app-like admin panel — no footer, same as Dashboard.
+  const isSettingsPage = /\/settings(\/|$)/.test(pathname)
 
   if (isAuthPage || isWizardPage) return <>{children}</>
 
-  if (isDashboardPage || isMessagesPage) {
+  if (isDashboardPage || isMessagesPage || isSettingsPage) {
     return (
       <>
         <Header />
