@@ -100,5 +100,47 @@ export interface AgentReviewsResponse {
   viewerHasReviewed: boolean
 }
 
+// ── Directory / Find an Agent (Page 11, MVP) ────────────────────────────────
+
+/**
+ * Card shape for the `/agents` directory grid.
+ * Mirrors docs/en/pages/11-find-agent.md §5 "Data fields" (`agentCard`).
+ */
+export interface AgentCardData {
+  id: string
+  slug: string
+  name: string
+  avatar: string | null
+  agencyName: string | null
+  verified: boolean
+  tier: AgentTier
+  rating: number
+  reviewsCount: number
+  languages: string[]
+  scope: string[]
+  specialties: string[]
+  listingsActive: number
+  avgResponseHours: number | null
+  createdAt: string
+}
+
+/**
+ * Deterministic sort options for the MVP (docs/en/pages/11 §3.4). The full
+ * spec's "Most reviews" / "Fast responder" options and any Pro/promoted
+ * ranking boost are out of scope for this task.
+ */
+export const AGENTS_SORT_OPTIONS = ['rating', 'listings', 'newest'] as const
+export type AgentsSort = (typeof AGENTS_SORT_OPTIONS)[number]
+
+/** Shared between the API route and its mock-data fallback. */
+export const AGENTS_PAGE_SIZE = 12
+
+export interface AgentsListResponse {
+  items: AgentCardData[]
+  total: number
+  page: number
+  pageSize: number
+}
+
 // ── Currency re-export (convenience for form components) ───────────────────
 export type { Currency }
