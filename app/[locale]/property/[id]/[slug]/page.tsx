@@ -59,6 +59,40 @@ async function fetchProperty(id: string): Promise<PropertyDetail | null> {
   }
 }
 
+/**
+ * Guarded session lookup — used to prefill the "Schedule a tour" form
+ * (Page 27) for a logged-in viewer. Guarded the same way every route
+ * handler in this codebase guards Supabase calls, so local/dev/test runs
+ * without Supabase env vars still render the page instead of throwing.
+ */
+async function fetchCurrentUser(): Promise<{ name: string | null; phone: string | null } | null> {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!supabaseUrl || !anonKey || supabaseUrl.includes('your-project-id')) return null
+
+  try {
+    const { createServerClient } = await import('@/lib/supabase/server')
+    const supabase = await createServerClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (!user) return null
+
+    type ProfileRow = { full_name: string | null; phone: string | null }
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('full_name, phone')
+      .eq('id', user.id)
+      .single()
+
+    const userProfile = profile as ProfileRow | null
+    return { name: userProfile?.full_name ?? null, phone: userProfile?.phone ?? null }
+  } catch {
+    return null
+  }
+}
+
 // ── generateMetadata ──────────────────────────────────────────────────────────
 
 export async function generateMetadata({
@@ -119,7 +153,7 @@ export default async function PropertyDetailPage({
   const { locale: rawLocale, id } = await params
   const locale = safeLocale(rawLocale)
 
-  const property = await fetchProperty(id)
+  const [property, currentUser] = await Promise.all([fetchProperty(id), fetchCurrentUser()])
   if (!property) notFound()
 
   const title = property.title[locale] ?? property.title.en ?? property.title.hy ?? 'Property'
@@ -266,7 +300,12 @@ export default async function PropertyDetailPage({
             {property.isOwner ? (
               <OwnerManageBar property={property} />
             ) : (
-              <ContactCard owner={property.owner} propertyId={property.id} />
+              <ContactCard
+                owner={property.owner}
+                propertyId={property.id}
+                isAvailable={isAvailable}
+                currentUser={currentUser}
+              />
             )}
           </aside>
         </div>
@@ -283,6 +322,7 @@ export default async function PropertyDetailPage({
           phone={property.owner.phone}
           isFavorited={property.isFavorited}
           isAvailable={isAvailable}
+          currentUser={currentUser}
         />
       )}
     </>

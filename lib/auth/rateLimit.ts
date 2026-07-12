@@ -66,4 +66,6 @@ export const LIMITS = {
   OTP_RESEND: { max: 1, windowMs: 60 * 1000 },
   /** 5 "Send a request" submissions per hour per user (docs/en/pages/10 §3.7) */
   AGENT_LEAD: { max: 5, windowMs: 60 * 60 * 1000 },
+  /** 5 tour requests per hour per user, or per IP for guests (docs/design/27-schedule-tour-handoff.md §6) */
+  TOUR_REQUEST: { max: 5, windowMs: 60 * 60 * 1000 },
 } as const
