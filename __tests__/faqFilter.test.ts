@@ -3,7 +3,13 @@
  * category tabs + free-text search on /faq, and article search on /help.
  */
 import { describe, it, expect } from 'vitest'
-import { ALL_CATEGORIES, filterFaqItems, filterArticlesByQuery, type FaqItem } from '../lib/faq/filter'
+import {
+  ALL_CATEGORIES,
+  filterFaqItems,
+  filterArticlesByQuery,
+  resolveInitialCategory,
+  type FaqItem,
+} from '../lib/faq/filter'
 
 const ITEMS: FaqItem[] = [
   { id: 'how-to-list', category: 'seller', question: 'How do I list a property?', answer: 'Use the wizard.' },
@@ -52,6 +58,28 @@ describe('filterFaqItems — free-text search', () => {
     const result = filterFaqItems(ITEMS, 'free', 'seller')
     expect(result.map((item) => item.id)).toEqual(['is-listing-free'])
     expect(filterFaqItems(ITEMS, 'free', 'buyer')).toHaveLength(0)
+  })
+})
+
+describe('resolveInitialCategory — /faq?category= deep-link', () => {
+  const known = ['all', 'general', 'seller', 'buyer', 'account']
+
+  it('returns the requested category when it is known (Help Center "Getting started")', () => {
+    expect(resolveInitialCategory('general', known)).toBe('general')
+  })
+
+  it('falls back to ALL_CATEGORIES when the category is missing', () => {
+    expect(resolveInitialCategory(null, known)).toBe(ALL_CATEGORIES)
+    expect(resolveInitialCategory(undefined, known)).toBe(ALL_CATEGORIES)
+    expect(resolveInitialCategory('', known)).toBe(ALL_CATEGORIES)
+  })
+
+  it('falls back to ALL_CATEGORIES for an unknown category', () => {
+    expect(resolveInitialCategory('does-not-exist', known)).toBe(ALL_CATEGORIES)
+  })
+
+  it('treats an explicit "all" as ALL_CATEGORIES', () => {
+    expect(resolveInitialCategory('all', known)).toBe(ALL_CATEGORIES)
   })
 })
 

@@ -38,6 +38,20 @@ export function filterFaqItems(
   })
 }
 
+/**
+ * Resolves the initial category tab from a `?category=` query-string value. The Help
+ * Center "Getting started" card links to `/faq?category=general`, so the FAQ page must
+ * open pre-filtered to that category. Returns the requested category only when it is a
+ * known, non-`all` category; anything unknown/empty falls back to `ALL_CATEGORIES`.
+ */
+export function resolveInitialCategory(
+  requested: string | null | undefined,
+  knownCategories: readonly string[]
+): string {
+  if (!requested || requested === ALL_CATEGORIES) return ALL_CATEGORIES
+  return knownCategories.includes(requested) ? requested : ALL_CATEGORIES
+}
+
 export interface SearchableArticle {
   id: string
   title: string

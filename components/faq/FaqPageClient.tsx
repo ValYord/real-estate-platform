@@ -6,7 +6,12 @@ import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 import Tabs from '@/components/ui/Tabs'
 import Accordion, { type AccordionItemData } from '@/components/ui/Accordion'
-import { ALL_CATEGORIES, filterFaqItems, type FaqItem } from '@/lib/faq/filter'
+import {
+  ALL_CATEGORIES,
+  filterFaqItems,
+  resolveInitialCategory,
+  type FaqItem,
+} from '@/lib/faq/filter'
 
 interface FaqPageClientProps {
   items: FaqItem[]
@@ -28,23 +33,29 @@ export default function FaqPageClient({ items, categories }: FaqPageClientProps)
 
   const filtered = useMemo(() => filterFaqItems(items, query, category), [items, query, category])
 
-  // Deep-link support: `/faq#how-to-list` auto-expands + scrolls once, on mount.
+  // Deep-link support, once on mount:
+  //  - `/faq#how-to-list` auto-expands + scrolls to a specific item (across all categories).
+  //  - `/faq?category=general` pre-filters to a category (Help Center "Getting started").
+  // A hash (specific item) takes precedence so the linked item is always visible.
   useEffect(() => {
     if (didDeepLink.current) return
     didDeepLink.current = true
 
     const hash = window.location.hash.replace('#', '')
-    if (!hash) return
-    const match = items.find((item) => item.id === hash)
-    if (!match) return
+    const match = hash ? items.find((item) => item.id === hash) : undefined
+    if (match) {
+      setCategory(ALL_CATEGORIES)
+      setOpenIds([hash])
+      requestAnimationFrame(() => {
+        document.getElementById(hash)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      })
+      return
+    }
 
-    setCategory(ALL_CATEGORIES)
-    setOpenIds([hash])
-
-    requestAnimationFrame(() => {
-      document.getElementById(hash)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    })
-  }, [items])
+    const requested = new URLSearchParams(window.location.search).get('category')
+    const initial = resolveInitialCategory(requested, Object.keys(categories))
+    if (initial !== ALL_CATEGORIES) setCategory(initial)
+  }, [items, categories])
 
   const categoryOptions = Object.entries(categories).map(([value, label]) => ({ value, label }))
 
