@@ -2,26 +2,42 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { MessageSquare, Phone, Star, CheckCircle, User, Loader2 } from 'lucide-react'
+import { MessageSquare, Phone, Star, CheckCircle, User, Loader2, CalendarClock } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { cn } from '@/lib/utils'
 import { contactSchema, type ContactFormValues } from '@/lib/property/schemas'
 import type { PropertyOwner } from '@/lib/property/types'
+import ScheduleTourModal from './ScheduleTourModal'
 
 interface ContactCardProps {
   owner: PropertyOwner
   propertyId: string
+  /** Mirrors MobileBottomBar's existing prop — disables the tour CTA for sold/archived listings. */
+  isAvailable: boolean
+  /** Prefill for the "Schedule a tour" form; `null` for guests. */
+  currentUser: { name: string | null; phone: string | null } | null
 }
 
 /**
  * Sidebar contact card — "Send message", "Show phone", quick contact form.
- * Auth-gated: guests are redirected to login.
+ * Auth-gated: guests are redirected to login. The "Schedule a tour" CTA
+ * (Page 27) is the exception — guests may submit a tour request directly.
  */
-export default function ContactCard({ owner, propertyId }: ContactCardProps) {
+export default function ContactCard({ owner, propertyId, isAvailable, currentUser }: ContactCardProps) {
   const [phoneVisible, setPhoneVisible] = useState(false)
   const [msgLoading, setMsgLoading] = useState(false)
   const [formSuccess, setFormSuccess] = useState(false)
+  const [showTourModal, setShowTourModal] = useState(false)
+  const [tourRequested, setTourRequested] = useState(false)
+  const [tourToastVisible, setTourToastVisible] = useState(false)
+
+  const handleTourSent = () => {
+    setShowTourModal(false)
+    setTourRequested(true)
+    setTourToastVisible(true)
+    setTimeout(() => setTourToastVisible(false), 4000)
+  }
 
   const {
     register,
@@ -172,7 +188,45 @@ export default function ContactCard({ owner, propertyId }: ContactCardProps) {
             )}
           </button>
         ) : null}
+
+        <button
+          onClick={() => setShowTourModal(true)}
+          disabled={!isAvailable}
+          className="w-full h-12 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+        >
+          <CalendarClock className="w-4 h-4" aria-hidden="true" />
+          Schedule a tour
+        </button>
+
+        {tourRequested && (
+          <p
+            role="status"
+            className="text-xs text-green-700 bg-green-50 border border-green-200 rounded-lg px-3 py-2 text-center"
+          >
+            Tour requested — the owner will confirm soon.
+          </p>
+        )}
       </div>
+
+      {showTourModal && (
+        <ScheduleTourModal
+          propertyId={propertyId}
+          currentUser={currentUser}
+          onClose={() => setShowTourModal(false)}
+          onSent={handleTourSent}
+        />
+      )}
+
+      {tourToastVisible && (
+        <div
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg text-sm font-medium max-w-sm w-full mx-4 bg-gray-900 text-white"
+        >
+          <span className="flex-1">Tour requested — the owner will confirm soon.</span>
+        </div>
+      )}
 
       {/* Divider */}
       <hr className="border-gray-100" />

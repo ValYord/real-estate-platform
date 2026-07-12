@@ -58,7 +58,8 @@ export async function resolveNotificationTarget(
     item.type === 'price_drop' ||
     item.type === 'listing_approved' ||
     item.type === 'listing_rejected' ||
-    item.type === 'listing_expiring'
+    item.type === 'listing_expiring' ||
+    item.type === 'tour_requested'
 
   if (isPropertyTarget && item.payload.propertyId) {
     const { data } = await supabase

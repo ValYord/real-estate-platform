@@ -36,6 +36,7 @@ const KNOWN_TYPES: readonly NotificationType[] = [
   'listing_rejected',
   'listing_expiring',
   'new_review',
+  'tour_requested',
 ]
 
 function isNotificationType(value: string): value is NotificationType {
@@ -54,6 +55,8 @@ function toPayload(metadata: unknown): NotificationPayload {
   if (typeof record.name === 'string') payload.name = record.name
   if (typeof record.percent === 'number') payload.percent = record.percent
   if (typeof record.rating === 'number') payload.rating = record.rating
+  if (typeof record.requestedAt === 'string') payload.requestedAt = record.requestedAt
+  if (record.tourType === 'in_person' || record.tourType === 'video') payload.tourType = record.tourType
   return payload
 }
 
@@ -124,6 +127,8 @@ export function notificationText(item: NotificationItem): string {
       return `"${p.title ?? 'Your listing'}" expires soon`
     case 'new_review':
       return `${p.name ?? 'Someone'} rated you${p.rating != null ? ` ⭐${p.rating}` : ''}`
+    case 'tour_requested':
+      return `${p.name ?? 'Someone'} requested a tour of "${p.title ?? 'your listing'}"`
   }
 }
 
@@ -149,6 +154,8 @@ export function notificationHref(item: NotificationItem): string | null {
       return p.searchId ? `/saved-searches/${p.searchId}` : '/search'
     case 'new_review':
       return p.agentSlug ? `/agent/${p.agentSlug}#reviews` : null
+    case 'tour_requested':
+      return p.propertyId ? `/property/${p.propertyId}` : null
   }
 }
 
@@ -162,6 +169,7 @@ export const NOTIFICATION_ICON: Record<NotificationType, { emoji: string; bg: st
   listing_rejected: { emoji: '⛔', bg: 'bg-red-50' },
   listing_expiring: { emoji: '⏳', bg: 'bg-yellow-50' },
   new_review: { emoji: '⭐', bg: 'bg-amber-50' },
+  tour_requested: { emoji: '📅', bg: 'bg-teal-50' },
 }
 
 // ── Relative time (doc examples: "now", "5m", "2h", "1d") ──────────────────

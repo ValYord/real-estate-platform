@@ -3,7 +3,10 @@
  * Mirrors docs/en/pages/22-notifications.md §5 "Data fields" / "API contracts".
  */
 
-/** The seven notification types documented in doc §3.3. */
+/**
+ * The seven notification types documented in doc §3.3, plus `tour_requested`
+ * added for Page 27 — Schedule a Tour (docs/design/27-schedule-tour-handoff.md §9).
+ */
 export type NotificationType =
   | 'message'
   | 'price_drop'
@@ -12,6 +15,7 @@ export type NotificationType =
   | 'listing_rejected'
   | 'listing_expiring'
   | 'new_review'
+  | 'tour_requested'
 
 /** Filter tabs on `/notifications` (doc §3.2) — `all`/`unread` are cross-cutting, the rest are type categories. */
 export type NotificationFilter = 'all' | 'unread' | 'messages' | 'property' | 'alerts'
@@ -34,6 +38,10 @@ export interface NotificationPayload {
   percent?: number
   /** Review rating (e.g. 4 for "⭐4"). */
   rating?: number
+  /** ISO datetime of the requested tour (Page 27). */
+  requestedAt?: string
+  /** Tour type requested — 'in_person' | 'video' (Page 27). */
+  tourType?: 'in_person' | 'video'
 }
 
 export interface NotificationItem {

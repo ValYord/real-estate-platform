@@ -1,29 +1,41 @@
 'use client'
 
 import { useState } from 'react'
-import { MessageSquare, Phone, Heart, Loader2 } from 'lucide-react'
+import { MessageSquare, Phone, Heart, Loader2, CalendarClock } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import ScheduleTourModal from './ScheduleTourModal'
 
 interface MobileBottomBarProps {
   propertyId: string
   phone: string | null
   isFavorited?: boolean
   isAvailable?: boolean
+  /** Prefill for the "Schedule a tour" form; `null` for guests. */
+  currentUser?: { name: string | null; phone: string | null } | null
 }
 
 /**
  * Fixed bottom bar shown on mobile.
- * Contains [💬 Message] [📞 Call] [♡ Favorite] buttons.
+ * Contains [💬 Message] [📅 Tour] [📞 Call] [♡ Favorite] controls.
  */
 export default function MobileBottomBar({
   propertyId,
   phone,
   isFavorited = false,
   isAvailable = true,
+  currentUser = null,
 }: MobileBottomBarProps) {
   const [fav, setFav] = useState(isFavorited)
   const [favLoading, setFavLoading] = useState(false)
   const [msgLoading, setMsgLoading] = useState(false)
+  const [showTourModal, setShowTourModal] = useState(false)
+  const [tourToastVisible, setTourToastVisible] = useState(false)
+
+  const handleTourSent = () => {
+    setShowTourModal(false)
+    setTourToastVisible(true)
+    setTimeout(() => setTourToastVisible(false), 4000)
+  }
 
   const handleFav = async () => {
     if (favLoading) return
@@ -97,16 +109,29 @@ export default function MobileBottomBar({
         Message
       </button>
 
+      <button
+        onClick={() => setShowTourModal(true)}
+        disabled={!isAvailable}
+        className={cn(
+          'flex-1 h-12 border border-primary text-primary rounded-lg font-medium flex items-center justify-center gap-2 transition-colors hover:bg-primary/5',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+          !isAvailable && 'opacity-50 cursor-not-allowed',
+        )}
+      >
+        <CalendarClock className="w-4 h-4" aria-hidden="true" />
+        Tour
+      </button>
+
       {phone && isAvailable && (
         <a
           href={`tel:${phone.replace(/\s/g, '')}`}
+          aria-label="Call"
           className={cn(
-            'flex-1 h-12 border border-primary text-primary rounded-lg font-medium flex items-center justify-center gap-2 transition-colors hover:bg-primary/5',
+            'w-12 h-12 border border-gray-200 text-gray-600 rounded-lg flex items-center justify-center transition-colors hover:border-gray-300',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
           )}
         >
           <Phone className="w-4 h-4" aria-hidden="true" />
-          Call
         </a>
       )}
 
@@ -128,6 +153,26 @@ export default function MobileBottomBar({
           <Heart className="w-4 h-4" aria-hidden="true" fill={fav ? 'currentColor' : 'none'} />
         )}
       </button>
+
+      {showTourModal && (
+        <ScheduleTourModal
+          propertyId={propertyId}
+          currentUser={currentUser}
+          onClose={() => setShowTourModal(false)}
+          onSent={handleTourSent}
+        />
+      )}
+
+      {tourToastVisible && (
+        <div
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+          className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg text-sm font-medium max-w-sm w-full mx-4 bg-gray-900 text-white"
+        >
+          <span className="flex-1">Tour requested — the owner will confirm soon.</span>
+        </div>
+      )}
     </div>
   )
 }

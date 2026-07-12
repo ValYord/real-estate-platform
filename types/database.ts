@@ -38,6 +38,8 @@ export type ListingStatus = 'active' | 'draft' | 'pending' | 'archived' | 'sold'
 export type MediaType = 'image' | 'video' | 'virtual_tour'
 export type AgentStatus = 'active' | 'suspended'
 export type DealWish = 'buy' | 'sell' | 'rent'
+export type TourType = 'in_person' | 'video'
+export type TourStatus = 'pending'
 
 // ---------------------------------------------------------------------------
 // Database shape (mirrors the Supabase generated-types structure so
@@ -704,6 +706,69 @@ export interface Database {
           {
             foreignKeyName: 'agent_leads_user_id_fkey'
             columns: ['user_id']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+
+      // ── tours ────────────────────────────────────────────────────────────
+      tours: {
+        Row: {
+          id: string
+          property_id: string
+          owner_id: string
+          requester_id: string | null
+          tour_type: TourType
+          requested_at: string
+          name: string
+          phone: string
+          note: string | null
+          status: TourStatus
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          property_id: string
+          owner_id: string
+          requester_id?: string | null
+          tour_type: TourType
+          requested_at: string
+          name: string
+          phone: string
+          note?: string | null
+          status?: TourStatus
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          property_id?: string
+          owner_id?: string
+          requester_id?: string | null
+          tour_type?: TourType
+          requested_at?: string
+          name?: string
+          phone?: string
+          note?: string | null
+          status?: TourStatus
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'tours_property_id_fkey'
+            columns: ['property_id']
+            referencedRelation: 'properties'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'tours_owner_id_fkey'
+            columns: ['owner_id']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'tours_requester_id_fkey'
+            columns: ['requester_id']
             referencedRelation: 'profiles'
             referencedColumns: ['id']
           },
