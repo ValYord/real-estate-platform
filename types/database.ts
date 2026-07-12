@@ -524,6 +524,50 @@ export interface Database {
         ]
       }
 
+      // ── saved_searches ───────────────────────────────────────────────────
+      saved_searches: {
+        Row: {
+          id: string
+          user_id: string
+          name: string
+          filters: Json
+          /** Generated column: md5(filters::text). Not insertable/updatable. */
+          filters_hash: string
+          alert_frequency: string
+          last_alerted_at: string | null
+          new_match_count: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          name: string
+          filters: Json
+          alert_frequency?: string
+          last_alerted_at?: string | null
+          new_match_count?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          name?: string
+          filters?: Json
+          alert_frequency?: string
+          last_alerted_at?: string | null
+          new_match_count?: number
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'saved_searches_user_id_fkey'
+            columns: ['user_id']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+
       // ── notifications ─────────────────────────────────────────────────────
       notifications: {
         Row: {
