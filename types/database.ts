@@ -36,6 +36,8 @@ export type DealType = 'sale' | 'rent'
 export type PropertyType = 'apartment' | 'house' | 'commercial' | 'land' | 'garage' | 'newdev'
 export type ListingStatus = 'active' | 'draft' | 'pending' | 'archived' | 'sold'
 export type MediaType = 'image' | 'video' | 'virtual_tour'
+export type AgentStatus = 'active' | 'suspended'
+export type DealWish = 'buy' | 'sell' | 'rent'
 
 // ---------------------------------------------------------------------------
 // Database shape (mirrors the Supabase generated-types structure so
@@ -62,6 +64,9 @@ export interface Database {
           agent_slug: string | null
           agent_rating: number | null
           agent_review_count: number
+          /** Added in 0003_profile_agent_fields.sql. */
+          agency_name: string | null
+          license_no: string | null
         }
         Insert: {
           id: string
@@ -78,6 +83,8 @@ export interface Database {
           agent_slug?: string | null
           agent_rating?: number | null
           agent_review_count?: number
+          agency_name?: string | null
+          license_no?: string | null
         }
         Update: {
           id?: string
@@ -94,6 +101,8 @@ export interface Database {
           agent_slug?: string | null
           agent_rating?: number | null
           agent_review_count?: number
+          agency_name?: string | null
+          license_no?: string | null
         }
         Relationships: [
           {
@@ -485,6 +494,7 @@ export interface Database {
           id: string
           reporter_id: string
           conversation_id: string | null
+          review_id: string | null
           reason: string
           note: string | null
           status: string
@@ -494,6 +504,7 @@ export interface Database {
           id?: string
           reporter_id: string
           conversation_id?: string | null
+          review_id?: string | null
           reason: string
           note?: string | null
           status?: string
@@ -503,6 +514,7 @@ export interface Database {
           id?: string
           reporter_id?: string
           conversation_id?: string | null
+          review_id?: string | null
           reason?: string
           note?: string | null
           status?: string
@@ -519,6 +531,180 @@ export interface Database {
             foreignKeyName: 'reports_conversation_id_fkey'
             columns: ['conversation_id']
             referencedRelation: 'conversations'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'reports_review_id_fkey'
+            columns: ['review_id']
+            referencedRelation: 'agent_reviews'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+
+      // ── agents ───────────────────────────────────────────────────────────
+      agents: {
+        Row: {
+          user_id: string
+          bio: Json
+          specialties: string[]
+          languages: string[]
+          scope: string[]
+          verified: boolean
+          status: AgentStatus
+          avg_response_hours: number | null
+          deals_closed_count: number | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          user_id: string
+          bio?: Json
+          specialties?: string[]
+          languages?: string[]
+          scope?: string[]
+          verified?: boolean
+          status?: AgentStatus
+          avg_response_hours?: number | null
+          deals_closed_count?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          user_id?: string
+          bio?: Json
+          specialties?: string[]
+          languages?: string[]
+          scope?: string[]
+          verified?: boolean
+          status?: AgentStatus
+          avg_response_hours?: number | null
+          deals_closed_count?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'agents_user_id_fkey'
+            columns: ['user_id']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+
+      // ── agent_reviews ────────────────────────────────────────────────────
+      agent_reviews: {
+        Row: {
+          id: string
+          agent_id: string
+          author_id: string
+          rating: number
+          text: string
+          reply: string | null
+          replied_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          agent_id: string
+          author_id: string
+          rating: number
+          text: string
+          reply?: string | null
+          replied_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          agent_id?: string
+          author_id?: string
+          rating?: number
+          text?: string
+          reply?: string | null
+          replied_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'agent_reviews_agent_id_fkey'
+            columns: ['agent_id']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'agent_reviews_author_id_fkey'
+            columns: ['author_id']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+
+      // ── agent_leads ──────────────────────────────────────────────────────
+      agent_leads: {
+        Row: {
+          id: string
+          agent_id: string
+          user_id: string
+          deal_type: DealWish
+          property_type: string
+          city: string
+          budget_min: number | null
+          budget_max: number | null
+          currency: Currency
+          rooms: number | null
+          name: string
+          phone: string
+          message: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          agent_id: string
+          user_id: string
+          deal_type: DealWish
+          property_type: string
+          city: string
+          budget_min?: number | null
+          budget_max?: number | null
+          currency: Currency
+          rooms?: number | null
+          name: string
+          phone: string
+          message?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          agent_id?: string
+          user_id?: string
+          deal_type?: DealWish
+          property_type?: string
+          city?: string
+          budget_min?: number | null
+          budget_max?: number | null
+          currency?: Currency
+          rooms?: number | null
+          name?: string
+          phone?: string
+          message?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'agent_leads_agent_id_fkey'
+            columns: ['agent_id']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'agent_leads_user_id_fkey'
+            columns: ['user_id']
+            referencedRelation: 'profiles'
             referencedColumns: ['id']
           },
         ]
