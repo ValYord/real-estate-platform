@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link } from '@/i18n/navigation'
 import { profileSchema, type ProfileInput } from '@/lib/settings/schemas'
+import { runValidatedSave } from '@/lib/settings/validatedSave'
 import { useSettings, useDirtyFormGuard } from './SettingsContext'
 import AvatarUploader from './AvatarUploader'
 import SaveBar from './SaveBar'
@@ -53,7 +54,7 @@ export default function ProfileForm() {
 
   useDirtyFormGuard({
     dirty: isDirty,
-    onSave: () => handleSubmit(submit)().then(() => true).catch(() => false),
+    onSave: runValidatedSave(handleSubmit, submit),
     onDiscard: () =>
       reset({ name: user.name, phone: user.phone ?? '', bio: user.bio ?? '' }),
   })

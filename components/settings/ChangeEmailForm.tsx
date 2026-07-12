@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { changeEmailSchema, type ChangeEmailInput } from '@/lib/settings/schemas'
+import { runValidatedSave } from '@/lib/settings/validatedSave'
 import { useSettings, useDirtyFormGuard } from './SettingsContext'
 
 /** Account tab — change email (§3.3). Dual-confirmation via Supabase's secure email change. */
@@ -48,7 +49,7 @@ export default function ChangeEmailForm() {
 
   useDirtyFormGuard({
     dirty: isDirty,
-    onSave: () => handleSubmit(submit)().then(() => true).catch(() => false),
+    onSave: runValidatedSave(handleSubmit, submit),
     onDiscard: () => reset({ newEmail: '' }),
   })
 

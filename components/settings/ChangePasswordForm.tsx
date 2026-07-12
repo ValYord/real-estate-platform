@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { passwordSchema, type PasswordInput as PasswordFormInput } from '@/lib/settings/schemas'
+import { runValidatedSave } from '@/lib/settings/validatedSave'
 import { useSettings, useDirtyFormGuard } from './SettingsContext'
 import PasswordInput from '@/components/auth/PasswordInput'
 
@@ -55,7 +56,7 @@ export default function ChangePasswordForm() {
 
   useDirtyFormGuard({
     dirty: isDirty,
-    onSave: () => handleSubmit(submit)().then(() => true).catch(() => false),
+    onSave: runValidatedSave(handleSubmit, submit),
     onDiscard: () => reset({ current: '', new: '', confirm: '' }),
   })
 
