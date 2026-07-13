@@ -812,6 +812,43 @@ export interface Database {
           },
         ]
       }
+
+      // ── plans ───────────────────────────────────────────────────────────
+      plans: {
+        Row: {
+          id: string
+          tier: UserTier
+          is_popular: boolean
+          sort_order: number
+          /** Narrowed to PlanPrices (lib/plans/types.ts) at the read boundary. */
+          prices: Json
+          /** Narrowed to PlanFeatures (lib/plans/types.ts) at the read boundary. */
+          features: Json
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tier: UserTier
+          is_popular?: boolean
+          sort_order?: number
+          prices?: Json
+          features?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tier?: UserTier
+          is_popular?: boolean
+          sort_order?: number
+          prices?: Json
+          features?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
 
     Views: {
