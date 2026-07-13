@@ -42,11 +42,12 @@ Centralized tokens are the single source of truth, defined in the Tailwind theme
 (`app/globals.css` `@theme` / `tailwind.config`) and consumed everywhere via utility classes /
 CSS variables.
 
-- **Color** — a neutral scale (50→950), one primary brand hue + one accent, and **semantic**
-  tokens (`bg`, `surface`, `border`, `text`, `muted`, `success`, `warning`, `danger`). Authored
-  light-first with dark-mode-ready variables.
-- **Typography** — a quality variable font (Inter or Geist), a modular type scale
-  (`xs`→`display`), tight heading tracking, comfortable body line-height.
+- **Color** — a **warm-tinted neutral** scale (50→950) for premium warmth; **primary = deep
+  blue** (trust/premium, fitting real estate); **accent = warm amber/gold** (CTAs, highlights);
+  and **semantic** tokens (`bg`, `surface`, `border`, `text`, `muted`, `success`, `warning`,
+  `danger`). Authored light-first with dark-mode-ready variables.
+- **Typography** — **Geist** (variable), a modular type scale (`xs`→`display`), tight heading
+  tracking, comfortable body line-height.
 - **Spacing / radii / shadows** — one spacing scale; a small radii set (`sm/md/lg/xl/full`);
   subtle layered shadows (a key premium signal).
 - **Motion tokens** — durations (`fast/base/slow`) and easings (`standard/entrance/exit`) so all
