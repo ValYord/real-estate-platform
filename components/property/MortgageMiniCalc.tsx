@@ -130,7 +130,7 @@ export default function MortgageMiniCalc({ price, currency }: MortgageMiniCalcPr
 
         {/* CTA to full calculator */}
         <Link
-          href={`/mortgage/calculators?price=${price}&currency=${currency}`}
+          href={`/mortgage-calculators?price=${price}&currency=${currency}`}
           className="flex items-center justify-center gap-1.5 text-sm text-primary hover:text-primary/80 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
         >
           Detailed calculator

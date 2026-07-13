@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { ZodError } from 'zod'
 import { conversationSchema } from '@/lib/property/schemas'
 import { conversationsQuerySchema } from '@/lib/messages/schemas'
+import { agentConversationSchema } from '@/lib/agent/schemas'
 import { firstOf, mapPeer, mapProperty, type ProfileRef, type PropertyRef } from '@/lib/messages/server'
 import type { ConversationListItem, ConversationsResponse } from '@/lib/messages/types'
 
@@ -177,13 +178,15 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 /**
  * POST /api/conversations
  *
- * Creates (or reopens) a conversation between the authenticated user and the
- * property owner, optionally including a prefilled message.
+ * Creates (or reopens) a conversation between the authenticated user and
+ * either a property owner or — for the agent profile page's "Send a
+ * message" button (docs/en/pages/10 §3.7) — an agent directly, with no
+ * property attached (`property_id` is nullable on `conversations`).
  *
  * Auth: required — returns 401 when the caller is not authenticated.
  * Rate-limit: 5 requests per hour per user (returns 429 when exceeded).
  *
- * Body: { propertyId: string, message: string }
+ * Body: { propertyId: string, message: string } | { agentId: string, message: string }
  * Returns: 201 { conversationId: string }
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
@@ -194,6 +197,16 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: 'invalid_json' }, { status: 400 })
   }
 
+  const isAgentConversation =
+    typeof body === 'object' && body !== null && 'agentId' in (body as Record<string, unknown>)
+
+  if (isAgentConversation) {
+    return handleAgentConversation(body)
+  }
+  return handlePropertyConversation(body)
+}
+
+async function handlePropertyConversation(body: unknown): Promise<NextResponse> {
   let input: ReturnType<typeof conversationSchema.parse>
   try {
     input = conversationSchema.parse(body)
@@ -302,4 +315,105 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   // Development / test: no Supabase configured — return 401 (no auth)
   return NextResponse.json({ error: 'auth_required' }, { status: 401 })
+}
+
+/**
+ * Agent-initiated conversation — "Send a message" on the agent profile page.
+ * No property is attached (`property_id` stays null).
+ */
+async function handleAgentConversation(body: unknown): Promise<NextResponse> {
+  let input: ReturnType<typeof agentConversationSchema.parse>
+  try {
+    input = agentConversationSchema.parse(body)
+  } catch (err) {
+    if (err instanceof ZodError) {
+      return NextResponse.json(
+        { error: 'validation_error', fields: err.flatten().fieldErrors },
+        { status: 422 },
+      )
+    }
+    return NextResponse.json({ error: 'bad_request' }, { status: 400 })
+  }
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  if (!supabaseUrl || !anonKey || supabaseUrl.includes('your-project-id')) {
+    return NextResponse.json({ error: 'auth_required' }, { status: 401 })
+  }
+
+  try {
+    const { createServerClient } = await import('@/lib/supabase/server')
+    const supabase = await createServerClient()
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ error: 'auth_required' }, { status: 401 })
+    }
+
+    if (input.agentId === user.id) {
+      return NextResponse.json({ error: 'cannot_message_self' }, { status: 422 })
+    }
+
+    type AgentRow = { user_id: string }
+    const agentResult = await supabase
+      .from('agents')
+      .select('user_id')
+      .eq('user_id', input.agentId)
+      .single()
+
+    if (agentResult.error || !(agentResult.data as AgentRow | null)) {
+      return NextResponse.json({ error: 'not_found' }, { status: 404 })
+    }
+
+    type ConversationRow = { id: string }
+    const existingResult = await supabase
+      .from('conversations')
+      .select('id')
+      .is('property_id', null)
+      .eq('buyer_id', user.id)
+      .eq('seller_id', input.agentId)
+      .maybeSingle()
+
+    const existing = existingResult.data as ConversationRow | null
+
+    let conversationId: string
+
+    if (existing) {
+      conversationId = existing.id
+    } else {
+      const { createAdminClient } = await import('@/lib/supabase/admin')
+      const adminSupabase = createAdminClient()
+
+      const createdResult = await adminSupabase
+        .from('conversations')
+        .insert({
+          property_id: null,
+          buyer_id: user.id,
+          seller_id: input.agentId,
+        })
+        .select('id')
+        .single()
+
+      const created = createdResult.data as ConversationRow | null
+      if (createdResult.error || !created) {
+        return NextResponse.json({ error: 'server_error' }, { status: 500 })
+      }
+
+      conversationId = created.id
+
+      await adminSupabase.from('messages').insert({
+        conversation_id: conversationId,
+        sender_id: user.id,
+        body: input.message,
+      })
+    }
+
+    return NextResponse.json({ conversationId }, { status: 201 })
+  } catch {
+    return NextResponse.json({ error: 'server_error' }, { status: 500 })
+  }
 }

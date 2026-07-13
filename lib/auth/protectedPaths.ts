@@ -9,6 +9,8 @@ const PROTECTED_PATHS = [
   '/messages',
   '/sell',
   '/listing',
+  '/settings',
+  '/notifications',
 ] as const
 
 /**

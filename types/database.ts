@@ -36,6 +36,14 @@ export type DealType = 'sale' | 'rent'
 export type PropertyType = 'apartment' | 'house' | 'commercial' | 'land' | 'garage' | 'newdev'
 export type ListingStatus = 'active' | 'draft' | 'pending' | 'archived' | 'sold'
 export type MediaType = 'image' | 'video' | 'virtual_tour'
+export type Locale = 'hy' | 'ru' | 'en'
+export type Theme = 'light' | 'dark' | 'system'
+export type AgentStatus = 'active' | 'suspended'
+export type DealWish = 'buy' | 'sell' | 'rent'
+export type HomeValuePropertyType = 'apartment' | 'house' | 'land' | 'commercial'
+export type HomeValueCondition = 'new' | 'renovated' | 'good' | 'needs_renovation'
+export type HomeValueConfidence = 'high' | 'medium' | 'low'
+export type HomeValueFallbackLevel = 'district' | 'city' | 'none'
 export type ContactSubject = 'general' | 'support' | 'partnership' | 'complaint'
 export type ContactMessageStatus = 'new' | 'read' | 'archived'
 
@@ -47,6 +55,39 @@ export type ContactMessageStatus = 'new' | 'read' | 'archived'
 export interface Database {
   public: {
     Tables: {
+      contact_messages: {
+        Row: {
+          id: string
+          name: string
+          email: string
+          phone: string | null
+          subject: ContactSubject
+          body: string
+          status: ContactMessageStatus
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          email: string
+          phone?: string | null
+          subject: ContactSubject
+          body: string
+          status?: ContactMessageStatus
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          email?: string
+          phone?: string | null
+          subject?: ContactSubject
+          body?: string
+          status?: ContactMessageStatus
+          created_at?: string
+        }
+        Relationships: []
+      }
       // ── profiles ────────────────────────────────────────────────────────
       profiles: {
         Row: {
@@ -64,6 +105,14 @@ export interface Database {
           agent_slug: string | null
           agent_rating: number | null
           agent_review_count: number
+          lang: Locale
+          currency: Currency
+          theme: Theme
+          notification_prefs: Json
+          privacy: Json
+          /** Added in 0003_profile_agent_fields.sql. */
+          agency_name: string | null
+          license_no: string | null
         }
         Insert: {
           id: string
@@ -80,6 +129,13 @@ export interface Database {
           agent_slug?: string | null
           agent_rating?: number | null
           agent_review_count?: number
+          lang?: Locale
+          currency?: Currency
+          theme?: Theme
+          notification_prefs?: Json
+          privacy?: Json
+          agency_name?: string | null
+          license_no?: string | null
         }
         Update: {
           id?: string
@@ -96,6 +152,13 @@ export interface Database {
           agent_slug?: string | null
           agent_rating?: number | null
           agent_review_count?: number
+          lang?: Locale
+          currency?: Currency
+          theme?: Theme
+          notification_prefs?: Json
+          privacy?: Json
+          agency_name?: string | null
+          license_no?: string | null
         }
         Relationships: [
           {
@@ -487,6 +550,7 @@ export interface Database {
           id: string
           reporter_id: string
           conversation_id: string | null
+          review_id: string | null
           reason: string
           note: string | null
           status: string
@@ -496,6 +560,7 @@ export interface Database {
           id?: string
           reporter_id: string
           conversation_id?: string | null
+          review_id?: string | null
           reason: string
           note?: string | null
           status?: string
@@ -505,6 +570,7 @@ export interface Database {
           id?: string
           reporter_id?: string
           conversation_id?: string | null
+          review_id?: string | null
           reason?: string
           note?: string | null
           status?: string
@@ -521,6 +587,224 @@ export interface Database {
             foreignKeyName: 'reports_conversation_id_fkey'
             columns: ['conversation_id']
             referencedRelation: 'conversations'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'reports_review_id_fkey'
+            columns: ['review_id']
+            referencedRelation: 'agent_reviews'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+
+      // ── agents ───────────────────────────────────────────────────────────
+      agents: {
+        Row: {
+          user_id: string
+          bio: Json
+          specialties: string[]
+          languages: string[]
+          scope: string[]
+          verified: boolean
+          status: AgentStatus
+          avg_response_hours: number | null
+          deals_closed_count: number | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          user_id: string
+          bio?: Json
+          specialties?: string[]
+          languages?: string[]
+          scope?: string[]
+          verified?: boolean
+          status?: AgentStatus
+          avg_response_hours?: number | null
+          deals_closed_count?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          user_id?: string
+          bio?: Json
+          specialties?: string[]
+          languages?: string[]
+          scope?: string[]
+          verified?: boolean
+          status?: AgentStatus
+          avg_response_hours?: number | null
+          deals_closed_count?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'agents_user_id_fkey'
+            columns: ['user_id']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+
+      // ── agent_reviews ────────────────────────────────────────────────────
+      agent_reviews: {
+        Row: {
+          id: string
+          agent_id: string
+          author_id: string
+          rating: number
+          text: string
+          reply: string | null
+          replied_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          agent_id: string
+          author_id: string
+          rating: number
+          text: string
+          reply?: string | null
+          replied_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          agent_id?: string
+          author_id?: string
+          rating?: number
+          text?: string
+          reply?: string | null
+          replied_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'agent_reviews_agent_id_fkey'
+            columns: ['agent_id']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'agent_reviews_author_id_fkey'
+            columns: ['author_id']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+
+      // ── agent_leads ──────────────────────────────────────────────────────
+      agent_leads: {
+        Row: {
+          id: string
+          agent_id: string
+          user_id: string
+          deal_type: DealWish
+          property_type: string
+          city: string
+          budget_min: number | null
+          budget_max: number | null
+          currency: Currency
+          rooms: number | null
+          name: string
+          phone: string
+          message: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          agent_id: string
+          user_id: string
+          deal_type: DealWish
+          property_type: string
+          city: string
+          budget_min?: number | null
+          budget_max?: number | null
+          currency: Currency
+          rooms?: number | null
+          name: string
+          phone: string
+          message?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          agent_id?: string
+          user_id?: string
+          deal_type?: DealWish
+          property_type?: string
+          city?: string
+          budget_min?: number | null
+          budget_max?: number | null
+          currency?: Currency
+          rooms?: number | null
+          name?: string
+          phone?: string
+          message?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'agent_leads_agent_id_fkey'
+            columns: ['agent_id']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'agent_leads_user_id_fkey'
+            columns: ['user_id']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+
+      // ── saved_searches ───────────────────────────────────────────────────
+      saved_searches: {
+        Row: {
+          id: string
+          user_id: string
+          name: string
+          filters: Json
+          /** Generated column: md5(filters::text). Not insertable/updatable. */
+          filters_hash: string
+          alert_frequency: string
+          last_alerted_at: string | null
+          new_match_count: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          name: string
+          filters: Json
+          alert_frequency?: string
+          last_alerted_at?: string | null
+          new_match_count?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          name?: string
+          filters?: Json
+          alert_frequency?: string
+          last_alerted_at?: string | null
+          new_match_count?: number
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'saved_searches_user_id_fkey'
+            columns: ['user_id']
+            referencedRelation: 'profiles'
             referencedColumns: ['id']
           },
         ]
@@ -568,39 +852,141 @@ export interface Database {
         ]
       }
 
-      // ── contact_messages (Page 23 — /contact form) ─────────────────────────
-      contact_messages: {
+      // ── plans ───────────────────────────────────────────────────────────
+      plans: {
         Row: {
           id: string
-          name: string
-          email: string
-          phone: string | null
-          subject: ContactSubject
-          body: string
-          status: ContactMessageStatus
+          tier: UserTier
+          is_popular: boolean
+          sort_order: number
+          /** Narrowed to PlanPrices (lib/plans/types.ts) at the read boundary. */
+          prices: Json
+          /** Narrowed to PlanFeatures (lib/plans/types.ts) at the read boundary. */
+          features: Json
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tier: UserTier
+          is_popular?: boolean
+          sort_order?: number
+          prices?: Json
+          features?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tier?: UserTier
+          is_popular?: boolean
+          sort_order?: number
+          prices?: Json
+          features?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+
+      // ── home_value_estimates ────────────────────────────────────────────
+      home_value_estimates: {
+        Row: {
+          id: string
+          hash: string
+          owner_id: string | null
+          lat: number
+          lng: number
+          country: string
+          city: string
+          district: string | null
+          address_label: string | null
+          property_type: HomeValuePropertyType
+          area_m2: number
+          rooms: number | null
+          floor: number | null
+          floors_total: number | null
+          year_built: number | null
+          condition: HomeValueCondition | null
+          estimate: number
+          low: number
+          high: number
+          currency: Currency
+          price_per_m2: number
+          median_price_per_m2: number
+          confidence: HomeValueConfidence
+          comps_count: number
+          fallback_level: HomeValueFallbackLevel
+          /** Narrowed to EstimateFactor[] (lib/home-value/types.ts) at the read boundary. */
+          factors: Json
           created_at: string
         }
         Insert: {
           id?: string
-          name: string
-          email: string
-          phone?: string | null
-          subject: ContactSubject
-          body: string
-          status?: ContactMessageStatus
+          hash: string
+          owner_id?: string | null
+          lat: number
+          lng: number
+          country?: string
+          city: string
+          district?: string | null
+          address_label?: string | null
+          property_type: HomeValuePropertyType
+          area_m2: number
+          rooms?: number | null
+          floor?: number | null
+          floors_total?: number | null
+          year_built?: number | null
+          condition?: HomeValueCondition | null
+          estimate: number
+          low: number
+          high: number
+          currency?: Currency
+          price_per_m2: number
+          median_price_per_m2: number
+          confidence: HomeValueConfidence
+          comps_count?: number
+          fallback_level?: HomeValueFallbackLevel
+          factors?: Json
           created_at?: string
         }
         Update: {
           id?: string
-          name?: string
-          email?: string
-          phone?: string | null
-          subject?: ContactSubject
-          body?: string
-          status?: ContactMessageStatus
+          hash?: string
+          owner_id?: string | null
+          lat?: number
+          lng?: number
+          country?: string
+          city?: string
+          district?: string | null
+          address_label?: string | null
+          property_type?: HomeValuePropertyType
+          area_m2?: number
+          rooms?: number | null
+          floor?: number | null
+          floors_total?: number | null
+          year_built?: number | null
+          condition?: HomeValueCondition | null
+          estimate?: number
+          low?: number
+          high?: number
+          currency?: Currency
+          price_per_m2?: number
+          median_price_per_m2?: number
+          confidence?: HomeValueConfidence
+          comps_count?: number
+          fallback_level?: HomeValueFallbackLevel
+          factors?: Json
           created_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'home_value_estimates_owner_id_fkey'
+            columns: ['owner_id']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+        ]
       }
     }
 

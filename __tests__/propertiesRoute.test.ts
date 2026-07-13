@@ -94,3 +94,57 @@ describe('GET /api/properties', () => {
     })
   })
 })
+
+describe('GET /api/properties?ids=... (compare)', () => {
+  it('returns items in the same order as the requested ids (mock fallback)', async () => {
+    const { GET } = await import('../app/api/properties/route')
+    const req = makeRequest('ids=2,1')
+    const res = await GET(req)
+    expect(res.status).toBe(200)
+    const body = await res.json()
+    expect(body.items.map((i: { id: string }) => i.id)).toEqual(['2', '1'])
+  })
+
+  it('marks an id with no seed match as unavailable instead of throwing/500', async () => {
+    const { GET } = await import('../app/api/properties/route')
+    const req = makeRequest('ids=1,does-not-exist')
+    const res = await GET(req)
+    expect(res.status).toBe(200)
+    const body = await res.json()
+    expect(body.items).toHaveLength(2)
+    const missing = body.items.find((i: { id: string }) => i.id === 'does-not-exist')
+    expect(missing).toBeTruthy()
+    expect(missing.unavailable).toBe(true)
+    expect(missing.title).toBeNull()
+  })
+
+  it('returns a normal, available item for a valid id', async () => {
+    const { GET } = await import('../app/api/properties/route')
+    const req = makeRequest('ids=1')
+    const res = await GET(req)
+    expect(res.status).toBe(200)
+    const body = await res.json()
+    expect(body.items[0].unavailable).toBe(false)
+    expect(body.items[0].id).toBe('1')
+  })
+
+  it('returns { items: [] } with status 200 (not 400) when all tokens are malformed', async () => {
+    const { GET } = await import('../app/api/properties/route')
+    const req = makeRequest('ids=%20,,<script>')
+    const res = await GET(req)
+    expect(res.status).toBe(200)
+    const body = await res.json()
+    expect(body.items).toEqual([])
+  })
+
+  it('takes the ids branch even when other filter params are present', async () => {
+    const { GET } = await import('../app/api/properties/route')
+    const req = makeRequest('ids=1,2&deal=unknown')
+    const res = await GET(req)
+    // Would be 422 if this fell through to filter validation — asserts the
+    // ids branch short-circuits before parseSearchParams runs.
+    expect(res.status).toBe(200)
+    const body = await res.json()
+    expect(body.items).toHaveLength(2)
+  })
+})

@@ -1,17 +1,21 @@
 'use client'
 
 import { useState, useCallback, useTransition } from 'react'
-import { useRouter } from '@/i18n/navigation'
+import { useRouter, Link } from '@/i18n/navigation'
 import { useQuery, keepPreviousData } from '@tanstack/react-query'
 import { FilterBar } from './FilterBar'
 import type { ViewMode } from './FilterBar'
 import { ListingsPanel } from './ListingsPanel'
 import { SearchMap } from './SearchMap'
 import { ResultsHeader } from './ResultsHeader'
+import SaveSearchModal from './SaveSearchModal'
+import SignInPromptModal from './SignInPromptModal'
+import { CompareBar } from '@/components/compare/CompareBar'
 import type { Filters } from '@/lib/search/filtersSchema'
 import { filtersToParams } from '@/lib/search/filtersSchema'
 import type { PropertiesResponse } from '@/lib/search/types'
-import { Map, List } from 'lucide-react'
+import { hasSessionCookie } from '@/lib/auth/hasSessionCookie'
+import { Map, List, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 async function fetchProperties(filters: Filters): Promise<PropertiesResponse> {
@@ -35,6 +39,9 @@ export function SearchPageClient({
   const [filters, setFilters] = useState<Filters>(initialFilters)
   const [viewMode, setViewMode] = useState<ViewMode>('split')
   const [hoveredId, setHoveredId] = useState<string | null>(null)
+  const [saveSearchModalOpen, setSaveSearchModalOpen] = useState(false)
+  const [signInPromptOpen, setSignInPromptOpen] = useState(false)
+  const [saveSearchToast, setSaveSearchToast] = useState<'saved' | 'duplicate' | null>(null)
 
   // Shared data query — ResultsHeader, SearchMap, and ListingsPanel all read from here
   const queryKey = ['properties', filtersToParams(filters).toString()]
@@ -102,8 +109,11 @@ export function SearchPageClient({
   )
 
   const handleSaveSearch = useCallback(() => {
-    // Guest → login modal stub (no auth persistence in this task)
-    alert('Sign in to save your search')
+    if (hasSessionCookie()) {
+      setSaveSearchModalOpen(true)
+    } else {
+      setSignInPromptOpen(true)
+    }
   }, [])
 
   const showList = viewMode === 'list' || viewMode === 'split'
@@ -189,6 +199,61 @@ export function SearchPageClient({
           )}
         </button>
       </div>
+
+      {/* Floating compare bar — appears once a property is selected via PropertyCard's checkbox */}
+      <CompareBar />
+
+      {/* Save-search touch point — the one new piece of UI on this page */}
+      {saveSearchModalOpen && (
+        <SaveSearchModal
+          filters={filters}
+          onClose={() => setSaveSearchModalOpen(false)}
+          onSaved={() => {
+            setSaveSearchModalOpen(false)
+            setSaveSearchToast('saved')
+          }}
+          onDuplicate={() => {
+            setSaveSearchModalOpen(false)
+            setSaveSearchToast('duplicate')
+          }}
+        />
+      )}
+
+      {signInPromptOpen && (
+        <SignInPromptModal
+          redirectTo={`/search?${filtersToParams(filters).toString()}`}
+          onClose={() => setSignInPromptOpen(false)}
+        />
+      )}
+
+      {saveSearchToast && (
+        <div
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg text-sm font-medium max-w-sm w-full mx-4 bg-gray-900 text-white"
+        >
+          <span className="flex-1">
+            {saveSearchToast === 'duplicate' ? 'This search is already saved' : 'Search saved'}
+          </span>
+          {saveSearchToast === 'saved' && (
+            <Link
+              href="/saved-searches"
+              className="text-xs font-semibold underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white rounded shrink-0"
+            >
+              View saved searches
+            </Link>
+          )}
+          <button
+            type="button"
+            onClick={() => setSaveSearchToast(null)}
+            aria-label="Dismiss notification"
+            className="shrink-0 text-white/70 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white rounded"
+          >
+            <X className="w-4 h-4" aria-hidden="true" />
+          </button>
+        </div>
+      )}
     </>
   )
 }

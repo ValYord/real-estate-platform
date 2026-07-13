@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import type { Metadata } from 'next'
+import { GeistSans } from 'geist/font/sans'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
 import { notFound } from 'next/navigation'
@@ -31,8 +32,8 @@ export default async function LocaleLayout({
   const messages = await getMessages()
 
   return (
-    <html lang={locale} suppressHydrationWarning>
-      <body className="flex flex-col min-h-screen">
+    <html lang={locale} className={GeistSans.variable} suppressHydrationWarning>
+      <body className={`${GeistSans.className} flex flex-col min-h-screen`}>
         <NextIntlClientProvider messages={messages}>
           <QueryProvider>
             <ConditionalChrome>{children}</ConditionalChrome>

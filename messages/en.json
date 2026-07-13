@@ -64,6 +64,77 @@
       "unavailable": "Map unavailable"
     }
   },
+  "pro": {
+    "meta": {
+      "title": "Pro plans for agents — price and features | RE Platform",
+      "description": "Compare the Free, Pro, and Premium plans. More listings, analytics, and featured placement for agents."
+    },
+    "hero": {
+      "h1": "Sell faster with Pro tools",
+      "subtitle": "More listings, statistics, featured placement, and a Pro badge."
+    },
+    "toggle": {
+      "monthly": "Monthly",
+      "annual": "Annual",
+      "discountBadge": "–20%",
+      "annualNote": "2 months free"
+    },
+    "tiers": {
+      "free": "Free",
+      "pro": "Pro",
+      "premium": "Premium"
+    },
+    "popularBadge": "Most popular",
+    "perMonth": "/mo",
+    "perYear": "{amount} per year",
+    "cta": {
+      "startFree": "Start for free",
+      "choosePro": "Choose Pro",
+      "choosePremium": "Choose Premium",
+      "currentPlan": "Your current plan",
+      "notImplemented": "Checkout isn't available yet — we'll email you when it's ready.",
+      "error": "Something went wrong. Please try again.",
+      "loading": "Please wait…"
+    },
+    "features": {
+      "listings": "Active listings",
+      "featuredPerMonth": "Featured / promoted listings",
+      "analytics": "Analytics",
+      "proBadge": "Pro badge on profile",
+      "rankingPriority": "Find-an-Agent ranking priority",
+      "leadInbox": "Lead inbox",
+      "bulkUpload": "Bulk upload (CSV)",
+      "teamSeats": "Team members",
+      "support": "Priority support",
+      "placementGuarantee": "Placement guarantee"
+    },
+    "featureValues": {
+      "analytics_basic": "Basic",
+      "analytics_extended": "Extended",
+      "analytics_full": "Full + export",
+      "ranking_medium": "Medium",
+      "ranking_high": "High",
+      "leadInboxPriority": "Priority",
+      "support_email": "Email",
+      "support_email_phone": "Email + phone",
+      "unlimited": "Unlimited"
+    },
+    "included": "Included",
+    "notIncluded": "Not included",
+    "faq": {
+      "title": "Frequently asked questions",
+      "q1": "When am I charged?",
+      "a1": "You're charged immediately when you choose a paid plan, then automatically on the same date every billing cycle (monthly or annually) until you cancel.",
+      "q2": "Can I cancel anytime?",
+      "a2": "Yes. You can cancel anytime from your billing settings; your plan stays active until the end of the current billing period.",
+      "q3": "What happens to my listings after a downgrade?",
+      "a3": "Listings above your new plan's limit are archived, not deleted — you can restore them if you upgrade again.",
+      "q4": "Which currencies can I pay with?",
+      "a4": "Prices are shown in the currency selected in the header (AMD, USD, EUR, RUB).",
+      "q5": "Is there a refund?",
+      "a5": "We offer a full refund within 14 days of your first payment if you're not satisfied — contact support."
+    }
+  },
   "static": {
     "common": {
       "home": "Home",
