@@ -1,11 +1,14 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Menu, X, Heart, Bell, ChevronDown } from 'lucide-react'
+import { Menu, X, Heart, ChevronDown } from 'lucide-react'
 import { useTranslations, useLocale } from 'next-intl'
 import { Link, useRouter, usePathname } from '@/i18n/navigation'
 import { LOCALES, type Locale } from '@/lib/locale'
 import CurrencySwitcher from '@/components/layout/CurrencySwitcher'
+import NotificationBellDesktop from '@/components/notifications/NotificationBellDesktop'
+import NotificationBellMobileLink from '@/components/notifications/NotificationBellMobileLink'
+import { useUnreadNotifications } from '@/components/notifications/useUnreadNotifications'
 import { cn } from '@/lib/utils'
 
 // ─── Nav data ────────────────────────────────────────────────────────────────
@@ -54,7 +57,7 @@ const NAV_ITEMS: NavItemConfig[] = [
   {
     key: 'mortgage',
     items: [
-      { label: 'Calculators', href: '/mortgage/calculators' },
+      { label: 'Calculators', href: '/mortgage-calculators' },
       { label: 'Rates', href: '/mortgage/rates' },
       { label: 'Pre-approval', href: '/mortgage/pre-approval' },
       { label: 'Finance tips', href: '/guides?category=finance' },
@@ -94,6 +97,11 @@ export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [openMenu, setOpenMenu] = useState<string | null>(null)
   const menuTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Page 22 — Notifications: single subscription/query shared by the
+  // desktop dropdown bell and the mobile drawer bell (see the hook's doc
+  // comment for why this must be called exactly once).
+  const { userId, unreadCount, markAllReadOptimistic, markOneReadOptimistic } = useUnreadNotifications()
 
   // Track scroll position to switch header background
   useEffect(() => {
@@ -234,19 +242,15 @@ export default function Header() {
               <Heart className="w-5 h-5" aria-hidden="true" />
             </Link>
 
-            {/* Notifications */}
-            <Link
-              href="/notifications"
-              aria-label={tHeader('notifications')}
-              className={cn(
-                'p-2 rounded-lg transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
-                scrolled
-                  ? 'text-gray-600 hover:text-primary hover:bg-gray-100'
-                  : 'text-white/80 hover:text-white hover:bg-white/10',
-              )}
-            >
-              <Bell className="w-5 h-5" aria-hidden="true" />
-            </Link>
+            {/* Notifications — guests don't see the bell (doc "Roles") */}
+            {userId && (
+              <NotificationBellDesktop
+                scrolled={scrolled}
+                unreadCount={unreadCount}
+                onMarkAllRead={markAllReadOptimistic}
+                onItemRead={markOneReadOptimistic}
+              />
+            )}
 
             {/* Separator */}
             <div
@@ -448,14 +452,12 @@ export default function Header() {
                   <Heart className="w-4 h-4" aria-hidden="true" />
                   {tHeader('favorites')}
                 </Link>
-                <Link
-                  href="/notifications"
-                  className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-primary transition-colors"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  <Bell className="w-4 h-4" aria-hidden="true" />
-                  {tHeader('notifications')}
-                </Link>
+                {userId && (
+                  <NotificationBellMobileLink
+                    unreadCount={unreadCount}
+                    onNavigate={() => setMobileOpen(false)}
+                  />
+                )}
               </div>
             </div>
           </div>

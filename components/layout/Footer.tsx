@@ -19,7 +19,7 @@ const COLUMNS: FooterColumn[] = [
       { label: 'Buy', href: '/search?deal=sale' },
       { label: 'Sell', href: '/home-value' },
       { label: 'Rent', href: '/search?deal=rent' },
-      { label: 'Mortgage', href: '/mortgage/calculators' },
+      { label: 'Mortgage', href: '/mortgage-calculators' },
     ],
   },
   {

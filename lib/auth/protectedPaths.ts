@@ -10,6 +10,7 @@ const PROTECTED_PATHS = [
   '/sell',
   '/listing',
   '/settings',
+  '/notifications',
 ] as const
 
 /**
