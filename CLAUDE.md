@@ -32,6 +32,17 @@ Reviewers enforce these rules against the diff. Flag only path-scoped, clearly-b
 ### TypeScript
 - Do not use `any` to bypass typing; do not use `@ts-ignore` without an explanatory reason.
 
+### Design system
+- UI uses theme tokens (`app/globals.css` `@theme`) — no hard-coded hex colors or px spacing in
+  components/pages; use the Tailwind utilities they back (`bg-primary`, `text-muted`, `shadow-md`,
+  `rounded-lg`, etc). See `DESIGN_SYSTEM.md`.
+- Compose UI from `components/ui` primitives (`Button`, `Card`, `Badge`, `Input`, `Select`,
+  `Field`, `Skeleton`, `Dialog`, `Tooltip`) — flag ad-hoc reimplementations of a primitive that
+  already exists there.
+- Animate only via `components/motion` primitives (`FadeIn`, `SlideIn`, `Stagger`,
+  `PageTransition`, `Reveal`) — flag direct `framer-motion` usage in page/feature code that
+  bypasses these, since the primitives preserve `prefers-reduced-motion`.
+
 ### Hygiene
 - No `console.log` in committed code.
 - Validate external input at server boundaries (e.g. with zod).
