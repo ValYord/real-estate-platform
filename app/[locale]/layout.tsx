@@ -6,6 +6,8 @@ import { getMessages } from 'next-intl/server'
 import { notFound } from 'next/navigation'
 import ConditionalChrome from '@/components/layout/ConditionalChrome'
 import { QueryProvider } from '@/components/providers/QueryProvider'
+import CookieConsent from '@/components/cookies/CookieConsent'
+import AnalyticsGate from '@/components/cookies/AnalyticsGate'
 import { LOCALES, type Locale } from '@/lib/locale'
 
 export const metadata: Metadata = {
@@ -36,6 +38,9 @@ export default async function LocaleLayout({
           <QueryProvider>
             <ConditionalChrome>{children}</ConditionalChrome>
           </QueryProvider>
+          {/* Global cookie consent (Page 23) — appears on every page. */}
+          <CookieConsent />
+          <AnalyticsGate />
         </NextIntlClientProvider>
       </body>
     </html>

@@ -64,6 +64,8 @@ export const LIMITS = {
   FORGOT: { max: 3, windowMs: 60 * 60 * 1000 },
   /** 1 OTP resend per 60 seconds per user+channel */
   OTP_RESEND: { max: 1, windowMs: 60 * 1000 },
+  /** 3 contact form submissions per hour per IP (Page 23 — /contact) */
+  CONTACT: { max: 3, windowMs: 60 * 60 * 1000 },
   /** 5 "Send a request" submissions per hour per user (docs/en/pages/10 §3.7) */
   AGENT_LEAD: { max: 5, windowMs: 60 * 60 * 1000 },
   /**
