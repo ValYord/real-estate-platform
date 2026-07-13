@@ -66,4 +66,10 @@ export const LIMITS = {
   OTP_RESEND: { max: 1, windowMs: 60 * 1000 },
   /** 5 "Send a request" submissions per hour per user (docs/en/pages/10 §3.7) */
   AGENT_LEAD: { max: 5, windowMs: 60 * 60 * 1000 },
+  /**
+   * 20 valuation calculations per hour per IP (docs/en/pages/12 — the tool
+   * is intentionally usable by guests with no session, so this is keyed by
+   * IP rather than user id, same as the other pre-auth endpoints above).
+   */
+  HOME_VALUE_ESTIMATE: { max: 20, windowMs: 60 * 60 * 1000 },
 } as const

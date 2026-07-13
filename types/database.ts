@@ -40,6 +40,10 @@ export type Locale = 'hy' | 'ru' | 'en'
 export type Theme = 'light' | 'dark' | 'system'
 export type AgentStatus = 'active' | 'suspended'
 export type DealWish = 'buy' | 'sell' | 'rent'
+export type HomeValuePropertyType = 'apartment' | 'house' | 'land' | 'commercial'
+export type HomeValueCondition = 'new' | 'renovated' | 'good' | 'needs_renovation'
+export type HomeValueConfidence = 'high' | 'medium' | 'low'
+export type HomeValueFallbackLevel = 'district' | 'city' | 'none'
 
 // ---------------------------------------------------------------------------
 // Database shape (mirrors the Supabase generated-types structure so
@@ -848,6 +852,106 @@ export interface Database {
           updated_at?: string
         }
         Relationships: []
+      }
+
+      // ── home_value_estimates ────────────────────────────────────────────
+      home_value_estimates: {
+        Row: {
+          id: string
+          hash: string
+          owner_id: string | null
+          lat: number
+          lng: number
+          country: string
+          city: string
+          district: string | null
+          address_label: string | null
+          property_type: HomeValuePropertyType
+          area_m2: number
+          rooms: number | null
+          floor: number | null
+          floors_total: number | null
+          year_built: number | null
+          condition: HomeValueCondition | null
+          estimate: number
+          low: number
+          high: number
+          currency: Currency
+          price_per_m2: number
+          median_price_per_m2: number
+          confidence: HomeValueConfidence
+          comps_count: number
+          fallback_level: HomeValueFallbackLevel
+          /** Narrowed to EstimateFactor[] (lib/home-value/types.ts) at the read boundary. */
+          factors: Json
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          hash: string
+          owner_id?: string | null
+          lat: number
+          lng: number
+          country?: string
+          city: string
+          district?: string | null
+          address_label?: string | null
+          property_type: HomeValuePropertyType
+          area_m2: number
+          rooms?: number | null
+          floor?: number | null
+          floors_total?: number | null
+          year_built?: number | null
+          condition?: HomeValueCondition | null
+          estimate: number
+          low: number
+          high: number
+          currency?: Currency
+          price_per_m2: number
+          median_price_per_m2: number
+          confidence: HomeValueConfidence
+          comps_count?: number
+          fallback_level?: HomeValueFallbackLevel
+          factors?: Json
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          hash?: string
+          owner_id?: string | null
+          lat?: number
+          lng?: number
+          country?: string
+          city?: string
+          district?: string | null
+          address_label?: string | null
+          property_type?: HomeValuePropertyType
+          area_m2?: number
+          rooms?: number | null
+          floor?: number | null
+          floors_total?: number | null
+          year_built?: number | null
+          condition?: HomeValueCondition | null
+          estimate?: number
+          low?: number
+          high?: number
+          currency?: Currency
+          price_per_m2?: number
+          median_price_per_m2?: number
+          confidence?: HomeValueConfidence
+          comps_count?: number
+          fallback_level?: HomeValueFallbackLevel
+          factors?: Json
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'home_value_estimates_owner_id_fkey'
+            columns: ['owner_id']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+        ]
       }
     }
 
