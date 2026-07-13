@@ -79,6 +79,35 @@ describe('Dialog', () => {
     expect(dialog.className).toContain('max-w-lg')
     expect(dialog.className).toContain('w-full')
   })
+
+  it('locks body scroll while open and restores it on close', () => {
+    const { rerender } = render(
+      <Dialog open={true} onOpenChange={() => {}}>
+        <DialogTitle>Title</DialogTitle>
+      </Dialog>,
+    )
+    expect(document.body.style.overflow).toBe('hidden')
+
+    rerender(
+      <Dialog open={false} onOpenChange={() => {}}>
+        <DialogTitle>Title</DialogTitle>
+      </Dialog>,
+    )
+    expect(document.body.style.overflow).toBe('')
+  })
+
+  it('wires DialogTitle to the panel via aria-labelledby', () => {
+    render(
+      <Dialog open={true} onOpenChange={() => {}}>
+        <DialogTitle>My Title</DialogTitle>
+      </Dialog>,
+    )
+    const dialog = screen.getByRole('dialog')
+    const title = screen.getByText('My Title')
+    const labelledBy = dialog.getAttribute('aria-labelledby')
+    expect(labelledBy).toBeTruthy()
+    expect(title.getAttribute('id')).toBe(labelledBy)
+  })
 })
 
 function ControlledDialog() {

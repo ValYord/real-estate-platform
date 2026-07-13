@@ -35,7 +35,8 @@ Reviewers enforce these rules against the diff. Flag only path-scoped, clearly-b
 ### Design system
 - UI uses theme tokens (`app/globals.css` `@theme`) — no hard-coded hex colors or px spacing in
   components/pages; use the Tailwind utilities they back (`bg-primary`, `text-muted`, `shadow-md`,
-  `rounded-lg`, etc). See `DESIGN_SYSTEM.md`.
+  `rounded-lg`, etc). See `DESIGN_SYSTEM.md`. (Exception: discrete data-viz ramps that need distinct
+  hues with no semantic-token equivalent, e.g. the password-strength meter — comment the exemption.)
 - Compose UI from `components/ui` primitives (`Button`, `Card`, `Badge`, `Input`, `Select`,
   `Field`, `Skeleton`, `Dialog`, `Tooltip`) — flag ad-hoc reimplementations of a primitive that
   already exists there.

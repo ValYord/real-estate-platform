@@ -209,9 +209,6 @@ wrapper.
   `up`), `delay?: number`. Slides + fades in from the given direction, once, on scroll.
 - **`Stagger`** (`Stagger.tsx`) — props: `gap?: number` (default `0.08`, seconds between
   children). Wraps each direct child in its own fade/lift animation, staggered by `gap`.
-- **`PageTransition`** (`PageTransition.tsx`) — no props beyond `children`. Cross-fades route
-  content on pathname change (`AnimatePresence mode="wait"`); intended to wrap a layout's
-  `children`.
 - **`Reveal`** (`Reveal.tsx`) — no props beyond `children`. Ties opacity/position directly to
   scroll progress as the element crosses the viewport (`useScroll` + `useTransform`), rather than
   firing once.
@@ -237,9 +234,10 @@ check it there before guessing.
   field, skeleton, dialog, or tooltip inline — use the existing primitive, extending via
   `className` (merged safely through `cn`) rather than duplicating its styles.
 - **Animate only via `components/motion`.** Don't call `framer-motion` directly in page/feature
-  code for entrances, scroll reveals, staggered lists, or page transitions — wrap with `FadeIn`,
-  `SlideIn`, `Stagger`, `PageTransition`, or `Reveal` so `prefers-reduced-motion` is respected
-  automatically.
+  code for entrances, scroll reveals, or staggered lists — wrap with `FadeIn`,
+  `SlideIn`, `Stagger`, or `Reveal` so `prefers-reduced-motion` is respected
+  automatically. (Route-level page transitions are planned; they'll be wired into the layout
+  during page integration.)
 
 ## For the Designer agent (SP2)
 

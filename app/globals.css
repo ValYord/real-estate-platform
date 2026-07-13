@@ -2,9 +2,6 @@
 @import "mapbox-gl/dist/mapbox-gl.css";
 
 @theme {
-  /* Brand primary color — kept for existing pages; now points at --color-primary below */
-  --color-primary-foreground: #ffffff;
-
   /* Typography */
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
     "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif,

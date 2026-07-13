@@ -16,6 +16,8 @@ function getPasswordStrength(password: string): 0 | 1 | 2 | 3 | 4 {
 }
 
 const STRENGTH_LABEL = ['', 'Weak', 'Fair', 'Good', 'Strong'] as const
+// Intentional exemption from the design-system "tokens only" rule: a discrete weak→strong
+// strength ramp needs distinct hues (red→green) that the semantic tokens don't provide.
 const STRENGTH_COLOR = [
   '',
   'bg-red-500',
