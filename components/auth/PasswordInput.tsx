@@ -16,6 +16,8 @@ function getPasswordStrength(password: string): 0 | 1 | 2 | 3 | 4 {
 }
 
 const STRENGTH_LABEL = ['', 'Weak', 'Fair', 'Good', 'Strong'] as const
+// Intentional exemption from the design-system "tokens only" rule: a discrete weak→strong
+// strength ramp needs distinct hues (red→green) that the semantic tokens don't provide.
 const STRENGTH_COLOR = [
   '',
   'bg-red-500',
@@ -52,7 +54,7 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
         {label && (
           <label
             htmlFor={id}
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-sm font-medium text-text mb-1"
           >
             {label}
           </label>
@@ -69,9 +71,9 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
               'h-11 w-full rounded-lg border px-3 pr-10 text-sm transition-colors',
               'focus:outline-none focus:ring-2',
               error
-                ? 'border-red-500 focus:ring-red-200'
-                : 'border-gray-300 focus:ring-primary/40 focus:border-primary',
-              inputProps.disabled && 'opacity-50 cursor-not-allowed bg-gray-50',
+                ? 'border-danger focus:ring-danger/20'
+                : 'border-border focus:ring-primary/40 focus:border-primary',
+              inputProps.disabled && 'opacity-50 cursor-not-allowed bg-neutral-50',
             )}
             {...inputProps}
           />
@@ -81,7 +83,7 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
             onClick={() => setVisible((v) => !v)}
             aria-label={visible ? 'Hide password' : 'Show password'}
             aria-pressed={visible}
-            className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-gray-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-r-lg"
+            className="absolute inset-y-0 right-0 flex items-center px-3 text-muted hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-r-lg"
           >
             {visible ? (
               <EyeOff className="w-4 h-4" aria-hidden="true" />
@@ -100,12 +102,12 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
                   key={bar}
                   className={cn(
                     'h-1 flex-1 rounded-full transition-colors duration-300',
-                    strength >= bar ? STRENGTH_COLOR[strength] : 'bg-gray-200',
+                    strength >= bar ? STRENGTH_COLOR[strength] : 'bg-neutral-200',
                   )}
                 />
               ))}
             </div>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted">
               {strength > 0 && (
                 <span className="font-medium">{STRENGTH_LABEL[strength]} — </span>
               )}
@@ -118,7 +120,7 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
           <p
             id={`${id}-error`}
             role="alert"
-            className="text-xs text-red-600 mt-1"
+            className="text-xs text-danger mt-1"
           >
             {error}
           </p>
