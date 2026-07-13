@@ -36,6 +36,8 @@ export type DealType = 'sale' | 'rent'
 export type PropertyType = 'apartment' | 'house' | 'commercial' | 'land' | 'garage' | 'newdev'
 export type ListingStatus = 'active' | 'draft' | 'pending' | 'archived' | 'sold'
 export type MediaType = 'image' | 'video' | 'virtual_tour'
+export type Locale = 'hy' | 'ru' | 'en'
+export type Theme = 'light' | 'dark' | 'system'
 export type AgentStatus = 'active' | 'suspended'
 export type DealWish = 'buy' | 'sell' | 'rent'
 
@@ -64,6 +66,11 @@ export interface Database {
           agent_slug: string | null
           agent_rating: number | null
           agent_review_count: number
+          lang: Locale
+          currency: Currency
+          theme: Theme
+          notification_prefs: Json
+          privacy: Json
           /** Added in 0003_profile_agent_fields.sql. */
           agency_name: string | null
           license_no: string | null
@@ -83,6 +90,11 @@ export interface Database {
           agent_slug?: string | null
           agent_rating?: number | null
           agent_review_count?: number
+          lang?: Locale
+          currency?: Currency
+          theme?: Theme
+          notification_prefs?: Json
+          privacy?: Json
           agency_name?: string | null
           license_no?: string | null
         }
@@ -101,6 +113,11 @@ export interface Database {
           agent_slug?: string | null
           agent_rating?: number | null
           agent_review_count?: number
+          lang?: Locale
+          currency?: Currency
+          theme?: Theme
+          notification_prefs?: Json
+          privacy?: Json
           agency_name?: string | null
           license_no?: string | null
         }

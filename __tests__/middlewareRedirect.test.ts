@@ -49,6 +49,21 @@ describe('isProtectedPath()', () => {
     it('protects /[locale]/messages/[id]', () => {
       expect(isProtectedPath('/en/messages/abc-123')).toBe(true)
     })
+
+    it('protects /[locale]/settings (Page 21)', () => {
+      expect(isProtectedPath('/hy/settings')).toBe(true)
+    })
+
+    it('protects /[locale]/settings/profile deep-link tab', () => {
+      expect(isProtectedPath('/ru/settings/profile')).toBe(true)
+    })
+
+    it('protects /[locale]/settings/account, /preferences, /notifications, /privacy tabs', () => {
+      expect(isProtectedPath('/en/settings/account')).toBe(true)
+      expect(isProtectedPath('/en/settings/preferences')).toBe(true)
+      expect(isProtectedPath('/en/settings/notifications')).toBe(true)
+      expect(isProtectedPath('/en/settings/privacy')).toBe(true)
+    })
   })
 
   describe('listing wizard routes require authentication', () => {
@@ -112,5 +127,9 @@ describe('auth redirect page for /sell/new', () => {
   it('redirects /listing/[id]/edit to /auth/login', () => {
     // Non-sell paths redirect to login, not register
     expect(resolveAuthPage('/hy/listing/abc-123/edit')).toBe('login')
+  })
+
+  it('redirects /settings (guest) to /auth/login, not register', () => {
+    expect(resolveAuthPage('/hy/settings')).toBe('login')
   })
 })
