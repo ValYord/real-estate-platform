@@ -34,7 +34,12 @@ export type UserTier = 'free' | 'pro' | 'premium'
 export type Currency = 'AMD' | 'USD' | 'EUR' | 'RUB'
 export type DealType = 'sale' | 'rent'
 export type PropertyType = 'apartment' | 'house' | 'commercial' | 'land' | 'garage' | 'newdev'
-export type ListingStatus = 'active' | 'draft' | 'pending' | 'archived' | 'sold'
+/** 'rejected' added in 0012_admin_moderation.sql (Page 24 — admin moderation). */
+export type ListingStatus = 'active' | 'draft' | 'pending' | 'archived' | 'sold' | 'rejected'
+/** Page 24 — admin moderation audit log action names. */
+export type AdminActionName = 'listing_approved' | 'listing_rejected'
+/** Page 24 — admin moderation audit log target kinds. */
+export type AdminActionTargetType = 'listing'
 export type MediaType = 'image' | 'video' | 'virtual_tour'
 export type Locale = 'hy' | 'ru' | 'en'
 export type Theme = 'light' | 'dark' | 'system'
@@ -991,6 +996,48 @@ export interface Database {
           {
             foreignKeyName: 'home_value_estimates_owner_id_fkey'
             columns: ['owner_id']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+
+      // ── admin_actions ────────────────────────────────────────────────────
+      // Page 24 — Admin Panel MVP. Audit log row written by every mutating
+      // admin action (approve/reject a listing, ...). Added in
+      // 0012_admin_moderation.sql.
+      admin_actions: {
+        Row: {
+          id: string
+          admin_id: string
+          action: AdminActionName
+          target_type: AdminActionTargetType
+          target_id: string
+          meta: Json
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          admin_id: string
+          action: AdminActionName
+          target_type: AdminActionTargetType
+          target_id: string
+          meta?: Json
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          admin_id?: string
+          action?: AdminActionName
+          target_type?: AdminActionTargetType
+          target_id?: string
+          meta?: Json
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'admin_actions_admin_id_fkey'
+            columns: ['admin_id']
             referencedRelation: 'profiles'
             referencedColumns: ['id']
           },
