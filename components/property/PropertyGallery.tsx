@@ -19,10 +19,15 @@ import {
   Loader2,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { getVisibleMediaTabs, type MediaTab } from '@/lib/property/tabs'
 import type { PropertyMedia } from '@/lib/property/types'
 
 // Lazy-load the full-screen lightbox — never SSR'd
 const Lightbox = dynamic(() => import('./Lightbox'), { ssr: false })
+// Lazy-load the 360° tour viewer (+ its `three` dependency) — only fetched
+// once the [🌐 360°] tab is actually clicked, never on the page's initial
+// load. See docs/design/26-virtual-tour-viewer-handoff.md.
+const Tour360Tab = dynamic(() => import('./Tour360Tab'), { ssr: false })
 
 interface PropertyGalleryProps {
   media: PropertyMedia[]
@@ -31,17 +36,18 @@ interface PropertyGalleryProps {
   propertyId: string
   isFavorited?: boolean
   isAvailable?: boolean
+  /** Page 26 — null when the listing has no 360° tour (tab is omitted entirely). */
+  tourType?: 'panorama' | 'embed_url' | 'video' | null
+  tourData?: unknown
 }
 
-type MediaTab = 'photo' | 'video' | 'tour360' | 'map' | 'floorplan'
-
-const TABS: { key: MediaTab; label: string; Icon: React.ElementType }[] = [
-  { key: 'photo', label: 'Photos', Icon: Camera },
-  { key: 'video', label: 'Video', Icon: Video },
-  { key: 'tour360', label: '360°', Icon: Globe },
-  { key: 'map', label: 'Map', Icon: Map },
-  { key: 'floorplan', label: 'Floor plan', Icon: LayoutGrid },
-]
+const TAB_ICONS: Record<MediaTab, React.ElementType> = {
+  photo: Camera,
+  video: Video,
+  tour360: Globe,
+  map: Map,
+  floorplan: LayoutGrid,
+}
 
 type ShareChannel = 'copy' | 'telegram' | 'whatsapp' | 'email'
 
@@ -66,11 +72,18 @@ export default function PropertyGallery({
   propertyId,
   isFavorited = false,
   isAvailable = true,
+  tourType = null,
+  tourData = null,
 }: PropertyGalleryProps) {
   const photos = media.filter((m) => m.type === 'photo')
   const hasVideo = media.some((m) => m.type === 'video')
-  const hasTour360 = media.some((m) => m.type === 'tour360')
+  // Page 26 — tour presence comes from the properties.tour_type/tour_data
+  // columns (see lib/tour360), not the `media` array (property_media's own
+  // 'virtual_tour' media_type is an unrelated, pre-existing concept — see D2
+  // in the design handoff).
+  const hasTour360 = tourType != null
   const hasFloorplan = media.some((m) => m.type === 'floorplan')
+  const visibleTabs = getVisibleMediaTabs({ hasVideo, hasTour360, hasFloorplan })
 
   const [activeTab, setActiveTab] = useState<MediaTab>('photo')
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
@@ -186,7 +199,7 @@ export default function PropertyGallery({
     <div>
       {/* ── Desktop gallery grid ── */}
       <div className="hidden md:block relative">
-        {photos.length === 0 ? (
+        {activeTab === 'photo' && (photos.length === 0 ? (
           <div className="h-[480px] bg-gray-100 rounded-xl flex items-center justify-center">
             <Camera className="w-12 h-12 text-gray-300" aria-hidden="true" />
             <p className="ml-3 text-gray-400">No photos available</p>
@@ -269,6 +282,11 @@ export default function PropertyGallery({
               })}
             </div>
           </div>
+        ))}
+
+        {/* 360° tour tab content (desktop) — see PART A of Page 26 */}
+        {activeTab === 'tour360' && hasTour360 && tourType && (
+          <Tour360Tab tourType={tourType} tourData={tourData} title={title} city={city} />
         )}
 
         {/* Overlay buttons (top-right) */}
@@ -311,7 +329,7 @@ export default function PropertyGallery({
 
       {/* ── Mobile swipe carousel ── */}
       <div className="md:hidden relative h-[280px] bg-gray-100 overflow-hidden">
-        {photos.length === 0 ? (
+        {activeTab === 'photo' && (photos.length === 0 ? (
           <div className="h-full flex items-center justify-center">
             <Camera className="w-10 h-10 text-gray-300" aria-hidden="true" />
           </div>
@@ -356,6 +374,11 @@ export default function PropertyGallery({
               </>
             )}
           </>
+        ))}
+
+        {/* 360° tour tab content (mobile) — see PART A of Page 26 */}
+        {activeTab === 'tour360' && hasTour360 && tourType && (
+          <Tour360Tab tourType={tourType} tourData={tourData} title={title} city={city} mobile />
         )}
 
         {/* Mobile overlay buttons */}
@@ -402,11 +425,14 @@ export default function PropertyGallery({
         role="tablist"
         aria-label="Media types"
       >
-        {TABS.map(({ key, label, Icon }) => {
+        {visibleTabs.map(({ key, label }) => {
+          const Icon = TAB_ICONS[key]
+          // The 360° tab is never rendered disabled — when there's no tour
+          // it's filtered out of `visibleTabs` entirely (see D1 in the
+          // design handoff). video/floorplan keep the existing disabled
+          // treatment, unchanged (out of scope for this task).
           const isDisabled =
-            (key === 'video' && !hasVideo) ||
-            (key === 'tour360' && !hasTour360) ||
-            (key === 'floorplan' && !hasFloorplan)
+            (key === 'video' && !hasVideo) || (key === 'floorplan' && !hasFloorplan)
 
           return (
             <button

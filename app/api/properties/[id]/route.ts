@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { getMockPropertyDetail } from '@/lib/property/mockData'
+import { tourTypeSchema } from '@/lib/tour360/schemas'
 import type { PropertyDetail } from '@/lib/property/types'
 
 type Params = { id: string }
@@ -43,6 +44,7 @@ export async function GET(
           `id, slug, title, description, price, currency, area_m2, rooms, bedrooms, bathrooms,
            floor, floors_total, year_built, property_type, deal_type, status,
            city, district, address, amenities, location, created_at, listed_at, owner_id,
+           tour_type, tour_data,
            profiles!properties_owner_id_fkey(id, full_name, avatar_url, phone, role),
            property_media(id, url, media_type, sort_order)`,
         )
@@ -141,6 +143,8 @@ type RawRow = {
   created_at: string
   listed_at: string | null
   owner_id: string
+  tour_type: string | null
+  tour_data: unknown
   profiles: RawProfile | RawProfile[] | null
   property_media: RawMedia[] | null
 }
@@ -165,6 +169,16 @@ function buildSupabaseResponse(row: RawRow, userId: string | null): PropertyDeta
 
   const createdAt = new Date(row.created_at)
   const isNew = Date.now() - createdAt.getTime() < 7 * 24 * 60 * 60 * 1000
+
+  // Page 26 — the [🌐 360°] tab only ever appears when tour_type parses as
+  // one of the known enum values (the DB has a CHECK constraint for this
+  // too; this is defense-in-depth). tour_data's *shape* is intentionally not
+  // deep-validated here — that happens in the client viewer component
+  // (lib/tour360/schemas.ts's parseTourData), which renders a fallback card
+  // instead of throwing when it doesn't match tourType's schema.
+  const parsedTourType = tourTypeSchema.safeParse(row.tour_type)
+  const tourType = parsedTourType.success ? parsedTourType.data : null
+  const tourData = tourType ? (row.tour_data ?? null) : null
 
   return {
     id: row.id,
@@ -195,6 +209,8 @@ function buildSupabaseResponse(row: RawRow, userId: string | null): PropertyDeta
     heating: null,
     condition: null,
     media,
+    tourType,
+    tourData,
     owner: {
       id: profile?.id ?? row.owner_id,
       name: profile?.full_name ?? 'Unknown',

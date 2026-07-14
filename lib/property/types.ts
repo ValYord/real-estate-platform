@@ -55,6 +55,16 @@ export interface PropertyDetail {
   heating: string | null
   condition: string | null
   media: PropertyMedia[]
+  /**
+   * Page 26 (360° Virtual Tour Viewer, Part A). `tourType`/`tourData` are
+   * passed through as raw as the DB allows (`tourType` is at least a known
+   * string when present; `tourData` is untyped `unknown`) — the property
+   * page must validate `tourData`'s shape with zod (see
+   * lib/tour360/schemas.ts's `parseTourData`) before rendering it, not trust
+   * it just because it's non-null.
+   */
+  tourType: 'panorama' | 'embed_url' | 'video' | null
+  tourData: unknown
   owner: PropertyOwner
   viewsCount: number
   favoritesCount: number
