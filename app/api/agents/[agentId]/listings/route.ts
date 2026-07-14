@@ -5,7 +5,7 @@ import { MOCK_AGENT_LISTINGS } from '@/lib/agent/mockData'
 import type { AgentListingsResponse } from '@/lib/agent/types'
 import type { PropertyListItem } from '@/lib/search/types'
 
-type Params = { id: string }
+type Params = { agentId: string }
 
 const PAGE_SIZE = 12
 
@@ -38,7 +38,7 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<Params> },
 ): Promise<NextResponse> {
-  const { id } = await params
+  const { agentId: id } = await params
   const { searchParams } = new URL(request.url)
 
   let query: ReturnType<typeof agentListingsQuerySchema.parse>

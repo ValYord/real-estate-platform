@@ -30,13 +30,13 @@ function makeGetRequest(url: string): import('next/server').NextRequest {
   return { url } as unknown as import('next/server').NextRequest
 }
 
-function makeParams(id: string): { params: Promise<{ id: string }> } {
-  return { params: Promise.resolve({ id }) }
+function makeParams(id: string): { params: Promise<{ agentId: string }> } {
+  return { params: Promise.resolve({ agentId: id }) }
 }
 
 describe('GET /api/agents/[id]/listings', () => {
   it('returns 422 for an invalid deal param', async () => {
-    const { GET } = await import('../app/api/agents/[id]/listings/route')
+    const { GET } = await import('../app/api/agents/[agentId]/listings/route')
     const res = await GET(
       makeGetRequest(`http://localhost/api/agents/${AGENT_ID}/listings?deal=lease`),
       makeParams(AGENT_ID),
@@ -45,7 +45,7 @@ describe('GET /api/agents/[id]/listings', () => {
   })
 
   it('returns all listings (mock data has 2 sale + 1 rent) when deal=all', async () => {
-    const { GET } = await import('../app/api/agents/[id]/listings/route')
+    const { GET } = await import('../app/api/agents/[agentId]/listings/route')
     const res = await GET(
       makeGetRequest(`http://localhost/api/agents/${AGENT_ID}/listings?deal=all`),
       makeParams(AGENT_ID),
@@ -57,7 +57,7 @@ describe('GET /api/agents/[id]/listings', () => {
   })
 
   it('filters to only "sale" listings when deal=sale', async () => {
-    const { GET } = await import('../app/api/agents/[id]/listings/route')
+    const { GET } = await import('../app/api/agents/[agentId]/listings/route')
     const res = await GET(
       makeGetRequest(`http://localhost/api/agents/${AGENT_ID}/listings?deal=sale`),
       makeParams(AGENT_ID),
@@ -68,7 +68,7 @@ describe('GET /api/agents/[id]/listings', () => {
   })
 
   it('filters to only "rent" listings when deal=rent', async () => {
-    const { GET } = await import('../app/api/agents/[id]/listings/route')
+    const { GET } = await import('../app/api/agents/[agentId]/listings/route')
     const res = await GET(
       makeGetRequest(`http://localhost/api/agents/${AGENT_ID}/listings?deal=rent`),
       makeParams(AGENT_ID),
@@ -79,7 +79,7 @@ describe('GET /api/agents/[id]/listings', () => {
   })
 
   it('sorts ascending by price when sort=price_asc', async () => {
-    const { GET } = await import('../app/api/agents/[id]/listings/route')
+    const { GET } = await import('../app/api/agents/[agentId]/listings/route')
     const res = await GET(
       makeGetRequest(`http://localhost/api/agents/${AGENT_ID}/listings?deal=all&sort=price_asc`),
       makeParams(AGENT_ID),
@@ -90,7 +90,7 @@ describe('GET /api/agents/[id]/listings', () => {
   })
 
   it('sorts descending by price when sort=price_desc', async () => {
-    const { GET } = await import('../app/api/agents/[id]/listings/route')
+    const { GET } = await import('../app/api/agents/[agentId]/listings/route')
     const res = await GET(
       makeGetRequest(`http://localhost/api/agents/${AGENT_ID}/listings?deal=all&sort=price_desc`),
       makeParams(AGENT_ID),
@@ -101,7 +101,7 @@ describe('GET /api/agents/[id]/listings', () => {
   })
 
   it('defaults to deal=all and sort=new when no query params are given', async () => {
-    const { GET } = await import('../app/api/agents/[id]/listings/route')
+    const { GET } = await import('../app/api/agents/[agentId]/listings/route')
     const res = await GET(
       makeGetRequest(`http://localhost/api/agents/${AGENT_ID}/listings`),
       makeParams(AGENT_ID),

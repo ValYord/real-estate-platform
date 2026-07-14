@@ -1,6 +1,8 @@
 {
   "permissions": {
     "allow": [
+      "Bash(npx eslint *)",
+      "Bash(echo \"exit: $?\")",
       "Bash(export NEXT_PUBLIC_SUPABASE_URL=https://placeholder.supabase.co NEXT_PUBLIC_SUPABASE_ANON_KEY=placeholder-anon-key)",
       "Bash(npx next *)",
       "Bash(echo \"REAL_EXIT_CODE=$?\")",

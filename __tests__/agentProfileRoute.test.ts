@@ -24,8 +24,8 @@ function makeGetRequest(url: string): import('next/server').NextRequest {
   return { url } as unknown as import('next/server').NextRequest
 }
 
-function makeParams(slug: string): { params: Promise<{ slug: string }> } {
-  return { params: Promise.resolve({ slug }) }
+function makeParams(slug: string): { params: Promise<{ agentId: string }> } {
+  return { params: Promise.resolve({ agentId: slug }) }
 }
 
 const PROFILE_ROW = {
@@ -115,7 +115,7 @@ describe('GET /api/agents/[slug] — mock-data fallback (no Supabase env)', () =
   })
 
   it('returns 404 for an unknown slug', async () => {
-    const { GET } = await import('../app/api/agents/[slug]/route')
+    const { GET } = await import('../app/api/agents/[agentId]/route')
     const res = await GET(makeGetRequest('http://localhost/api/agents/no-such-agent'), makeParams('no-such-agent'))
     expect(res.status).toBe(404)
     const body = await res.json()
@@ -123,7 +123,7 @@ describe('GET /api/agents/[slug] — mock-data fallback (no Supabase env)', () =
   })
 
   it('returns 200 with the full AgentProfile shape for the seeded mock slug', async () => {
-    const { GET } = await import('../app/api/agents/[slug]/route')
+    const { GET } = await import('../app/api/agents/[agentId]/route')
     const res = await GET(
       makeGetRequest('http://localhost/api/agents/anna-petrosyan-yerevan'),
       makeParams('anna-petrosyan-yerevan'),
@@ -156,7 +156,7 @@ describe('GET /api/agents/[slug] — Supabase-backed', () => {
     vi.mocked(createAdminClient).mockReturnValueOnce(
       buildAdminClient({ profile: null }) as unknown as ReturnType<typeof createAdminClient>,
     )
-    const { GET } = await import('../app/api/agents/[slug]/route')
+    const { GET } = await import('../app/api/agents/[agentId]/route')
     const res = await GET(makeGetRequest('http://localhost/api/agents/nope'), makeParams('nope'))
     expect(res.status).toBe(404)
   })
@@ -172,7 +172,7 @@ describe('GET /api/agents/[slug] — Supabase-backed', () => {
     vi.mocked(createServerClient).mockResolvedValueOnce(
       buildServerClient(null) as unknown as Awaited<ReturnType<typeof createServerClient>>,
     )
-    const { GET } = await import('../app/api/agents/[slug]/route')
+    const { GET } = await import('../app/api/agents/[agentId]/route')
     const res = await GET(
       makeGetRequest('http://localhost/api/agents/anna-petrosyan-yerevan'),
       makeParams('anna-petrosyan-yerevan'),
@@ -191,7 +191,7 @@ describe('GET /api/agents/[slug] — Supabase-backed', () => {
     vi.mocked(createServerClient).mockResolvedValueOnce(
       buildServerClient('some-other-user') as unknown as Awaited<ReturnType<typeof createServerClient>>,
     )
-    const { GET } = await import('../app/api/agents/[slug]/route')
+    const { GET } = await import('../app/api/agents/[agentId]/route')
     const res = await GET(
       makeGetRequest('http://localhost/api/agents/anna-petrosyan-yerevan'),
       makeParams('anna-petrosyan-yerevan'),
@@ -210,7 +210,7 @@ describe('GET /api/agents/[slug] — Supabase-backed', () => {
     vi.mocked(createServerClient).mockResolvedValueOnce(
       buildServerClient(PROFILE_ROW.id) as unknown as Awaited<ReturnType<typeof createServerClient>>,
     )
-    const { GET } = await import('../app/api/agents/[slug]/route')
+    const { GET } = await import('../app/api/agents/[agentId]/route')
     const res = await GET(
       makeGetRequest('http://localhost/api/agents/anna-petrosyan-yerevan'),
       makeParams('anna-petrosyan-yerevan'),
@@ -231,7 +231,7 @@ describe('GET /api/agents/[slug] — Supabase-backed', () => {
     vi.mocked(createServerClient).mockResolvedValueOnce(
       buildServerClient(PROFILE_ROW.id) as unknown as Awaited<ReturnType<typeof createServerClient>>,
     )
-    const { GET } = await import('../app/api/agents/[slug]/route')
+    const { GET } = await import('../app/api/agents/[agentId]/route')
     const res = await GET(
       makeGetRequest('http://localhost/api/agents/anna-petrosyan-yerevan'),
       makeParams('anna-petrosyan-yerevan'),
