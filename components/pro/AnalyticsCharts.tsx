@@ -23,10 +23,12 @@ import type {
   ProAnalyticsMetric,
   ProDateRange,
 } from '@/lib/pro-dashboard/types'
+import Card from '@/components/ui/Card'
+import Skeleton from '@/components/ui/Skeleton'
+import Stagger from '@/components/motion/Stagger'
 import UpgradeOverlay from './UpgradeOverlay'
 import EmptyProStats from './EmptyProStats'
 import TopListingsTable from './TopListingsTable'
-import FadeIn from './FadeIn'
 
 // Free-tier placeholder series shown blurred behind <UpgradeOverlay> — a
 // plausible, gently rising shape, never real caller data (mirrors
@@ -61,7 +63,7 @@ function useAnalyticsQuery(
 }
 
 function SkeletonPanel() {
-  return <div className="bg-white border border-gray-200 rounded-xl p-4 h-72 bg-gray-100 animate-pulse" />
+  return <Skeleton className="h-72 w-full rounded-lg" />
 }
 
 /** sr-only data table fallback + `role="img"` `aria-label` — Recharts renders
@@ -78,8 +80,8 @@ function ChartPanel({
   chart: ReactElement
 }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-4 h-72">
-      <p className="text-sm font-medium text-gray-700 mb-2">{title}</p>
+    <Card className="p-4 h-72">
+      <p className="text-sm font-medium text-text mb-2">{title}</p>
       <div role="img" aria-label={ariaLabel} className="h-56">
         <ResponsiveContainer width="100%" height="100%">
           {chart}
@@ -102,14 +104,14 @@ function ChartPanel({
           </tbody>
         </table>
       </div>
-    </div>
+    </Card>
   )
 }
 
 function ChartRetry({ onRetry }: { onRetry: () => void }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-4 h-72 flex flex-col items-center justify-center gap-2 text-center">
-      <p className="text-sm text-gray-500">Couldn&apos;t load this chart</p>
+    <Card className="p-4 h-72 flex flex-col items-center justify-center gap-2 text-center">
+      <p className="text-sm text-muted">Couldn&apos;t load this chart</p>
       <button
         type="button"
         onClick={onRetry}
@@ -117,14 +119,17 @@ function ChartRetry({ onRetry }: { onRetry: () => void }) {
       >
         Try again
       </button>
-    </div>
+    </Card>
   )
 }
 
 function renderChart(metric: ProAnalyticsMetric, data: AnalyticsSeriesPoint[]) {
   const commonAxes = (
     <>
-      <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+      {/* `stroke` is an SVG prop, not a className, so it can't take a Tailwind
+       * utility directly — read the `--color-border` token's CSS variable
+       * instead of a hard-coded hex (docs/design/18-pro-dashboard-handoff.md §2.3). */}
+      <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
       <XAxis dataKey="date" tick={{ fontSize: 11 }} minTickGap={24} />
       <YAxis tick={{ fontSize: 11 }} allowDecimals={false} width={32} />
       <Tooltip />
@@ -232,29 +237,28 @@ export default function AnalyticsCharts() {
   }
 
   return (
-    <div className="space-y-4">
-      {CHART_CONFIGS.map((config, i) => {
-        const query = queries[config.metric]
+    <Stagger>
+      <div className="space-y-4">
+        {CHART_CONFIGS.map((config) => {
+          const query = queries[config.metric]
 
-        if (query.isError || !query.data) {
-          return <ChartRetry key={config.metric} onRetry={() => void query.refetch()} />
-        }
+          if (query.isError || !query.data) {
+            return <ChartRetry key={config.metric} onRetry={() => void query.refetch()} />
+          }
 
-        return (
-          <FadeIn key={config.metric} delayMs={Math.min(i, 5) * 40}>
+          return (
             <ChartPanel
+              key={config.metric}
               title={config.title}
               ariaLabel={config.ariaLabel}
               data={query.data.series}
               chart={renderChart(config.metric, query.data.series)}
             />
-          </FadeIn>
-        )
-      })}
+          )
+        })}
 
-      <FadeIn delayMs={CHART_CONFIGS.length * 40}>
         <TopListingsTable items={primary?.topListings ?? []} />
-      </FadeIn>
-    </div>
+      </div>
+    </Stagger>
   )
 }

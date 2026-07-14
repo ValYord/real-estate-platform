@@ -1,12 +1,14 @@
 import { Link } from '@/i18n/navigation'
+import Card from '@/components/ui/Card'
+import Tooltip from '@/components/ui/Tooltip'
 import type { TopListing } from '@/lib/pro-dashboard/types'
 
 function formatCtr(n: number): string {
   return `${(n * 100).toFixed(1)}%`
 }
 
-const HEADER_CELL = 'text-xs uppercase text-gray-500 font-medium text-left p-3 border-b border-gray-100'
-const BODY_CELL = 'text-sm text-gray-900 p-3 border-b border-gray-100'
+const HEADER_CELL = 'text-xs uppercase text-muted font-medium text-left p-3 border-b border-border'
+const BODY_CELL = 'text-sm text-text p-3 border-b border-border'
 
 interface TopListingsTableProps {
   items: TopListing[]
@@ -19,14 +21,14 @@ interface TopListingsTableProps {
 export default function TopListingsTable({ items }: TopListingsTableProps) {
   if (items.length === 0) {
     return (
-      <div className="bg-white border border-gray-200 rounded-xl p-6 text-center">
-        <p className="text-sm text-gray-500">No listings to rank yet.</p>
-      </div>
+      <Card className="p-6 text-center">
+        <p className="text-sm text-muted">No listings to rank yet.</p>
+      </Card>
     )
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl overflow-x-auto">
+    <Card className="p-0 overflow-x-auto">
       <table className="w-full min-w-[560px]">
         <caption className="sr-only">Top performing listings</caption>
         <thead>
@@ -36,12 +38,16 @@ export default function TopListingsTable({ items }: TopListingsTableProps) {
             <th scope="col" className={HEADER_CELL}>Favorites</th>
             <th scope="col" className={HEADER_CELL}>Clicks</th>
             <th scope="col" className={HEADER_CELL}>Leads</th>
-            <th scope="col" className={HEADER_CELL}>CTR</th>
+            <th scope="col" className={HEADER_CELL}>
+              <Tooltip content="Contact clicks ÷ views">
+                <span className="underline decoration-dotted underline-offset-2 cursor-help">CTR</span>
+              </Tooltip>
+            </th>
           </tr>
         </thead>
         <tbody>
           {items.map((item) => (
-            <tr key={item.id} className="hover:bg-gray-50 transition-colors">
+            <tr key={item.id} className="hover:bg-neutral-100 transition-colors">
               <td className={BODY_CELL}>
                 <Link
                   href={`/property/${item.id}/${item.slug}` as Parameters<typeof Link>[0]['href']}
@@ -59,6 +65,6 @@ export default function TopListingsTable({ items }: TopListingsTableProps) {
           ))}
         </tbody>
       </table>
-    </div>
+    </Card>
   )
 }

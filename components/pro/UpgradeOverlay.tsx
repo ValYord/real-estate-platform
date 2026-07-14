@@ -27,13 +27,18 @@ export default function UpgradeOverlay({ locked, message, children }: UpgradeOve
       <div aria-disabled="true" className="pointer-events-none select-none" inert>
         {children}
       </div>
-      <div className="absolute inset-0 backdrop-blur-sm bg-white/60 rounded-xl flex flex-col items-center justify-center gap-3 text-center px-4">
-        <p className="text-sm text-gray-600 max-w-xs">
+      <div className="absolute inset-0 backdrop-blur-sm bg-surface/60 rounded-lg flex flex-col items-center justify-center gap-3 text-center px-4">
+        <p className="text-sm text-muted max-w-xs">
           {message ?? 'Upgrade to Pro to unlock live analytics for your listings.'}
         </p>
+        {/* A real, focusable <Link> — must stay a genuine anchor (crawlable,
+         * right-click-openable), not a `Button` `onClick`, per page spec §7.
+         * `Button` has no polymorphic element-swap prop, so this replicates
+         * its `variant="primary" size="md"` cva output by hand
+         * (docs/design/18-pro-dashboard-handoff.md §2.4). */}
         <Link
           href="/pro"
-          className="inline-flex items-center justify-center h-11 px-5 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          className="inline-flex items-center justify-center gap-2 rounded-md font-medium bg-primary text-primary-fg hover:bg-primary/90 shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 h-11 px-4 text-sm"
         >
           Upgrade to Pro
         </Link>

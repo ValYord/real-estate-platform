@@ -52,7 +52,7 @@ export default function ProSidebar({ onNavClick, itemHeightClassName = 'h-10' }:
               'flex items-center gap-3 px-4 rounded-md text-sm transition-colors duration-100',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
               itemHeightClassName,
-              active ? 'bg-primary/10 text-primary font-medium' : 'text-gray-700 hover:bg-gray-50',
+              active ? 'bg-primary/10 text-primary font-medium' : 'text-text hover:bg-neutral-100',
             )}
           >
             <Icon aria-hidden="true" className="w-5 h-5 flex-shrink-0" />

@@ -4,16 +4,19 @@ import { useQuery } from '@tanstack/react-query'
 import { useProDashboardStore } from '@/store/proDashboardStore'
 import { fetchProOverview, ProApiError } from '@/lib/pro-dashboard/client'
 import type { OverviewResponse } from '@/lib/pro-dashboard/types'
+import Skeleton from '@/components/ui/Skeleton'
+import Card from '@/components/ui/Card'
+import Stagger from '@/components/motion/Stagger'
 import KpiCard from './KpiCard'
 import UpgradeOverlay from './UpgradeOverlay'
 import EmptyProStats from './EmptyProStats'
-import FadeIn from './FadeIn'
 
 interface CardData {
   label: string
   value: string
   trend?: number
   sparkline?: number[]
+  labelHint?: string
 }
 
 function formatCount(n: number): string {
@@ -45,7 +48,11 @@ function buildCards(data: OverviewResponse): CardData[] {
       sparkline: data.sparklines.leads,
     },
     { label: 'Active listings', value: formatCount(data.activeListings.value) },
-    { label: 'Conversion rate', value: formatPercent(data.conversionRate.value) },
+    {
+      label: 'Conversion rate',
+      value: formatPercent(data.conversionRate.value),
+      labelHint: 'Contact clicks ÷ views for the selected period',
+    },
   ]
 }
 
@@ -66,10 +73,10 @@ const GRID_CLASSNAME = 'grid grid-cols-2 lg:grid-cols-6 gap-3'
 
 function SkeletonCard() {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-4 h-24">
-      <div className="bg-gray-100 animate-pulse rounded-lg h-6 w-12 mb-2" />
-      <div className="bg-gray-100 animate-pulse rounded h-4 w-20" />
-    </div>
+    <Card className="p-4 h-24 flex flex-col gap-2 justify-center">
+      <Skeleton className="h-6 w-12 rounded-lg" />
+      <Skeleton className="h-4 w-20" />
+    </Card>
   )
 }
 
@@ -115,8 +122,8 @@ export default function OverviewKpis() {
 
   if (isError || !data) {
     return (
-      <div className="rounded-xl border border-gray-200 p-4 text-center">
-        <p className="text-sm text-gray-500 mb-2">Couldn&apos;t load overview stats</p>
+      <Card className="p-4 text-center">
+        <p className="text-sm text-muted mb-2">Couldn&apos;t load overview stats</p>
         <button
           type="button"
           onClick={() => void refetch()}
@@ -124,7 +131,7 @@ export default function OverviewKpis() {
         >
           Try again
         </button>
-      </div>
+      </Card>
     )
   }
 
@@ -135,12 +142,19 @@ export default function OverviewKpis() {
   const cards = buildCards(data)
 
   return (
-    <div className={GRID_CLASSNAME}>
-      {cards.map((card, i) => (
-        <FadeIn key={card.label} delayMs={Math.min(i, 5) * 40}>
-          <KpiCard label={card.label} value={card.value} trend={card.trend} sparkline={card.sparkline} />
-        </FadeIn>
-      ))}
-    </div>
+    <Stagger>
+      <div className={GRID_CLASSNAME}>
+        {cards.map((card) => (
+          <KpiCard
+            key={card.label}
+            label={card.label}
+            value={card.value}
+            trend={card.trend}
+            sparkline={card.sparkline}
+            labelHint={card.labelHint}
+          />
+        ))}
+      </div>
+    </Stagger>
   )
 }

@@ -46,13 +46,13 @@ export default function ProDashboardShell({ tier, children }: ProDashboardShellP
   return (
     <div className="flex min-h-[calc(100vh-4rem)]">
       {/* Desktop persistent sidebar */}
-      <aside className="hidden lg:flex flex-col w-60 border-r border-gray-200 bg-white sticky top-16 h-[calc(100vh-4rem)] flex-shrink-0">
+      <aside className="hidden lg:flex flex-col w-60 border-r border-border bg-surface sticky top-16 h-[calc(100vh-4rem)] flex-shrink-0">
         <ProSidebar />
       </aside>
 
       {/* Mobile hamburger button */}
       <button
-        className="lg:hidden fixed top-[4.5rem] left-4 z-40 p-2 rounded-lg bg-white border border-gray-200 shadow-sm text-gray-700 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        className="lg:hidden fixed top-[4.5rem] left-4 z-40 p-2 rounded-lg bg-surface border border-border shadow-sm text-text hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         onClick={() => setDrawerOpen(true)}
         aria-label="Open Pro dashboard navigation"
         aria-expanded={drawerOpen}
@@ -66,7 +66,7 @@ export default function ProDashboardShell({ tier, children }: ProDashboardShellP
         aria-hidden="true"
         onClick={() => setDrawerOpen(false)}
         className={cn(
-          'fixed inset-0 bg-black/40 z-50 lg:hidden transition-opacity duration-300',
+          'fixed inset-0 bg-text/50 z-50 lg:hidden transition-opacity duration-300',
           drawerOpen ? 'opacity-100' : 'opacity-0 pointer-events-none',
         )}
       />
@@ -78,18 +78,18 @@ export default function ProDashboardShell({ tier, children }: ProDashboardShellP
         aria-modal="true"
         aria-label="Pro dashboard navigation"
         className={cn(
-          'fixed top-0 left-0 h-full w-72 bg-white shadow-xl z-50 lg:hidden',
+          'fixed top-0 left-0 h-full w-72 bg-surface shadow-lg z-50 lg:hidden',
           'flex flex-col transition-transform duration-300',
           drawerOpen ? 'translate-x-0' : '-translate-x-full',
         )}
       >
-        <div className="flex items-center justify-between px-4 h-16 border-b border-gray-100 flex-shrink-0">
-          <span className="text-base font-semibold text-gray-900">Pro dashboard</span>
+        <div className="flex items-center justify-between px-4 h-16 border-b border-border flex-shrink-0">
+          <span className="text-base font-semibold text-text">Pro dashboard</span>
           <button
             ref={closeButtonRef}
             onClick={() => setDrawerOpen(false)}
             aria-label="Close Pro dashboard navigation"
-            className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="p-2 rounded-lg text-muted hover:bg-neutral-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
             <X className="w-5 h-5" aria-hidden="true" />
           </button>

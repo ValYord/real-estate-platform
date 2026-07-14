@@ -1,3 +1,4 @@
+import FadeIn from '@/components/motion/FadeIn'
 import AnalyticsCharts from '@/components/pro/AnalyticsCharts'
 
 /**
@@ -10,7 +11,9 @@ import AnalyticsCharts from '@/components/pro/AnalyticsCharts'
 export default function ProDashboardAnalyticsPage() {
   return (
     <div>
-      <h1 className="text-lg font-semibold text-gray-900 mb-4">Analytics</h1>
+      <FadeIn>
+        <h1 className="text-lg font-semibold text-text mb-4">Analytics</h1>
+      </FadeIn>
       <AnalyticsCharts />
     </div>
   )

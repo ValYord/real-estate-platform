@@ -14,24 +14,24 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import KpiCard from '../components/pro/KpiCard'
 
 describe('KpiCard — trend direction (icon + text, not color alone)', () => {
-  it('renders an "Up" aria-label and green styling for a positive trend', () => {
+  it('renders an "Up" aria-label and success-token styling for a positive trend', () => {
     const html = renderToStaticMarkup(<KpiCard label="Total views" value="1,240" trend={0.12} />)
     expect(html).toContain('Up 12% versus previous period')
-    expect(html).toContain('text-green-600')
+    expect(html).toContain('text-success')
     expect(html).toContain('+12%')
   })
 
-  it('renders a "Down" aria-label and red styling for a negative trend', () => {
+  it('renders a "Down" aria-label and danger-token styling for a negative trend', () => {
     const html = renderToStaticMarkup(<KpiCard label="Contact clicks" value="54" trend={-0.03} />)
     expect(html).toContain('Down 3% versus previous period')
-    expect(html).toContain('text-red-500')
+    expect(html).toContain('text-danger')
     expect(html).toContain('-3%')
   })
 
-  it('renders a "No change" aria-label and neutral styling for a zero trend', () => {
+  it('renders a "No change" aria-label and muted-token styling for a zero trend', () => {
     const html = renderToStaticMarkup(<KpiCard label="Favorites" value="86" trend={0} />)
     expect(html).toContain('No change versus previous period')
-    expect(html).toContain('text-gray-400')
+    expect(html).toContain('text-muted')
   })
 
   it('renders a decorative dash (no aria-label) when there is no trend data at all', () => {

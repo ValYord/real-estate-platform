@@ -1,3 +1,4 @@
+import FadeIn from '@/components/motion/FadeIn'
 import OverviewKpis from '@/components/pro/OverviewKpis'
 
 /**
@@ -8,7 +9,9 @@ import OverviewKpis from '@/components/pro/OverviewKpis'
 export default function ProDashboardOverviewPage() {
   return (
     <div>
-      <h1 className="text-lg font-semibold text-gray-900 mb-4">Overview</h1>
+      <FadeIn>
+        <h1 className="text-lg font-semibold text-text mb-4">Overview</h1>
+      </FadeIn>
       <OverviewKpis />
     </div>
   )
