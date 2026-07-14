@@ -44,6 +44,8 @@ export type HomeValuePropertyType = 'apartment' | 'house' | 'land' | 'commercial
 export type HomeValueCondition = 'new' | 'renovated' | 'good' | 'needs_renovation'
 export type HomeValueConfidence = 'high' | 'medium' | 'low'
 export type HomeValueFallbackLevel = 'district' | 'city' | 'none'
+export type BlogCategory = 'buying' | 'selling' | 'renting' | 'financing' | 'market' | 'news'
+export type NewsletterSource = 'news_index' | 'article' | 'footer'
 
 // ---------------------------------------------------------------------------
 // Database shape (mirrors the Supabase generated-types structure so
@@ -952,6 +954,88 @@ export interface Database {
             referencedColumns: ['id']
           },
         ]
+      }
+
+      // ── blog_posts ───────────────────────────────────────────────────────
+      blog_posts: {
+        Row: {
+          id: string
+          slug: string
+          title: Json
+          excerpt: Json
+          body: Json
+          cover_image: string | null
+          category: BlogCategory
+          author_name: string
+          author_avatar: string | null
+          author_bio: string | null
+          author_credentials: string | null
+          is_featured: boolean
+          reading_time: number
+          published_at: string | null
+          updated_at: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          slug: string
+          title?: Json
+          excerpt?: Json
+          body?: Json
+          cover_image?: string | null
+          category: BlogCategory
+          author_name?: string
+          author_avatar?: string | null
+          author_bio?: string | null
+          author_credentials?: string | null
+          is_featured?: boolean
+          reading_time?: number
+          published_at?: string | null
+          updated_at?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          slug?: string
+          title?: Json
+          excerpt?: Json
+          body?: Json
+          cover_image?: string | null
+          category?: BlogCategory
+          author_name?: string
+          author_avatar?: string | null
+          author_bio?: string | null
+          author_credentials?: string | null
+          is_featured?: boolean
+          reading_time?: number
+          published_at?: string | null
+          updated_at?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+
+      // ── newsletter_subscribers ───────────────────────────────────────────
+      newsletter_subscribers: {
+        Row: {
+          id: string
+          email: string
+          source: NewsletterSource
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          email: string
+          source?: NewsletterSource
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          email?: string
+          source?: NewsletterSource
+          created_at?: string
+        }
+        Relationships: []
       }
     }
 

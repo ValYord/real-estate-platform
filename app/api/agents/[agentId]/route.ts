@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getMockAgentBySlug } from '@/lib/agent/mockData'
 import type { AgentBadge, AgentProfile } from '@/lib/agent/types'
 
-type Params = { slug: string }
+type Params = { agentId: string }
 
 /** "Top Agent" / "Fast responder" are computed heuristics for the MVP — see
  * docs/en/pages/10-agent-profile.md §3.2. The precise "top 5% in the city"
@@ -86,7 +86,7 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<Params> },
 ): Promise<NextResponse> {
-  const { slug } = await params
+  const { agentId: slug } = await params
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY

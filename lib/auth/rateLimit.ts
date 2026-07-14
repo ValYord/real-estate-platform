@@ -72,4 +72,6 @@ export const LIMITS = {
    * IP rather than user id, same as the other pre-auth endpoints above).
    */
   HOME_VALUE_ESTIMATE: { max: 20, windowMs: 60 * 60 * 1000 },
+  /** 3 newsletter signups per hour per IP (docs/en/pages/15-blog.md §5). */
+  NEWSLETTER_SUBSCRIBE: { max: 3, windowMs: 60 * 60 * 1000 },
 } as const

@@ -4,7 +4,7 @@ import { agentReviewSchema, agentReviewsQuerySchema } from '@/lib/agent/schemas'
 import { MOCK_AGENT_REVIEWS, getMockReviewSummary } from '@/lib/agent/mockData'
 import type { AgentReview, AgentReviewsResponse, ReviewBreakdown } from '@/lib/agent/types'
 
-type Params = { id: string }
+type Params = { agentId: string }
 
 const PAGE_SIZE = 10
 
@@ -72,7 +72,7 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<Params> },
 ): Promise<NextResponse> {
-  const { id } = await params
+  const { agentId: id } = await params
   const { searchParams } = new URL(request.url)
 
   let query: ReturnType<typeof agentReviewsQuerySchema.parse>
@@ -167,7 +167,7 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<Params> },
 ): Promise<NextResponse> {
-  const { id } = await params
+  const { agentId: id } = await params
 
   let body: unknown
   try {
