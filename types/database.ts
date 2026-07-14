@@ -44,6 +44,8 @@ export type HomeValuePropertyType = 'apartment' | 'house' | 'land' | 'commercial
 export type HomeValueCondition = 'new' | 'renovated' | 'good' | 'needs_renovation'
 export type HomeValueConfidence = 'high' | 'medium' | 'low'
 export type HomeValueFallbackLevel = 'district' | 'city' | 'none'
+export type GuideCategory = 'buyer' | 'seller' | 'renter' | 'finance'
+export type GuideStatus = 'draft' | 'published'
 export type ContactSubject = 'general' | 'support' | 'partnership' | 'complaint'
 export type ContactMessageStatus = 'new' | 'read' | 'archived'
 
@@ -987,6 +989,69 @@ export interface Database {
             referencedColumns: ['id']
           },
         ]
+      }
+
+      // ── guides ───────────────────────────────────────────────────────────
+      guides: {
+        Row: {
+          id: string
+          slug: string
+          category: GuideCategory
+          status: GuideStatus
+          featured: boolean
+          /** Narrowed to Partial<Record<Locale, string>> at the read boundary. */
+          title: Json
+          /** Narrowed to Partial<Record<Locale, string>> at the read boundary. */
+          excerpt: Json
+          /** Narrowed to Partial<Record<Locale, GuideBlock[]>> at the read boundary. */
+          body: Json
+          /** Narrowed to Partial<Record<Locale, GuideTocEntry[]>> at the read boundary. */
+          toc: Json
+          cover_url: string | null
+          author_name: string | null
+          author_credentials: string | null
+          reading_time: number
+          step_count: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          slug: string
+          category: GuideCategory
+          status?: GuideStatus
+          featured?: boolean
+          title: Json
+          excerpt: Json
+          body: Json
+          toc?: Json
+          cover_url?: string | null
+          author_name?: string | null
+          author_credentials?: string | null
+          reading_time?: number
+          step_count?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          slug?: string
+          category?: GuideCategory
+          status?: GuideStatus
+          featured?: boolean
+          title?: Json
+          excerpt?: Json
+          body?: Json
+          toc?: Json
+          cover_url?: string | null
+          author_name?: string | null
+          author_credentials?: string | null
+          reading_time?: number
+          step_count?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
     }
 
