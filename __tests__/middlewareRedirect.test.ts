@@ -106,6 +106,15 @@ describe('isProtectedPath()', () => {
     it('allows /[locale]/favorites (login wall rendered in-page, not redirected)', () => {
       expect(isProtectedPath('/hy/favorites')).toBe(false)
     })
+
+    // /admin (Page 24) is intentionally NOT in PROTECTED_PATHS: the
+    // acceptance criteria require a 403 "Access denied" page for guests too
+    // (not a redirect to /auth/login), so the guard lives entirely in
+    // app/[locale]/admin/layout.tsx's requireAdmin() check, not middleware.
+    it('does not redirect /[locale]/admin — the layout renders 403 in place instead', () => {
+      expect(isProtectedPath('/hy/admin')).toBe(false)
+      expect(isProtectedPath('/en/admin/moderation')).toBe(false)
+    })
   })
 })
 

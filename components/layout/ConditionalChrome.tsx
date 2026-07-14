@@ -28,8 +28,13 @@ export default function ConditionalChrome({ children }: { children: ReactNode })
   const isMessagesPage = /\/messages(\/|$)/.test(pathname)
   // Settings (Page 21) is an app-like admin panel — no footer, same as Dashboard.
   const isSettingsPage = /\/settings(\/|$)/.test(pathname)
+  // Admin panel (Page 24) renders its own top bar (AdminTopBar) and never the
+  // public mega-menu Header/Footer — it's a fully separate internal tool, and
+  // AdminLayout's server-side 403 branch must be the entire response body for
+  // a non-admin (no public chrome wrapped around it either).
+  const isAdminPage = /\/admin(\/|$)/.test(pathname)
 
-  if (isAuthPage || isWizardPage) return <>{children}</>
+  if (isAuthPage || isWizardPage || isAdminPage) return <>{children}</>
 
   if (isDashboardPage || isMessagesPage || isSettingsPage) {
     return (
