@@ -72,4 +72,6 @@ export const LIMITS = {
    * IP rather than user id, same as the other pre-auth endpoints above).
    */
   HOME_VALUE_ESTIMATE: { max: 20, windowMs: 60 * 60 * 1000 },
+  /** 5 "Get pre-approved" submissions per hour per user (docs/design/14-mortgage-rates-handoff.md §2). */
+  MORTGAGE_PREAPPROVAL: { max: 5, windowMs: 60 * 60 * 1000 },
 } as const
