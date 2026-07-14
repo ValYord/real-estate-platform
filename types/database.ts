@@ -46,6 +46,8 @@ export type HomeValueConfidence = 'high' | 'medium' | 'low'
 export type HomeValueFallbackLevel = 'district' | 'city' | 'none'
 export type GuideCategory = 'buyer' | 'seller' | 'renter' | 'finance'
 export type GuideStatus = 'draft' | 'published'
+export type ContactSubject = 'general' | 'support' | 'partnership' | 'complaint'
+export type ContactMessageStatus = 'new' | 'read' | 'archived'
 
 // ---------------------------------------------------------------------------
 // Database shape (mirrors the Supabase generated-types structure so
@@ -55,6 +57,39 @@ export type GuideStatus = 'draft' | 'published'
 export interface Database {
   public: {
     Tables: {
+      contact_messages: {
+        Row: {
+          id: string
+          name: string
+          email: string
+          phone: string | null
+          subject: ContactSubject
+          body: string
+          status: ContactMessageStatus
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          email: string
+          phone?: string | null
+          subject: ContactSubject
+          body: string
+          status?: ContactMessageStatus
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          email?: string
+          phone?: string | null
+          subject?: ContactSubject
+          body?: string
+          status?: ContactMessageStatus
+          created_at?: string
+        }
+        Relationships: []
+      }
       // ── profiles ────────────────────────────────────────────────────────
       profiles: {
         Row: {

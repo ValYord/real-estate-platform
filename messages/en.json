@@ -79,7 +79,11 @@
       "discountBadge": "–20%",
       "annualNote": "2 months free"
     },
-    "tiers": { "free": "Free", "pro": "Pro", "premium": "Premium" },
+    "tiers": {
+      "free": "Free",
+      "pro": "Pro",
+      "premium": "Premium"
+    },
     "popularBadge": "Most popular",
     "perMonth": "/mo",
     "perYear": "{amount} per year",
@@ -129,6 +133,592 @@
       "a4": "Prices are shown in the currency selected in the header (AMD, USD, EUR, RUB).",
       "q5": "Is there a refund?",
       "a5": "We offer a full refund within 14 days of your first payment if you're not satisfied — contact support."
+    }
+  },
+  "static": {
+    "common": {
+      "home": "Home",
+      "updated": "Last updated",
+      "tableOfContents": "Table of contents",
+      "backToTop": "Back to top",
+      "ctaListProperty": "List a property",
+      "ctaSearchProperties": "Search properties",
+      "ctaContactUs": "Contact us"
+    },
+    "about": {
+      "breadcrumb": "About us",
+      "metaTitle": "About us | RE Platform",
+      "metaDescription": "Learn about RE Platform's mission to make buying, selling and renting property in Armenia simple, transparent and trustworthy.",
+      "heroTitle": "About us",
+      "heroTagline": "We're building the most trusted way to buy, sell and rent property in Armenia.",
+      "storyHeading": "Our story",
+      "storyParagraphs": [
+        "RE Platform started in 2024 with a simple observation: finding a trustworthy listing, a reliable agent, or a fair price in Armenia's real estate market took far too much guesswork. Buyers scrolled through outdated classifieds, sellers struggled to reach real demand, and everyone relied on word of mouth to avoid scams.",
+        "We set out to build a single, modern marketplace where every listing is verifiable, every price is transparent, and every conversation happens in one place — whether you're buying your first apartment in Yerevan, renting a home in Gyumri, or listing a plot of land in Lori.",
+        "Today, RE Platform connects thousands of buyers, sellers, renters and agents across Armenia. We're still a small team, but our mission hasn't changed: make property transactions in Armenia simple, transparent and trustworthy — in Armenian, Russian and English."
+      ],
+      "missionHeading": "Mission & values",
+      "values": [
+        {
+          "title": "Transparency",
+          "body": "Clear pricing, verified listings and honest information — no hidden fees, no bait-and-switch."
+        },
+        {
+          "title": "Trust & safety",
+          "body": "Identity checks for agents, moderated listings, and a support team that actually responds."
+        },
+        {
+          "title": "Local expertise",
+          "body": "Built for Armenia's market — local currencies, neighborhoods, and legal context baked in."
+        },
+        {
+          "title": "Accessibility",
+          "body": "Trilingual by design (Armenian, Russian, English) so everyone can search and list with confidence."
+        }
+      ],
+      "statsHeading": "RE Platform in numbers",
+      "stats": [
+        {
+          "value": "10,000+",
+          "label": "active listings"
+        },
+        {
+          "value": "50+",
+          "label": "cities & towns covered"
+        },
+        {
+          "value": "120,000+",
+          "label": "monthly visitors"
+        }
+      ],
+      "ctaHeading": "Ready to get started?",
+      "ctaListLabel": "List a property",
+      "ctaSearchLabel": "Search properties",
+      "ctaContactLabel": "Contact us"
+    },
+    "contact": {
+      "breadcrumb": "Contact",
+      "metaTitle": "Contact us | RE Platform",
+      "metaDescription": "Get in touch with the RE Platform team — general questions, support, partnerships or complaints. We usually reply within one business day.",
+      "heroTitle": "Contact us",
+      "heroSubtitle": "Have a question? Fill out the form and we'll get back to you soon.",
+      "form": {
+        "nameLabel": "Name",
+        "namePlaceholder": "Your full name",
+        "emailLabel": "Email",
+        "emailPlaceholder": "you@example.com",
+        "phoneLabel": "Phone",
+        "phonePlaceholder": "+374 XX XXX XXX",
+        "phoneOptional": "optional",
+        "topicLabel": "Topic",
+        "topics": {
+          "general": "General",
+          "support": "Support",
+          "partnership": "Partnership",
+          "complaint": "Complaint"
+        },
+        "messageLabel": "Message",
+        "messagePlaceholder": "How can we help?",
+        "send": "Send",
+        "sending": "Sending…",
+        "success": "Thank you, we'll get back to you soon.",
+        "error": "Something went wrong, try again.",
+        "rateLimited": "Too many requests, try again a little later.",
+        "required": "required",
+        "errors": {
+          "name": "Name is required",
+          "email": "Invalid email address",
+          "phone": "Invalid phone number",
+          "subject": "Please choose a topic",
+          "message": "Message is too short",
+          "website": "Spam detected"
+        }
+      },
+      "office": {
+        "heading": "Our office",
+        "addressLabel": "Address",
+        "address": "1 Northern Ave, Yerevan 0001, Armenia",
+        "phoneLabel": "Phone",
+        "phone": "+374 10 123 456",
+        "emailLabel": "Email",
+        "email": "info@re-platform.am",
+        "hoursLabel": "Working hours",
+        "hours": "Mon–Fri, 09:00–18:00 (GMT+4)",
+        "socialLabel": "Follow us"
+      },
+      "map": {
+        "heading": "Find us",
+        "openInGoogleMaps": "Open in Google Maps",
+        "unavailable": "Map unavailable"
+      }
+    },
+    "faq": {
+      "breadcrumb": "FAQ",
+      "metaTitle": "Frequently asked questions | RE Platform",
+      "metaDescription": "Answers to the most common questions about buying, selling, renting and using RE Platform.",
+      "title": "Frequently asked questions",
+      "searchPlaceholder": "Search questions…",
+      "searchLabel": "Search questions",
+      "noResultsHeading": "Nothing found",
+      "noResultsBody": "Try a different search term, or contact us directly.",
+      "resultsCount": "{count, plural, one {# result} other {# results}}",
+      "categories": {
+        "all": "All",
+        "general": "General",
+        "buyer": "For buyers",
+        "seller": "For sellers",
+        "rent": "Rent",
+        "account": "Account & security",
+        "pro": "Payments (Pro)"
+      },
+      "ctaHeading": "Didn't find the answer?",
+      "ctaContact": "Contact us",
+      "ctaHelp": "Help Center",
+      "items": [
+        {
+          "id": "what-is-re-platform",
+          "category": "general",
+          "question": "What is RE Platform?",
+          "answer": "RE Platform is a marketplace to search, list, buy, sell and rent residential and commercial property across Armenia. Listings, agent profiles and messaging are all in one place, in Armenian, Russian and English."
+        },
+        {
+          "id": "is-it-free-to-browse",
+          "category": "general",
+          "question": "Is using RE Platform free?",
+          "answer": "Browsing, searching and contacting sellers is always free. Posting a basic listing is free too — optional Pro features (extra photos, boosted placement, analytics) are available on paid plans.",
+          "linkHref": "/pricing",
+          "linkLabel": "See pricing"
+        },
+        {
+          "id": "contact-a-seller",
+          "category": "buyer",
+          "question": "How do I contact a seller or agent?",
+          "answer": "Open any listing and use the “Send a message” button to start a conversation, or “Show phone” to call directly. All conversations are saved in your Messages inbox."
+        },
+        {
+          "id": "save-a-search",
+          "category": "buyer",
+          "question": "Can I save a search and get notified of new listings?",
+          "answer": "Yes. Set your filters on the search page, then click “Save search”. We'll notify you when a new listing matches your criteria."
+        },
+        {
+          "id": "how-to-list",
+          "category": "seller",
+          "question": "How do I list a property?",
+          "answer": "Click “Post a property” in the header and follow the step-by-step wizard: property type, location, details, photos, and price. Your listing goes live after a quick review.",
+          "linkHref": "/sell/new",
+          "linkLabel": "Go to the listing wizard"
+        },
+        {
+          "id": "change-listing-price",
+          "category": "seller",
+          "question": "How do I change the price of my listing?",
+          "answer": "Open your listing from the dashboard, click “Edit”, update the price and save. The change is reflected immediately.",
+          "linkHref": "/dashboard/listings",
+          "linkLabel": "Go to my listings"
+        },
+        {
+          "id": "is-listing-free",
+          "category": "seller",
+          "question": "Is posting a listing free?",
+          "answer": "Yes, posting a standard listing is free. Pro subscribers get additional photos, top placement in search results, and performance analytics."
+        },
+        {
+          "id": "search-for-rentals",
+          "category": "rent",
+          "question": "How do I search for rentals instead of sales?",
+          "answer": "Use the “Rent” toggle at the top of the search page, or start from the “Rent” menu in the header — results update to show rental listings only.",
+          "linkHref": "/search?deal=rent",
+          "linkLabel": "Browse rentals"
+        },
+        {
+          "id": "landlord-tools",
+          "category": "rent",
+          "question": "Are there special tools for landlords?",
+          "answer": "Yes — our Landlord tools help you track applicants, manage multiple units and collect rent reminders in one dashboard.",
+          "linkHref": "/landlord",
+          "linkLabel": "Explore landlord tools"
+        },
+        {
+          "id": "reset-password",
+          "category": "account",
+          "question": "How do I reset my password?",
+          "answer": "Go to the sign-in page and click “Forgot password”. We'll email you a secure link to set a new password.",
+          "linkHref": "/auth/forgot-password",
+          "linkLabel": "Reset your password"
+        },
+        {
+          "id": "account-verification",
+          "category": "account",
+          "question": "How is my account verified?",
+          "answer": "We verify accounts by email and, for agents, by phone and agency documentation. Verified badges help buyers trust listings faster."
+        },
+        {
+          "id": "delete-account",
+          "category": "account",
+          "question": "Can I delete my account and data?",
+          "answer": "Yes. Open Settings → Privacy and choose “Delete account”. This permanently removes your profile, listings and messages within 30 days.",
+          "linkHref": "/settings",
+          "linkLabel": "Go to settings"
+        },
+        {
+          "id": "pro-plan-benefits",
+          "category": "pro",
+          "question": "What do I get with a Pro subscription?",
+          "answer": "Pro plans unlock unlimited active listings, boosted placement, advanced analytics and priority support.",
+          "linkHref": "/pricing",
+          "linkLabel": "Compare plans"
+        },
+        {
+          "id": "pro-payment-methods",
+          "category": "pro",
+          "question": "What payment methods are supported?",
+          "answer": "We accept major debit and credit cards (Visa, Mastercard, ArCa) and local bank transfers for annual Pro plans."
+        },
+        {
+          "id": "pro-invoice",
+          "category": "pro",
+          "question": "Can I get an invoice or receipt for my payment?",
+          "answer": "Yes — invoices are generated automatically after each payment and are available from your billing settings."
+        }
+      ]
+    },
+    "terms": {
+      "breadcrumb": "Terms of Service",
+      "metaTitle": "Terms of Service | RE Platform",
+      "metaDescription": "The terms and conditions governing your use of RE Platform — accounts, listings, prohibited content and liability.",
+      "title": "Terms of Service",
+      "updatedAt": "2026-06-01",
+      "intro": "These Terms of Service (“Terms”) govern your access to and use of RE Platform. Please read them carefully.",
+      "sections": [
+        {
+          "id": "acceptance",
+          "heading": "1. Acceptance of terms",
+          "body": [
+            "By creating an account, browsing listings, or using any part of RE Platform (the “Service”), you agree to these Terms of Service. If you do not agree, please do not use the Service.",
+            "We may update these Terms from time to time; material changes will be announced on this page with an updated “Last updated” date."
+          ]
+        },
+        {
+          "id": "account",
+          "heading": "2. Your account",
+          "body": [
+            "You must provide accurate information when registering and keep your credentials confidential. You are responsible for all activity under your account.",
+            "We may suspend or terminate accounts that violate these Terms or applicable law."
+          ]
+        },
+        {
+          "id": "obligations",
+          "heading": "3. User obligations",
+          "body": [
+            "You agree to provide truthful information about any property you list, respond to inquiries in good faith, and comply with all applicable Armenian laws and regulations regarding property transactions."
+          ]
+        },
+        {
+          "id": "prohibited-content",
+          "heading": "4. Prohibited content",
+          "body": [
+            "You may not post listings that are fraudulent, misleading, discriminatory, or that advertise property you do not have the right to sell or rent. We reserve the right to remove any listing or content that violates this policy without notice."
+          ]
+        },
+        {
+          "id": "intellectual-property",
+          "heading": "5. Intellectual property",
+          "body": [
+            "The RE Platform name, logo, design and software are our property or licensed to us. Content you upload (photos, descriptions) remains yours, but you grant us a license to display it on the Service for the purpose of operating the marketplace."
+          ]
+        },
+        {
+          "id": "liability",
+          "heading": "6. Limitation of liability",
+          "body": [
+            "The Service is provided “as is”. To the maximum extent permitted by law, RE Platform is not liable for indirect, incidental or consequential damages arising from your use of the Service."
+          ]
+        },
+        {
+          "id": "marketplace-disclaimer",
+          "heading": "7. Marketplace disclaimer",
+          "body": [
+            "RE Platform is a listings and communication platform only. We are not a party to, and do not participate in, any financial transaction, sale, rental agreement, or payment between users. We do not verify title, condition, or legal status of any property. Always perform independent due diligence and consult a qualified professional before completing a transaction."
+          ]
+        },
+        {
+          "id": "dispute-resolution",
+          "heading": "8. Dispute resolution",
+          "body": [
+            "Disputes between users regarding a listed property are the sole responsibility of the parties involved. If you have a dispute with RE Platform itself, please contact us first — most issues can be resolved directly through our support team."
+          ]
+        },
+        {
+          "id": "governing-law",
+          "heading": "9. Governing law",
+          "body": [
+            "These Terms are governed by the laws of the Republic of Armenia. Where the Service is offered in other countries, local mandatory consumer-protection law may also apply and will take precedence where these Terms conflict with it."
+          ]
+        },
+        {
+          "id": "changes",
+          "heading": "10. Changes to these terms",
+          "body": [
+            "We may revise these Terms as the Service evolves. Continued use of the Service after changes take effect constitutes acceptance of the revised Terms. See also our Privacy Policy and Cookie Policy."
+          ]
+        }
+      ],
+      "relatedLinksLabel": "Related policies"
+    },
+    "privacy": {
+      "breadcrumb": "Privacy Policy",
+      "metaTitle": "Privacy Policy | RE Platform",
+      "metaDescription": "How RE Platform collects, uses and protects your personal data, and what rights you have over it.",
+      "title": "Privacy Policy",
+      "updatedAt": "2026-06-01",
+      "intro": "This Privacy Policy explains what personal data RE Platform collects, why, and the choices you have.",
+      "sections": [
+        {
+          "id": "data-collected",
+          "heading": "1. What data we collect",
+          "body": [
+            "We collect information you provide directly (name, email, phone, listing details) and information collected automatically (device, browser, pages visited, approximate location) when you use the Service."
+          ]
+        },
+        {
+          "id": "data-use",
+          "heading": "2. How we use it",
+          "body": [
+            "We use your data to operate the marketplace: to show and rank listings, enable messaging between users, send transactional notifications, prevent fraud, and improve the Service."
+          ]
+        },
+        {
+          "id": "cookies",
+          "heading": "3. Cookies",
+          "body": [
+            "We use necessary cookies to keep you signed in and remember your preferences, and — with your consent — analytics and marketing cookies. See our Cookie Policy for full details and how to manage your choices."
+          ]
+        },
+        {
+          "id": "third-parties",
+          "heading": "4. Third parties",
+          "body": [
+            "We share data with service providers who help us run the Service: Supabase (database & authentication hosting), Mapbox (maps), and, where consented, analytics providers. These providers only receive the data necessary to perform their function and are bound by data-processing agreements."
+          ]
+        },
+        {
+          "id": "retention",
+          "heading": "5. Data retention",
+          "body": [
+            "We keep account data for as long as your account is active, and listing data for as long as required for legal and accounting purposes after a listing closes. You can request earlier deletion (see “Your rights” below)."
+          ]
+        },
+        {
+          "id": "rights",
+          "heading": "6. Your rights",
+          "body": [
+            "Depending on your location, you may have the right to access, correct, export, or delete your personal data, and to object to or restrict certain processing. You can exercise most of these rights directly from Settings, or by contacting us."
+          ]
+        },
+        {
+          "id": "security",
+          "heading": "7. Data security",
+          "body": [
+            "We use industry-standard safeguards — encryption in transit, access controls, and row-level security on our database — to protect your data. No method of transmission or storage is 100% secure, but we work to minimize risk."
+          ]
+        },
+        {
+          "id": "children",
+          "heading": "8. Children's privacy",
+          "body": [
+            "The Service is not directed to children under 16, and we do not knowingly collect personal data from them. If you believe a child has provided us data, please contact us and we will delete it."
+          ]
+        },
+        {
+          "id": "dpo-contact",
+          "heading": "9. Contact for data protection",
+          "body": [
+            "For any privacy question or to exercise your rights, contact our data protection team at privacy@re-platform.am or through our Contact page."
+          ]
+        }
+      ],
+      "ctaManageData": "Manage my data"
+    },
+    "cookies": {
+      "breadcrumb": "Cookie Policy",
+      "metaTitle": "Cookie Policy | RE Platform",
+      "metaDescription": "Which cookies RE Platform uses, why, and how to manage your preferences.",
+      "title": "Cookie Policy",
+      "updatedAt": "2026-06-01",
+      "intro": "This Cookie Policy explains how RE Platform uses cookies and similar technologies, and how you can control them.",
+      "sections": [
+        {
+          "id": "what-are-cookies",
+          "heading": "1. What cookies are",
+          "body": [
+            "Cookies are small text files stored on your device that let a website remember information about your visit, such as your language preference or whether you're signed in."
+          ]
+        },
+        {
+          "id": "types",
+          "heading": "2. Types of cookies we use",
+          "body": [
+            "Necessary cookies keep the Service working (sessions, security, load balancing) and cannot be disabled. Analytical cookies help us understand how the Service is used, in aggregate. Marketing cookies help us and our partners measure and personalize ads. Analytical and marketing cookies are only set with your consent."
+          ]
+        },
+        {
+          "id": "third-party-cookies",
+          "heading": "3. Third-party cookies",
+          "body": [
+            "Some cookies are set by third parties that provide services on our behalf, such as analytics or maps providers. We only enable these after you consent to the relevant category."
+          ]
+        },
+        {
+          "id": "manage",
+          "heading": "4. How to manage or disable cookies",
+          "body": [
+            "You can change your consent at any time using the “Manage preferences” button below, or through your browser settings, which let you block or delete cookies. Blocking necessary cookies may break parts of the Service (e.g. staying signed in)."
+          ]
+        }
+      ],
+      "tableHeading": "Cookie categories",
+      "table": {
+        "categoryLabel": "Category",
+        "purposeLabel": "Purpose",
+        "durationLabel": "Duration",
+        "rows": [
+          {
+            "category": "Necessary",
+            "purpose": "Session, authentication, security, load balancing",
+            "duration": "Session – 12 months"
+          },
+          {
+            "category": "Analytics",
+            "purpose": "Understand usage patterns to improve the Service (aggregated, anonymized where possible)",
+            "duration": "Up to 24 months"
+          },
+          {
+            "category": "Marketing",
+            "purpose": "Measure and personalize advertising",
+            "duration": "Up to 12 months"
+          }
+        ]
+      },
+      "managePreferences": "Manage preferences"
+    },
+    "help": {
+      "breadcrumb": "Help Center",
+      "metaTitle": "Help Center | RE Platform",
+      "metaDescription": "Browse help articles by category or search for answers about using RE Platform.",
+      "title": "Help Center",
+      "subtitle": "Search our knowledge base or browse by category.",
+      "searchPlaceholder": "Search help articles…",
+      "searchLabel": "Search help articles",
+      "noResultsHeading": "Nothing found",
+      "noResultsBody": "Try a different search term, or contact us directly.",
+      "categoriesHeading": "Browse by category",
+      "categories": [
+        {
+          "id": "getting-started",
+          "title": "Getting started",
+          "description": "New to RE Platform? Learn the basics of searching, saving and contacting.",
+          "href": "/faq?category=general"
+        },
+        {
+          "id": "account-security",
+          "title": "Account & security",
+          "description": "Manage your profile, password, and privacy settings.",
+          "href": "/settings"
+        },
+        {
+          "id": "posting-a-listing",
+          "title": "Posting a listing",
+          "description": "Step-by-step help creating, editing and publishing listings.",
+          "href": "/sell/new"
+        },
+        {
+          "id": "search-favorites",
+          "title": "Search & favorites",
+          "description": "Filters, saved searches, and managing your favorites.",
+          "href": "/search"
+        },
+        {
+          "id": "messages",
+          "title": "Messages",
+          "description": "Talking to buyers, sellers and agents safely.",
+          "href": "/messages"
+        },
+        {
+          "id": "pro-payments",
+          "title": "Pro & payments",
+          "description": "Subscriptions, billing, invoices and Pro features.",
+          "href": "/pricing"
+        }
+      ],
+      "popularHeading": "Popular articles",
+      "popularArticles": [
+        {
+          "id": "how-to-list",
+          "title": "How do I list a property?",
+          "category": "posting-a-listing",
+          "href": "/faq#how-to-list"
+        },
+        {
+          "id": "reset-password",
+          "title": "How do I reset my password?",
+          "category": "account-security",
+          "href": "/faq#reset-password"
+        },
+        {
+          "id": "is-listing-free",
+          "title": "Is posting a listing free?",
+          "category": "posting-a-listing",
+          "href": "/faq#is-listing-free"
+        },
+        {
+          "id": "save-a-search",
+          "title": "How do I save a search?",
+          "category": "search-favorites",
+          "href": "/faq#save-a-search"
+        },
+        {
+          "id": "manage-cookies",
+          "title": "How do I manage my cookie preferences?",
+          "category": "account-security",
+          "href": "/cookies"
+        },
+        {
+          "id": "pro-plan-benefits",
+          "title": "What do I get with a Pro subscription?",
+          "category": "pro-payments",
+          "href": "/faq#pro-plan-benefits"
+        }
+      ],
+      "stillNeedHelp": "Still need help?",
+      "ctaContact": "Contact us",
+      "ctaFaq": "Visit the FAQ"
+    },
+    "cookieConsent": {
+      "bannerTitle": "We value your privacy",
+      "bannerBody": "We use necessary cookies to run this site, and — with your consent — analytics and marketing cookies to improve it. See our Cookie Policy for details.",
+      "acceptAll": "Accept all",
+      "necessaryOnly": "Necessary only",
+      "configure": "Configure",
+      "modalTitle": "Cookie preferences",
+      "modalBody": "Choose which categories of cookies we're allowed to use. You can change this at any time from the Cookie Policy page.",
+      "categories": {
+        "necessary": {
+          "label": "Necessary",
+          "description": "Required for the site to function — always on."
+        },
+        "analytics": {
+          "label": "Analytics",
+          "description": "Helps us understand how visitors use the site."
+        },
+        "marketing": {
+          "label": "Marketing",
+          "description": "Used to measure and personalize advertising."
+        }
+      },
+      "save": "Save preferences",
+      "cancel": "Cancel",
+      "managePreferencesLink": "Cookie preferences"
     }
   }
 }
