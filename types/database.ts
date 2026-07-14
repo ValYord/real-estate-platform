@@ -51,6 +51,8 @@ export type HomeValueConfidence = 'high' | 'medium' | 'low'
 export type HomeValueFallbackLevel = 'district' | 'city' | 'none'
 export type ContactSubject = 'general' | 'support' | 'partnership' | 'complaint'
 export type ContactMessageStatus = 'new' | 'read' | 'archived'
+/** Page 14 — Mortgage Rates Hub MVP. Added in 0013_mortgage_rates.sql. */
+export type MortgageLoanType = 'primary' | 'secondary' | 'new_construction' | 'refinance' | 'government'
 
 // ---------------------------------------------------------------------------
 // Database shape (mirrors the Supabase generated-types structure so
@@ -1038,6 +1040,151 @@ export interface Database {
           {
             foreignKeyName: 'admin_actions_admin_id_fkey'
             columns: ['admin_id']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+
+      // ── partner_banks ────────────────────────────────────────────────────
+      // Page 14 — Mortgage Rates Hub MVP. Public read-only reference data
+      // (bank directory), service-role-write only. Added in
+      // 0013_mortgage_rates.sql.
+      partner_banks: {
+        Row: {
+          id: string
+          slug: string
+          name: string
+          logo: string | null
+          country: string[]
+          description: string | null
+          is_active: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          slug: string
+          name: string
+          logo?: string | null
+          country?: string[]
+          description?: string | null
+          is_active?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          slug?: string
+          name?: string
+          logo?: string | null
+          country?: string[]
+          description?: string | null
+          is_active?: boolean
+          created_at?: string
+        }
+        Relationships: []
+      }
+
+      // ── mortgage_rates ───────────────────────────────────────────────────
+      // Page 14 — Mortgage Rates Hub MVP. Public read-only reference data
+      // (manually maintained rate sheet), service-role-write only. Added in
+      // 0013_mortgage_rates.sql.
+      mortgage_rates: {
+        Row: {
+          id: string
+          bank_id: string
+          country: string
+          currency: Currency
+          loan_type: MortgageLoanType
+          rate_pct: number
+          term_min: number
+          term_max: number
+          min_down_pct: number | null
+          max_ltv: number | null
+          commission_pct: number
+          updated_at: string
+          source: string | null
+        }
+        Insert: {
+          id?: string
+          bank_id: string
+          country: string
+          currency: Currency
+          loan_type: MortgageLoanType
+          rate_pct: number
+          term_min: number
+          term_max: number
+          min_down_pct?: number | null
+          max_ltv?: number | null
+          commission_pct?: number
+          updated_at?: string
+          source?: string | null
+        }
+        Update: {
+          id?: string
+          bank_id?: string
+          country?: string
+          currency?: Currency
+          loan_type?: MortgageLoanType
+          rate_pct?: number
+          term_min?: number
+          term_max?: number
+          min_down_pct?: number | null
+          max_ltv?: number | null
+          commission_pct?: number
+          updated_at?: string
+          source?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'mortgage_rates_bank_id_fkey'
+            columns: ['bank_id']
+            referencedRelation: 'partner_banks'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+
+      // ── preapproval_leads ────────────────────────────────────────────────
+      // Page 14 — Mortgage Rates Hub MVP. "Get pre-approved" lead form
+      // submissions. Added in 0013_mortgage_rates.sql.
+      preapproval_leads: {
+        Row: {
+          id: string
+          user_id: string
+          name: string
+          phone: string
+          loan_amount: number
+          country: string | null
+          currency: Currency | null
+          consent: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          name: string
+          phone: string
+          loan_amount: number
+          country?: string | null
+          currency?: Currency | null
+          consent: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          name?: string
+          phone?: string
+          loan_amount?: number
+          country?: string | null
+          currency?: Currency | null
+          consent?: boolean
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'preapproval_leads_user_id_fkey'
+            columns: ['user_id']
             referencedRelation: 'profiles'
             referencedColumns: ['id']
           },
