@@ -74,3 +74,24 @@ describe('GET /api/properties/[id]', () => {
     expect(body.isOwner).toBe(false)
   })
 })
+
+// ── Page 26 — 360° Virtual Tour Viewer (Part A) ─────────────────────────────
+describe('GET /api/properties/[id] — tour360 fields', () => {
+  it('includes tourType/tourData for a listing that has a tour', async () => {
+    const { GET } = await import('../app/api/properties/[id]/route')
+    const res = await GET(makeRequest('1'), makeParams('1'))
+    const body = await res.json()
+    expect(body.tourType).toBe('panorama')
+    expect(body.tourData).toHaveProperty('panoramaUrls')
+    expect(Array.isArray(body.tourData.panoramaUrls)).toBe(true)
+    expect(body.tourData.panoramaUrls.length).toBeGreaterThan(0)
+  })
+
+  it('tourType/tourData are both null for a listing with no tour (the "no tour" fixture)', async () => {
+    const { GET } = await import('../app/api/properties/[id]/route')
+    const res = await GET(makeRequest('2'), makeParams('2'))
+    const body = await res.json()
+    expect(body.tourType).toBeNull()
+    expect(body.tourData).toBeNull()
+  })
+})

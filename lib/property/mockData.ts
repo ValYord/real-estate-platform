@@ -73,6 +73,16 @@ export const MOCK_PROPERTIES: Record<string, PropertyDetail> = {
     heating: 'central',
     condition: 'renovated',
     media: MOCK_PHOTOS,
+    // Page 26 — this listing has a 360° panorama tour, so the [🌐 360°] tab
+    // renders for it; property '2' below has no tour data, so its tab is
+    // absent entirely (the "no tour" fixture used by tests).
+    tourType: 'panorama',
+    tourData: {
+      panoramaUrls: [
+        'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=4096&h=2048&fit=crop',
+      ],
+      sizeMB: 8,
+    },
     owner: {
       id: '12',
       name: 'Davit Hakobyan',
@@ -125,6 +135,9 @@ export const MOCK_PROPERTIES: Record<string, PropertyDetail> = {
     heating: 'central',
     condition: 'good',
     media: MOCK_PHOTOS,
+    // No tour data on this listing — the [🌐 360°] tab must not render at all.
+    tourType: null,
+    tourData: null,
     owner: {
       id: '13',
       name: 'Anna Grigoryan',

@@ -232,6 +232,8 @@ export default async function PropertyDetailPage({
               propertyId={property.id}
               isFavorited={property.isFavorited}
               isAvailable={isAvailable}
+              tourType={property.tourType}
+              tourData={property.tourData}
             />
 
             {/* Main info (price, title, address, key facts) */}

@@ -213,6 +213,10 @@ export interface Database {
           contact_preference: string | null
           video_url: string | null
           tour360_url: string | null
+          /** Page 26 (virtual tour viewer): 'panorama' | 'embed_url' | 'video', or null when no tour. */
+          tour_type: string | null
+          /** Shape depends on tour_type — validated with zod in lib/tour360/schemas.ts, never trusted as-is. */
+          tour_data: Json | null
           /** PostGIS GEOGRAPHY(POINT, 4326) returned as GeoJSON string by Supabase REST */
           location: string | null
           created_at: string
@@ -262,6 +266,8 @@ export interface Database {
           contact_preference?: string | null
           video_url?: string | null
           tour360_url?: string | null
+          tour_type?: string | null
+          tour_data?: Json | null
           location?: string | null
           created_at?: string
           updated_at?: string
@@ -310,6 +316,8 @@ export interface Database {
           contact_preference?: string | null
           video_url?: string | null
           tour360_url?: string | null
+          tour_type?: string | null
+          tour_data?: Json | null
           location?: string | null
           created_at?: string
           updated_at?: string
