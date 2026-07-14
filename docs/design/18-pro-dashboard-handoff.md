@@ -4,423 +4,489 @@
 [`docs/en/pages/18-pro-dashboard.md`](../en/pages/18-pro-dashboard.md) (deep
 spec — full page: shell, Overview, Analytics, Leads, Promoted, Bulk Upload,
 Team, Billing). This document does **not** repeat that spec in full; it pins
-down the **current task's MVP scope** (shell + Overview + Analytics only) and
-closes the gap between the generic spec's Tailwind sketch and *this specific
-codebase's* actual conventions.
+down the **current task's MVP scope** (shell + Overview + Analytics only, per
+§0 below) and closes the gap between the generic spec's Tailwind sketch and
+*this specific codebase's* actual, current design system.
 
-Audited against the current tree: `components/dashboard/DashboardSidebar.tsx`
-+ `components/dashboard/OverviewCards.tsx` (the sidebar/drawer shell and
-KPI-card patterns this page reuses almost verbatim, scoped down to 2 nav
-items), `components/dashboard/StatsModal.tsx` (the `7d/30d/90d` segmented
-range-selector **and** the dependency-free inline-SVG line chart — the
-pattern for Overview sparklines, and the shape `AnalyticsCharts` upgrades to
-Recharts), `components/home-value/ValueFactorsList.tsx` (the icon+color,
-not-color-alone trend-direction convention — reused verbatim for KPI trends),
-`components/agent/AgentHeader.tsx`'s `TIER_STYLES` map (`pro:
-bg-violet-100 text-violet-700`, `premium: bg-amber-100 text-amber-700` —
-already pixel-identical to the generic spec's tier-badge tokens), `store/currencyStore.ts`
-(the established "small global client-UI-state" Zustand pattern — reused for
-the date-range picker, see D3), `app/[locale]/messages/layout.tsx` (the
-auth-gated Server Component layout + client shell pattern this page's
-`<ProDashboardLayout>` copies), `app/[locale]/pro/page.tsx`'s `loadPlans()`
-(the existing `profiles.tier` read — the tier-source-of-truth this page
-reuses, see D2), `components/wizard/LimitReachedModal.tsx` (the
-upgrade-CTA visual language reused for the free-tier locked overlay),
-`components/mortgage/AmortizationTable.tsx` (plain `<table>` styling
-convention), `components/favorites/FavoritesGrid.tsx` (skeleton /
-error-retry / infinite-scroll-spinner visual language), `app/globals.css`
-(confirms: **no** custom `@keyframes`, no animation library anywhere in this
-codebase — all motion today is Tailwind's built-in `transition-*` /
-`animate-pulse` / `animate-spin` utilities; this doc's motion section stays
-inside that vocabulary, see D1), and `package.json` (confirms `recharts` is
-**not yet installed** — `@tanstack/react-query` and `zustand` already are).
+## 0. Why this document replaces the previous version of itself
 
----
+A first pass of this page (shell, `OverviewKpis`, `AnalyticsCharts`, the
+`/api/pro/overview` and `/api/pro/analytics` route handlers, the zod schemas,
+the data-fetch logic) is **already implemented and merged on this branch**
+(`components/pro/*`, `app/api/pro/*`, `lib/pro-dashboard/*`,
+`store/proDashboardStore.ts`, `app/[locale]/pro/dashboard/**`). It was built
+against a prior version of this same handoff document, written at a point
+where `components/ui/` and `components/motion/` **did not yet exist** on this
+branch — that document's own D1 said so explicitly and built everything from
+hand-rolled Tailwind (`bg-white border border-gray-200`, `text-gray-500`,
+`animate-pulse`, a bespoke `components/pro/FadeIn.tsx`, etc.).
 
-## 0. MVP scope for this task (read before building)
+Since then, **`main` gained the "Design system foundation" work** (tokens in
+`app/globals.css` `@theme`, `components/ui/*`, `components/motion/*`,
+documented in root `DESIGN_SYSTEM.md`) — this branch was cut before that
+landed, so it isn't reflected in the code that's already merged here.
+Root `CLAUDE.md`'s reviewer checklist now enforces, repo-wide: *"Compose UI
+from `components/ui` primitives... flag ad-hoc reimplementations,"* and
+*"Animate only via `components/motion` primitives... flag direct
+`framer-motion` usage in page/feature code that bypasses these."* The
+already-shipped Page 18 code predates that rule and doesn't follow it.
 
-Build exactly: the auth-gated dashboard shell (sidebar + topbar), the
-**Overview** section (§3.1 of the page spec), and the **Analytics** section
-(§3.2). This mirrors the task brief's scope exactly.
+**This document is the restyle spec**: it keeps every already-working piece
+of architecture (component tree, file layout, the `/api/pro/*` contracts,
+zod schemas, RLS-scoped queries, React Query wiring, the Zustand range
+store — none of that changes, none of it is wrong) and re-specifies **only
+the visual/presentational layer** — which token/primitive replaces which
+hand-rolled `<div className="bg-white border border-gray-200 ...">` — so a
+follow-up dev pass can restyle in place without re-deriving any data logic.
+§10 is a concrete file-by-file diff list for that pass.
 
-**Explicitly out of scope — do not build, do not add nav items or dead
-links for them:** Leads inbox (§3.3), Promoted listings manager (§3.5), Bulk
-CSV upload (§3.6), Team management (§3.7), Billing panel (§3.4), Stripe/
-payment-provider integration, Supabase Realtime. The sidebar in this task
-lists **only** "Overview" and "Analytics" — nothing else, not even
-disabled/greyed-out placeholders (that would still be a dead link).
-Premium-only extras mentioned in the generic spec's Analytics section
-(Traffic sources pie chart, `[Export CSV]`) are **also** out of scope for
-this task — Analytics ships only: views/favorites/contact-clicks/leads
-charts + Top performing listings table, per the task brief. Do not build a
-traffic-sources chart or an export button.
+**MVP scope (unchanged):** shell (sidebar + topbar) + Overview (§3.1 of the
+page spec) + Analytics (§3.2). **Explicitly out of scope** — do not build,
+do not add nav items or dead links for: Leads inbox, Promoted listings
+manager, Bulk CSV upload, Team management, Billing panel, Stripe/payment
+integration, Supabase Realtime, the Premium-only Traffic-sources pie chart,
+`[Export CSV]`. The sidebar lists **only** "Overview" and "Analytics."
 
 ---
 
-## 1. Design decisions that deviate from / resolve gaps in the generic page spec
+## 1. Design-system cheat sheet for this page
 
-| # | Page-spec / task tension | Decision for this codebase | Why |
-|---|---|---|---|
-| D1 | Task brief says "reuse `components/ui` primitives and `components/motion` wrappers." | **Neither directory exists in this repo.** There is no shadcn-style `components/ui/`, no animation-wrapper library, and `app/globals.css` defines only `--color-primary`/`--color-primary-foreground`/`--font-sans` — no custom keyframes anywhere in the codebase (verified). This page's "design system" *is* the set of Tailwind utility conventions already repeated across `components/dashboard/`, `components/favorites/`, `components/messages/`: `transition-colors`/`transition-opacity`/`transition-transform` for hover/open-close, `animate-pulse` for skeletons, `animate-spin` for loading spinners, plain `border border-gray-200 rounded-xl` cards. **Build within that existing vocabulary** — do not add `framer-motion` or a new `components/motion/` folder for this task. §5 below specifies every micro-interaction using only these utilities. |
-| D2 | Generic spec doesn't say where "the caller's plan/tier" comes from. | Reuse `profiles.tier` (`UserTier = 'free' \| 'pro' \| 'premium'`) exactly as `app/[locale]/pro/page.tsx`'s `loadPlans()` already reads it (`supabase.from('profiles').select('tier').eq('id', user.id).maybeSingle()`), and reuse the `plans` table (`supabase/migrations/0009_plans.sql`) only if a feature/quota value is needed later — for this task's scope (Overview + Analytics), `profiles.tier` alone is sufficient to decide "locked or live." **Do not invent a parallel tier/subscription table.** |
-| D3 | Generic spec's topbar sketch shows a bordered `▾` dropdown (`h-9 border border-gray-300 rounded-md`) for the date range. | Use the **segmented control** pattern already shipped in `StatsModal.tsx` (`flex gap-1 rounded-lg bg-gray-100 p-1`, active pill `bg-white text-gray-900 shadow-sm`) instead — it's the exact same `7d/30d/90d` value set this page needs, already built, already accessible (plain buttons, no popover/focus-trap plumbing to redo). For **cross-page state** (the topbar lives in the shared layout; Overview and Analytics are separate routes that both need the current range), lift it into a tiny Zustand store, mirroring `store/currencyStore.ts` exactly (see §2, `store/proDashboardStore.ts`) — this codebase's established pattern for small global client UI state read by multiple, non-nested components, rather than prop-drilling or introducing React Context (a pattern not used anywhere else in this repo). |
-| D4 | Generic spec: "KPI trend: ↑/↓ % icon, not color alone" with no concrete icon/markup given. | Reuse `ValueFactorsList.tsx`'s `DIRECTION_STYLE`/`DIRECTION_ICON` convention verbatim: `ArrowUp`/`text-green-600` for a positive trend, `ArrowDown`/`text-red-500` for negative, `Minus`/`text-gray-400` for flat (0% or no prior-period data). Same icon set (`lucide-react`, already a dependency), same colors, same "icon + colored `+12%` text" shape — no new visual language invented for this page. |
-| D5 | Generic spec: tier badge colors "Pro: `bg-violet-100 text-violet-700`; Premium: `bg-amber-100 text-amber-700`." | These are **already implemented**, verbatim, as `AgentHeader.tsx`'s `TIER_STYLES` map. Import/duplicate that exact map into `ProTopbar.tsx` (this repo duplicates small per-file maps rather than sharing a util — same convention `17-pricing-handoff.md` D6 and `PropertyMainInfo.tsx`'s `CURRENCY_SYMBOL` map already follow — don't create a new shared `lib/tier/badge.ts` for a 2-line map). |
-| D6 | Task brief: "sparkline optional" (Overview) vs. "Add `recharts`... " (Analytics). | Use **two different rendering strategies deliberately**: Overview KPI-card sparklines reuse `StatsModal.tsx`'s dependency-free inline-SVG `<polyline>`/area-fill approach (extract it into a small shared `components/pro/Sparkline.tsx`, stripped of the tooltip/axis-label text — a KPI card sparkline is a glance-only trend shape, not a full chart) — six of these render on every Overview load, and pulling Recharts' heavier runtime in for a 40×16px decoration is unjustified. Reserve `recharts` (the new dependency) for **Analytics only** — the four full charts (views/favorites/contact-clicks/leads) genuinely need axes, tooltips, and responsive containers, which is exactly what Recharts is for. |
-| D7 | Generic spec: "Locked overlay (Free): `backdrop-blur-sm bg-white/60` + centered 'Upgrade' CTA." | Match that token, but reuse `LimitReachedModal.tsx`'s CTA button styling for the overlay's link (`bg-primary text-white` primary button, `h-11 rounded-lg font-medium text-sm`) rather than inventing a new button style — this is the same "you hit a plan limit, go upgrade" moment visually, just inline instead of in a modal. |
-| D8 | Generic spec's sidebar lists 7 items (Overview…Billing) with an unread-Leads badge. | This task's sidebar renders **exactly 2 items** (Overview, Analytics) — reuse `DashboardSidebar.tsx`'s structural pattern (desktop `aside w-60 sticky`, mobile drawer with focus-trap/Escape/scroll-lock already fully implemented there) but with a 2-item `navItems` array and no badge logic (nothing here produces unread counts in this task's scope). Match `w-60` from the *page spec* (not `DashboardSidebar.tsx`'s `w-64` — the two dashboards are visually distinct surfaces, and `w-60` is what this page's own spec/token table specifies). |
+Confirmed against `DESIGN_SYSTEM.md` + `app/globals.css` (`@theme`) +
+`components/ui/*` + `components/motion/*` on `main` (commit `8a7171e`,
+"Design system foundation — tokens, primitives, motion, styleguide").
 
----
-
-## 2. Component inventory (new files)
-
-```
-app/[locale]/pro/dashboard/
-  layout.tsx                        (NEW — Server Component: session check (redirect
-                                      guests → /auth/login?next=/pro/dashboard, mirrors
-                                      messages/layout.tsx exactly), reads profiles.tier
-                                      once (D2), renders <ProDashboardShell tier>{children}</>)
-  page.tsx                          (NEW — Overview route: thin Server Component,
-                                      renders <OverviewKpis tier /> + quick-links row)
-  analytics/
-    page.tsx                        (NEW — Analytics route: thin Server Component,
-                                      renders <AnalyticsCharts tier />)
-
-components/pro/
-  ProDashboardShell.tsx              (NEW — 'use client': owns the responsive
-                                       sidebar/drawer chrome (copy DashboardSidebar's
-                                       drawer mechanics, D8) + mounts <ProTopbar/> +
-                                       renders {children} in the content pane)
-  ProSidebar.tsx                     (NEW — 'use client' or plain — nav list, 2 items,
-                                       `aria-current="page"` active state, D8)
-  ProTopbar.tsx                      (NEW — 'use client': tier badge (D5) + the
-                                       7d/30d/90d segmented control (D3), reads/writes
-                                       useProDashboardStore)
-  TierBadge.tsx                      (NEW — small presentational piece: tier → pill,
-                                       used by ProTopbar; also usable standalone in tests)
-  KpiCard.tsx                        (NEW — one KPI card: big number, label, trend
-                                       (D4), optional <Sparkline/>)
-  Sparkline.tsx                      (NEW — dependency-free inline SVG line, extracted
-                                       from StatsModal.tsx's LineChart, D6)
-  OverviewKpis.tsx                   (NEW — 'use client': React Query fetch of
-                                       GET /api/pro/overview?range=, renders the KPI
-                                       grid + quick-links row + all Overview states)
-  AnalyticsCharts.tsx                (NEW — 'use client': React Query fetch of
-                                       GET /api/pro/analytics?range=&metric=, renders
-                                       the 4 Recharts panels + TopListingsTable + all
-                                       Analytics states)
-  TopListingsTable.tsx               (NEW — presentational table, row click →
-                                       /property/[id])
-  UpgradeOverlay.tsx                 (NEW — the free-tier locked/blurred overlay,
-                                       D7 — wraps any widget: `<UpgradeOverlay
-                                       locked={tier === 'free'}>{children}</UpgradeOverlay>`)
-  EmptyProStats.tsx                  (NEW — "Not enough data yet" empty state,
-                                       shared by Overview + Analytics)
-
-store/
-  proDashboardStore.ts               (NEW — Zustand: `{ range: '7d'|'30d'|'90d',
-                                       setRange }`, mirrors currencyStore.ts, D3)
-
-lib/pro-dashboard/
-  types.ts                          (NEW — OverviewResponse, AnalyticsResponse,
-                                       DateRange, TopListing, etc. — API contract
-                                       shapes from the page spec §5)
-  schemas.ts                        (NEW — zod: rangeQuerySchema, analyticsQuerySchema)
-
-app/api/pro/
-  overview/route.ts                 (NEW — GET: session + tier check → 403
-                                       tier_insufficient for free; zod-validate
-                                       ?range; query the caller's own `properties`
-                                       rows only)
-  analytics/route.ts                 (NEW — GET: same guard; zod-validate
-                                       ?range&?metric; time-series + top-listings query)
-```
-
-Reuse, don't fork: `createServerClient()` (`@/lib/supabase/server`), the
-`auth.getUser()` + typed-error-response pattern from `app/api/favorites/route.ts`
-/ `app/api/dashboard/overview/route.ts` (same 401 shape, same
-`Promise.all([...])` parallel-query style — scope every query to
-`.eq('owner_id', user.id)` so RLS and the handler agree: no cross-tenant
-rows ever leave the query), `cn()` (`lib/utils.ts`), the `useInfiniteQuery`/
-skeleton conventions already in `FavoritesGrid.tsx` for loading/error states,
-and `DashboardSidebar.tsx`'s drawer open/close/focus-trap `useEffect`s
-verbatim inside `ProDashboardShell.tsx` (same Escape-key, body-scroll-lock,
-focus-on-open behavior — don't re-derive it).
-
----
-
-## 3. Wireframes
-
-### 3.1 Desktop (≥1024px)
-
-```
-┌────────────────────────────────────────────────────────────────┐
-│ HEADER (sticky, h-16 — existing global header)                  │
-├──────────────┬─────────────────────────────────────────────────┤
-│ SIDEBAR w-60 │ TOPBAR h-14: [Pro ▮] · [ 7d | 30d | 90d ]        │
-│ (sticky)     ├─────────────────────────────────────────────────┤
-│              │ Overview                                         │
-│ ▸ Overview   │ ┌──────┐┌──────┐┌──────┐┌──────┐┌──────┐┌──────┐│
-│ ▸ Analytics  │ │Views ││Favs  ││Clicks││Leads ││Active││Conv. ││
-│              │ │1,240 ││ 86   ││ 54   ││ 18   ││ 24   ││1.45% ││
-│              │ │↑12%  ││↑4%   ││↓3%   ││↓2%   ││  —   ││  —   ││
-│              │ │▁▂▃▅▇ ││▁▁▂▃▄ ││ ...  ││ ...  ││      ││      ││
-│              │ └──────┘└──────┘└──────┘└──────┘└──────┘└──────┘│
-│              │ [See leads →]   [Promote a listing →]  (disabled│
-│              │                  — Promoted ships in a later task)│
-└──────────────┴─────────────────────────────────────────────────┘
-```
-
-`grid-cols-2 lg:grid-cols-6 gap-3` for the KPI grid (page spec §3.1, exact
-class). "Quick links" per the spec, but scoped to this task: **"See leads"**
-and **"Promote listing"** both point at not-yet-built routes — render them as
-visibly `disabled` buttons with a small "coming soon" `title` tooltip rather
-than linking to a 404, or simply omit them entirely and ship the KPI grid
-only. Recommendation: **omit** the quick-links row for this task (cleanest —
-zero dead links, matches "do not add nav items or dead links" from §0) and
-let a later task add it alongside Leads/Promoted.
-
-### 3.2 Desktop — Analytics
-
-```
-┌──────────────┬─────────────────────────────────────────────────┐
-│ SIDEBAR      │ TOPBAR: [Pro ▮] · [ 7d | 30d | 90d ]             │
-│ ▸ Overview   ├─────────────────────────────────────────────────┤
-│ ▸ Analytics  │ ┌─── Views over time (line) ─────────────────┐  │
-│  (active)    │ │  Recharts <LineChart>, h-72                │  │
-│              │ └─────────────────────────────────────────────┘  │
-│              │ ┌─── Favorites over time (area) ─────────────┐  │
-│              │ └─────────────────────────────────────────────┘  │
-│              │ ┌─── Contact clicks (bar) ────────────────────┐  │
-│              │ └─────────────────────────────────────────────┘  │
-│              │ ┌─── Leads over time (line) ──────────────────┐  │
-│              │ └─────────────────────────────────────────────┘  │
-│              │ ┌─── Top performing listings (table) ─────────┐  │
-│              │ │ Listing        Views  Favs  Clicks  Leads CTR│  │
-│              │ │ Kentron 3-rm   1,240   86    54     18   1.4%│  │
-│              │ └─────────────────────────────────────────────┘  │
-└──────────────┴─────────────────────────────────────────────────┘
-```
-
-Each chart panel: `bg-white border border-gray-200 rounded-xl p-4`, height
-`h-72` (page spec §2 token table, verbatim). Stack panels vertically,
-`space-y-4` — the generic spec's "property selector" and "funnel" sub-widgets
-and the Premium-only "Traffic sources" pie / "Export CSV" button are **out of
-scope** for this task (§0); ship the 4 time-series charts + the table only.
-
-### 3.3 Mobile (<768px)
-
-```
-┌──────────────────────────┐
-│ HEADER (h-14)         ☰  │  ← hamburger opens the same drawer as
-├──────────────────────────┤     DashboardSidebar.tsx, 2 items only
-│ [Pro ▮]  [7d|30d|90d]    │  ← topbar wraps to 1 row, range control
-├──────────────────────────┤     shrinks: `text-xs px-2` at <400px
-│ ┌────────┐ ┌────────┐    │
-│ │ Views  │ │ Favs   │    │  KPI grid: grid-cols-2 (page spec §3.1)
-│ │ 1,240  │ │  86    │    │
-│ │ ↑12%   │ │ ↑4%    │    │
-│ └────────┘ └────────┘    │
-│ ┌────────┐ ┌────────┐    │
-│ │ Clicks │ │ Leads  │    │
-│ └────────┘ └────────┘    │
-│ ┌────────┐ ┌────────┐    │
-│ │ Active │ │ Conv.  │    │
-│ └────────┘ └────────┘    │
-├──────────────────────────┤
-│ (Analytics route only)   │
-│ ── Chart (full-width) ── │  ← Recharts ResponsiveContainer,
-│ ── Chart 2 ──            │     scroll-x not needed at h-64 mobile
-│ ── Top listings ──       │  ← card-list fallback (see §4 Table row)
-└──────────────────────────┘
-```
-
-No bottom tab-bar for this task — with only 2 sections, the hamburger drawer
-(already fully built in `DashboardSidebar.tsx`, just re-skinned with 2
-items) is simpler and avoids inventing a second nav pattern only to remove it
-again once Leads/Promoted/etc. ship and a bottom-tab layout might make more
-sense with 4+ items. Revisit bottom-tabs when those sections land.
-
----
-
-## 4. Layout tokens (exact classes)
-
-| Element | Class string |
+| Need | Use |
 |---|---|
-| Sidebar (`ProSidebar`, desktop) | `hidden lg:flex flex-col w-60 border-r border-gray-200 bg-white sticky top-16 h-[calc(100vh-4rem)] flex-shrink-0` |
-| Sidebar item | `flex items-center gap-3 px-4 h-10 rounded-md text-sm transition-colors duration-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary` |
-| Sidebar item (active) | append `bg-primary/10 text-primary font-medium`, `aria-current="page"` |
-| Sidebar item (inactive) | append `text-gray-700 hover:bg-gray-50` |
-| Mobile drawer | copy `DashboardSidebar.tsx`'s exact drawer markup/classes (`fixed top-0 left-0 h-full w-72 bg-white shadow-xl z-50`, `translate-x-0`/`-translate-x-full` transition, overlay `bg-black/40`) |
-| Topbar | `h-14 border-b border-gray-200 flex items-center justify-between px-4 lg:px-6 gap-3 flex-wrap` |
-| Tier badge (`TierBadge`) | `inline-flex items-center h-6 px-2.5 rounded-full text-xs font-semibold` + `TIER_STYLES[tier]` from D5 (`pro: bg-violet-100 text-violet-700`, `premium: bg-amber-100 text-amber-700`) |
-| Range segmented control wrapper | `flex gap-1 rounded-lg bg-gray-100 p-1` (copy `StatsModal.tsx` verbatim, D3) |
-| Range option (inactive) | `px-3 h-7 text-sm rounded-md transition-colors font-medium text-gray-500 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary` |
-| Range option (active) | `px-3 h-7 text-sm rounded-md font-medium bg-white text-gray-900 shadow-sm` |
-| KPI card (`KpiCard`) | `bg-white border border-gray-200 rounded-xl p-4 flex flex-col gap-1` |
-| KPI label | `text-sm text-gray-500` |
-| KPI number | `text-2xl font-bold text-gray-900 leading-none` |
-| KPI trend row | `flex items-center gap-1 text-sm` + `DIRECTION_STYLE[direction]` (D4: `text-green-600`/`text-red-500`/`text-gray-400`) |
-| KPI trend icon | `w-3.5 h-3.5` (`ArrowUp`/`ArrowDown`/`Minus`, `aria-hidden="true"`) |
-| Sparkline svg | `w-full h-8`, `text-primary` stroke/`text-primary/10` fill (copy `StatsModal.tsx`'s `LineChart`, strip axis `<text>` labels) |
-| Chart panel container | `bg-white border border-gray-200 rounded-xl p-4 h-72` |
-| Chart panel title | `text-sm font-medium text-gray-700 mb-2` |
-| Table wrapper | `bg-white border border-gray-200 rounded-xl overflow-x-auto` |
-| Table header cell | `text-xs uppercase text-gray-500 font-medium text-left p-3 border-b border-gray-100` |
-| Table body cell | `text-sm text-gray-900 p-3 border-b border-gray-100` |
-| Table row (interactive) | append `hover:bg-gray-50 cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset` to a `<tr tabIndex={0} role="button">`-equivalent (or wrap the row's first cell content in a `<Link>` — either satisfies "row click → `/property/[id]`") |
-| Locked overlay wrapper | `relative` on the widget's outer div |
-| Locked overlay scrim | `absolute inset-0 backdrop-blur-sm bg-white/60 rounded-xl flex flex-col items-center justify-center gap-3 text-center px-4` + `aria-disabled="true"` on the underlying widget content |
-| Locked overlay CTA | `inline-flex items-center justify-center h-11 px-5 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2` (copy `LimitReachedModal.tsx`'s primary button, D7), `href="/pro"` |
-| Locked overlay copy | `text-sm text-gray-600 max-w-xs` |
-| Empty state (`EmptyProStats`) | copy `EmptyInbox.tsx`'s shape: `flex flex-col items-center justify-center gap-3 text-center px-6 py-14`, icon `w-14 h-14 bg-gray-50 rounded-full` wrapping a `w-7 h-7 text-gray-300` lucide icon (`BarChart2` or `TrendingUp`), title `text-base font-medium text-gray-900`, body `text-sm text-gray-500` |
-| Skeleton card | `bg-white rounded-xl border border-gray-200 p-4 h-24` with two `bg-gray-100 animate-pulse` blocks inside (copy `OverviewCards.tsx`'s `SkeletonCard` verbatim) |
-| Error + retry | copy `FavoritesGrid.tsx`'s shape verbatim: `flex flex-col items-center justify-center py-14 text-center gap-3`, message `text-gray-500 text-sm`, retry `text-sm text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded` |
+| Page/content background | `bg-bg` (outer), `bg-surface` (cards/panels — aliases white) |
+| Borders | `border-border` |
+| Body text / headings | `text-text` |
+| Secondary/help text | `text-muted` |
+| Positive trend | `text-success` (never color alone — pair with an icon, §4) |
+| Negative trend | `text-danger` |
+| Neutral/flat trend | `text-muted` |
+| Brand actions, Pro tier accent | `bg-primary`, `text-primary`, `text-primary-fg` |
+| Premium tier accent / highlight | `bg-accent`, `text-accent-fg` (amber) |
+| Panel/card shell | `Card` (`components/ui/Card.tsx`) — `rounded-lg border-border bg-surface shadow-sm` baked in |
+| Pills (tier badge) | `Badge` (`components/ui/Badge.tsx`) — `variant="primary"` (Pro) / `variant="accent"` (Premium) |
+| Buttons / button-styled links | `Button` (`components/ui/Button.tsx`) visual classes (`variant="primary"`) |
+| Segmented range control | `Tabs` (`components/ui/Tabs.tsx`) — same primitive `PricingFaq.tsx` uses for its category filter |
+| Loading placeholders | `Skeleton` (`components/ui/Skeleton.tsx`) — `animate-pulse rounded-md bg-neutral-200` baked in |
+| Formula/glossary hints | `Tooltip` (`components/ui/Tooltip.tsx`) |
+| Grid/list entrance + stagger | `Stagger` (`components/motion/Stagger.tsx`) |
+| Single-element entrance (headings) | `FadeIn` (`components/motion/FadeIn.tsx`) |
+| Reduced motion | Automatic — every `components/motion/*` wrapper already calls `useReducedMotion()`; **do not** hand-roll a `motion-reduce:` variant like the old `components/pro/FadeIn.tsx` did |
+
+**Not used on this page, and why:**
+
+- **`Dialog`** — considered for the mobile nav drawer, rejected: `Dialog` is a
+  centered, portal-rendered modal (`fixed inset-0 flex items-center
+  justify-center`, no directional slide, no left-anchor option). The Pro
+  Dashboard's mobile drawer is a left-anchored sliding panel controlled by a
+  boolean (`drawerOpen`) — a different interaction shape. Keep it hand-rolled
+  (§3.1), same as `DashboardSidebar.tsx`'s drawer (still the only precedent
+  for this exact pattern anywhere in the app), but rebuilt on tokens instead
+  of raw grays (§3.1 table).
+- **`SlideIn` / `Reveal`** — both trigger off `whileInView` (scroll
+  intersection), not a controlled `open` boolean, so neither can drive the
+  drawer's open/close transition. Keep the drawer's open/close as plain
+  Tailwind `transition-transform duration-300` gated by React state — this
+  matches `DESIGN_SYSTEM.md`'s own guidance ("simple hover/tap... → plain
+  Tailwind," "Route-level page transitions are planned; they'll be wired
+  into the layout during page integration" — a controlled drawer toggle is
+  exactly that unsolved case today, not a gap specific to this page).
+- **`Field` / `Input` / `Select`** — no form inputs on this page (MVP scope
+  has no filters beyond the range control, which is a `Tabs` group, not a
+  `<select>`).
 
 ---
 
-## 5. Micro-interactions & motion (built only from utilities already in this codebase, D1)
+## 2. Section-by-section spec
 
-**Hover / tap feedback**
-- KPI cards, chart panels, table rows: `transition-colors duration-150` on
-  background (`hover:bg-gray-50` for rows; cards stay static background, no
-  hover-lift — matches `OverviewCards.tsx`'s `hover:shadow-sm
-  transition-shadow duration-150` if the KPI card should read as clickable;
-  for this task KPI cards are **not** clickable (no per-KPI drill-down route
-  exists yet), so omit the hover-shadow entirely — a card that looks
-  clickable but does nothing is worse than a static card).
-- Range segmented control / sidebar items / retry links: `transition-colors
-  duration-100`–`150`, `focus-visible:ring-2 focus-visible:ring-primary` on
-  every interactive element (keyboard parity with hover, already this
-  repo's blanket rule).
-- Table row press: no separate "tap" style needed beyond the `hover:bg-gray-50`
-  (mobile has no `:hover`, so the row's `focus-visible:ring-2` plus a plain
-  `active:bg-gray-100` utility gives touch feedback without new JS).
+### 2.1 `ProDashboardShell` (desktop sidebar + topbar + mobile drawer)
 
-**Entrance (route/section mount)**
-- KPI grid and chart panels fade+rise in on mount using a single reusable
-  Tailwind-only pattern — no library: give each card/panel
-  `animate-in fade-in slide-in-from-bottom-1 duration-300` **is not
-  available** (no `tailwindcss-animate` plugin installed) — instead use the
-  plain-CSS-compatible approach already implicitly used by this codebase's
-  skeleton→content swap: render the skeleton (`animate-pulse`) while
-  `isLoading`, then swap to the real content with a one-time `transition-opacity
-  duration-300` from a mounted `opacity-0` state to `opacity-100` (a `useEffect`
-  that flips a boolean one tick after mount, exactly the same shape as
-  `ProDashboardShell`'s drawer `opacity-0`/`opacity-100` toggle already does
-  for the overlay backdrop in `DashboardSidebar.tsx`). Keep it subtle: 200–300ms,
-  no translate/scale — this is a data dashboard, not a marketing page.
+*File: `components/pro/ProDashboardShell.tsx`, `ProSidebar.tsx`,
+`ProTopbar.tsx`, `TierBadge.tsx` — structure unchanged, restyle only.*
 
-**Staggered list (KPI cards, chart panels)**
-- Apply a small per-index `transitionDelay` inline style (`style={{
-  transitionDelay: \`${index * 40}ms\` }}`) on top of the same
-  opacity-0→100 transition above, capped at index 5 (6 KPI cards → max
-  200ms total stagger) so the grid doesn't feel sluggish. This uses only
-  inline `style` + the existing `transition-opacity` utility — no new
-  dependency, no keyframes.
-- `TopListingsTable` rows: same `transitionDelay` idea is unnecessary once
-  the panel itself has already faded in — do **not** stagger every table
-  row individually (visual noise for a data table); the panel-level fade is
-  enough.
+**Desktop sidebar** (`aside`, `w-60`, sticky):
+- Wrapper: `border-r border-border bg-surface` (was `border-gray-200
+  bg-white`).
+- Nav item (`ProSidebar`'s `<Link>`): unchanged shape (`flex items-center
+  gap-3 px-4 h-10 rounded-md text-sm transition-colors duration-100
+  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary`).
+  Active: `bg-primary/10 text-primary font-medium` — already token-correct,
+  no change. Inactive: `text-text hover:bg-neutral-100` (was `text-gray-700
+  hover:bg-gray-50`).
+- `<nav aria-label="Pro dashboard">`, active item `aria-current="page"` —
+  unchanged (page spec §7, already correct).
 
-**Scroll-reveal**
-- Not needed: this page is a fixed-viewport dashboard behind a sticky
-  sidebar/topbar, not a long scrolling marketing page — everything relevant
-  is visible after the initial section fade-in described above.  If
-  Analytics' 4 charts + table end up taller than the viewport on small
-  laptop screens, plain scroll is sufficient; do not add
-  `IntersectionObserver`-driven reveal animations for internal-tool content
-  (matches this app's existing convention — no other authenticated,
-  behind-login page in this codebase uses scroll-reveal; it's reserved for
-  public marketing pages like `/pro`, which itself doesn't use it either).
+**Mobile drawer** (hamburger + overlay + sliding panel — see §1 for why this
+stays hand-rolled instead of `Dialog`):
+- Trigger button: `bg-surface border-border text-text hover:bg-neutral-100
+  focus-visible:ring-2 focus-visible:ring-primary` (was `bg-white
+  border-gray-200 text-gray-700 hover:bg-gray-50`).
+- Overlay: `bg-text/50` (was `bg-black/40` — matches `Dialog`'s own overlay
+  token exactly, `data-dialog-overlay` in `Dialog.tsx` uses `bg-text/50`, so
+  this keeps the "scrim" color consistent between the one hand-rolled
+  overlay on this page and the shipped `Dialog` primitive elsewhere).
+- Panel: `bg-surface shadow-lg` (was `bg-white shadow-xl` — `shadow-lg` is
+  the largest documented shadow token; there is no `shadow-xl` token, don't
+  invent one). Header border: `border-border`. Close button: `text-muted
+  hover:bg-neutral-100 focus-visible:ring-2 focus-visible:ring-primary`.
+- Panel width (`w-72`), z-index (`z-50`), and the open/close
+  `translate-x-0`/`-translate-x-full` `transition-transform duration-300`
+  mechanism are all unchanged (§1 — controlled toggles stay plain Tailwind).
+- Mobile drawer nav items use `h-11` (44px touch target) vs. the desktop
+  `h-10` — unchanged from the current implementation, still correct per page
+  spec §7.
 
-**Loading states**
-- Skeleton cards/panels: `animate-pulse` (Tailwind built-in), exactly
-  `OverviewCards.tsx`'s `SkeletonCard`.
-- Spinner (retry-in-progress, "loading more" if ever added): `animate-spin`
-  on a `w-6 h-6 border-2 border-primary border-t-transparent rounded-full`
-  div — copy `FavoritesGrid.tsx`'s spinner verbatim.
+**Topbar** (`h-14 border-b`, tier badge + range control):
+- Wrapper: `border-b border-border` (was `border-gray-200`).
+- **Tier badge** — replace the custom `TierBadge`'s hand-rolled `<span>` +
+  `TIER_STYLES` map with `Badge`:
+  ```tsx
+  import Badge from '@/components/ui/Badge'
 
-**Reduced motion**
-- Every transition above is opacity/color, not transform-heavy, and all are
-  short (≤300ms) — no explicit `prefers-reduced-motion` override is required
-  beyond what the rest of this codebase already ships (confirmed: no page in
-  this repo currently guards `transition-*` behind `motion-reduce:`, so this
-  page doesn't need to be the first — flag to reviewer if this should
-  change platform-wide, but it's out of scope for a single-page task).
+  {tier !== 'free' && (
+    <Badge
+      variant={tier === 'premium' ? 'accent' : 'primary'}
+      className="h-6 font-semibold capitalize"
+    >
+      {tier}
+    </Badge>
+  )}
+  ```
+  **Deliberate deviation from `AgentHeader.tsx`'s `TIER_STYLES`** (`pro:
+  bg-violet-100 text-violet-700`, `premium: bg-amber-100 text-amber-700`,
+  the pattern the *previous* version of this doc told you to copy
+  verbatim): violet has **no token** in `app/globals.css`'s `@theme` block —
+  copying it would hard-code an undocumented hex-backed color into new code,
+  which the current `CLAUDE.md` reviewer checklist explicitly flags. Map
+  instead onto the two documented brand tokens: **Pro → `Badge
+  variant="primary"`** (deep blue — the base brand tier), **Premium →
+  `Badge variant="accent"`** (amber — `DESIGN_SYSTEM.md`'s accent token is
+  literally described as "highlights... etc.," and Premium is the
+  highlighted upsell tier). Do not backport this fix into `AgentHeader.tsx`
+  — that file is out of scope for this task; flag it to the design-system
+  maintainers as a follow-up if consistency across the two tier badges
+  matters later.
+- **Range control** — replace the hand-rolled segmented-control `<div
+  className="flex gap-1 rounded-lg bg-gray-100 p-1">...` with the `Tabs`
+  primitive (`components/ui/Tabs.tsx`), the same component
+  `components/pro/PricingFaq.tsx` already uses for its category filter (a
+  functionally identical "mutually-exclusive filter that re-fetches
+  content" interaction, not a distinct-panels tab bar — same justification
+  that precedent already established):
+  ```tsx
+  import Tabs from '@/components/ui/Tabs'
+
+  <Tabs
+    label="Date range"
+    options={[
+      { value: '7d', label: '7d' },
+      { value: '30d', label: '30d' },
+      { value: '90d', label: '90d' },
+    ]}
+    value={range}
+    onChange={(v) => setRange(v as ProDateRange)}
+  />
+  ```
+  This gives roving-tabindex keyboard nav (←/→/Home/End) for free, which the
+  old hand-rolled segmented control didn't have — a strict a11y upgrade, not
+  just a restyle. Visual note: `Tabs` renders individual rounded-full pill
+  buttons (active = solid `bg-primary` fill) rather than the page spec's
+  sketched "single grouped track" segmented control — accept the shipped
+  primitive's look rather than forking a new one; it's still a 3-option
+  low-stakes range picker either way.
+
+### 2.2 Overview — KPI grid
+
+*File: `components/pro/OverviewKpis.tsx`, `KpiCard.tsx`, `Sparkline.tsx`.*
+
+- Page heading (`app/[locale]/pro/dashboard/page.tsx`'s `<h1>`): `text-text`
+  (was `text-gray-900`), wrap in `FadeIn` (`components/motion/FadeIn.tsx`,
+  default `delay={0}`) for a small on-mount lift — the one-line heading is
+  the page's first thing to read, worth a beat of polish.
+- Grid wrapper: unchanged `grid grid-cols-2 lg:grid-cols-6 gap-3` (page spec
+  §3.1, exact class — a token-neutral layout class, nothing to migrate).
+- **Entrance/stagger**: replace the bespoke `components/pro/FadeIn.tsx` +
+  manual `delayMs={Math.min(i, 5) * 40}` loop with `Stagger`
+  (`components/motion/Stagger.tsx`, default `gap={0.08}`) wrapping the whole
+  card set — `Stagger` already fades+lifts each direct child in sequence,
+  which is exactly what the manual per-index-delay loop was hand-building:
+  ```tsx
+  import Stagger from '@/components/motion/Stagger'
+
+  <Stagger>
+    <div className="grid grid-cols-2 lg:grid-cols-6 gap-3">
+      {cards.map((card) => (
+        <KpiCard key={card.label} {...card} />
+      ))}
+    </div>
+  </Stagger>
+  ```
+  Note `Stagger` staggers its **direct children**, so it wraps the *grid*
+  as a single child here (one fade-in for the whole grid) rather than each
+  card individually — for a per-card stagger, restructure so each `KpiCard`
+  is a direct child of `Stagger` and let `Stagger`'s own CSS grid className
+  do the layout (`<Stagger className="grid grid-cols-2 lg:grid-cols-6
+  gap-3">` if a `className` passthrough is added to `Stagger`, or keep the
+  grid wrapper and accept the whole-grid single fade — **developer's call**,
+  both are reasonable; the whole-grid fade is simpler and still reads as
+  "entrance," per-card stagger is closer to the page-spec/task's explicit
+  "staggered lists" ask. Prefer per-card if `Stagger` already supports a
+  `className` prop passthrough (check current `Stagger.tsx` signature before
+  assuming); if not, that's a one-line addition to the shared primitive, not
+  a page-specific fork.
+- Delete `components/pro/FadeIn.tsx` once `Stagger` covers both Overview and
+  Analytics (§2.3) — it's a dead duplicate of `components/motion/FadeIn.tsx`
+  once nothing imports it, and `CLAUDE.md`'s hygiene rule is "flag ad-hoc
+  reimplementations."
+- **`KpiCard`** — replace the hand-rolled `<div className="bg-white
+  border border-gray-200 rounded-xl p-4 flex flex-col gap-1">` with `Card`:
+  ```tsx
+  import Card from '@/components/ui/Card'
+
+  <Card className="p-4 flex flex-col gap-1">
+    <span className="text-sm text-muted">{label}</span>
+    <span className="text-2xl font-bold text-text leading-none">{value}</span>
+    {/* trend row, below */}
+    {sparkline && sparkline.length > 1 && <Sparkline data={sparkline} />}
+  </Card>
+  ```
+  `variant="default"` (the `Card` default) — **not** `interactive`: KPI
+  cards have no per-KPI drill-down route in this task's scope, so no hover
+  shadow/cursor-pointer (unchanged reasoning from the prior version of this
+  doc — a card that looks clickable but does nothing is worse than a static
+  one).
+- **Trend row** — icon + colored text, never color alone (page spec §7,
+  unchanged requirement). Only the *color source* changes:
+  | Direction | Old (hand-rolled) | New (token) |
+  |---|---|---|
+  | Up | `text-green-600` | `text-success` |
+  | Down | `text-red-500` | `text-danger` |
+  | Neutral | `text-gray-400` | `text-muted` |
+  Icons (`ArrowUp`/`ArrowDown`/`Minus` from `lucide-react`) and the
+  `aria-label` summarizing direction in words ("Up 12% versus previous
+  period") are unchanged — already correct.
+- **`Sparkline`** — already token-compliant (`text-primary` stroke,
+  `text-primary/10` fill via `currentColor`), **no change needed**. Stays
+  `aria-hidden="true"` (decorative — the KPI number + trend text already
+  carry the meaning accessibly).
+- **Conversion rate** — add a `Tooltip` (`components/ui/Tooltip.tsx`) on the
+  label clarifying the formula, a small "modern-premium" polish detail with
+  zero new dependency:
+  ```tsx
+  <Tooltip content="Contact clicks ÷ views for the selected period">
+    <span className="text-sm text-muted underline decoration-dotted underline-offset-2 cursor-help">
+      Conversion rate
+    </span>
+  </Tooltip>
+  ```
+
+### 2.3 Analytics — chart panels + Top listings table
+
+*File: `components/pro/AnalyticsCharts.tsx`, `TopListingsTable.tsx`.*
+
+- Page heading: same `FadeIn` treatment as Overview's (§2.2).
+- **Chart panel wrapper** — replace `<div className="bg-white border
+  border-gray-200 rounded-xl p-4 h-72">` with `Card`:
+  ```tsx
+  <Card className="p-4 h-72">
+    <p className="text-sm font-medium text-text mb-2">{title}</p>
+    <div role="img" aria-label={ariaLabel} className="h-56">
+      <ResponsiveContainer width="100%" height="100%">{chart}</ResponsiveContainer>
+      <table className="sr-only">…</table> {/* unchanged — page spec §7 */}
+    </div>
+  </Card>
+  ```
+- **Recharts styling** — `stroke-primary` / `fill-primary/10` (favorites
+  area), `fill-primary` (bar), `stroke-primary` (line) are **already
+  token-compliant** (Tailwind v4 generates `stroke-*`/`fill-*` utilities for
+  every `@theme` color, including `primary`) — no change. `CartesianGrid`'s
+  `stroke="#E5E7EB"` is a raw hex on an SVG element prop (not a `className`,
+  so it can't take a Tailwind utility directly) — replace with the
+  `--color-border` token's resolved value via a CSS variable instead of a
+  literal hex, e.g. `stroke="var(--color-border)"` (SVG `stroke` accepts any
+  valid CSS color, and `--color-border` is already defined on `:root` by the
+  `@theme` block) — same visual result, zero hard-coded hex.
+- **Stack + stagger**: same `Stagger` treatment as §2.2 — wrap the 4 chart
+  panels + `TopListingsTable` (5 direct children) in one `Stagger`,
+  replacing the bespoke per-index `FadeIn`/`delayMs` loop. Because
+  `Stagger`'s `whileInView` fires per-child as *that child* scrolls into
+  view (not just once for the whole group — confirm against
+  `Stagger.tsx`'s actual `viewport` wiring: the container has `whileInView`,
+  children read `variants` from the container's stagger orchestration, so
+  in practice the reveal is gated by the *container* entering view, not
+  each child individually — verify this against the live component before
+  relying on true per-child scroll-reveal for panels far below the fold; if
+  the container is short enough to intersect the viewport in one shot on
+  most screens, this is moot). Either way this satisfies the task's
+  "scroll-reveal" ask for the taller Analytics stack without a separate
+  `Reveal` wrapper.
+- **`TopListingsTable`** — wrapper `<div className="bg-white border
+  border-gray-200 rounded-xl overflow-x-auto">` → `<Card className="p-0
+  overflow-x-auto">` (padding zeroed since table cells carry their own
+  `p-3`). Header cell `text-xs uppercase text-gray-500` → `text-muted`.
+  Body cell `text-gray-900` → `text-text`. Row hover `hover:bg-gray-50` →
+  `hover:bg-neutral-100`. Row/cell borders `border-gray-100` →
+  `border-border` (the codebase has no separate "hairline" border token —
+  reuse the one documented `border-border`, don't invent a lighter shade).
+  Add a `Tooltip` on the "CTR" header cell (`Contact clicks ÷ views`), same
+  formula-hint pattern as §2.2's Conversion rate.
+- **Loading**: replace `<div className="bg-white border border-gray-200
+  rounded-xl p-4 h-72 bg-gray-100 animate-pulse" />` with `<Skeleton
+  className="h-72 w-full rounded-lg" />` — `Skeleton` already bakes in
+  `animate-pulse rounded-md bg-neutral-200`; override to `rounded-lg` via
+  `className` (merged safely through `cn`/`twMerge`) to match `Card`'s own
+  radius so the loading→loaded swap doesn't visibly change corner radius.
+  Same for `OverviewKpis`'s `SkeletonCard` — `<Skeleton className="h-24
+  rounded-lg" />` (or compose two: a `h-6 w-12` bar + a `h-4 w-20` bar
+  inside a `Card`, closer to the current two-bar skeleton shape — either is
+  fine, `Skeleton` is a plain placeholder primitive with no internal
+  structure to preserve).
+
+### 2.4 Free-tier locked overlay
+
+*File: `components/pro/UpgradeOverlay.tsx` — wraps each KPI card / chart
+panel individually, keeping the grid/stack shape identical between Free and
+Pro views (unchanged structural decision).*
+
+- Scrim: `absolute inset-0 backdrop-blur-sm bg-surface/60 rounded-lg
+  flex flex-col items-center justify-center gap-3 text-center px-4` (was
+  `bg-white/60 rounded-xl` — `bg-surface/60` is the token-correct
+  equivalent of translucent white; `rounded-lg` matches `Card`'s radius
+  since the wrapped content is now a `Card`).
+- Copy: `text-sm text-muted max-w-xs` (was `text-gray-600`).
+- CTA — still a real, focusable `<Link href="/pro">` (page spec §7: "a
+  clear upgrade link... never blur-only" — must stay a genuine anchor, not
+  a `Button` `onClick`, so it's crawlable/right-click-openable). Replicate
+  `Button`'s `variant="primary" size="md"` visual output on the `<Link>`
+  directly, since `Button` renders a native `<button>` and has no
+  polymorphic `as`/`asChild` prop to swap the element type:
+  ```tsx
+  <Link
+    href="/pro"
+    className="inline-flex items-center justify-center gap-2 rounded-md font-medium
+               bg-primary text-primary-fg hover:bg-primary/90 shadow-sm
+               transition-colors focus-visible:outline-none focus-visible:ring-2
+               focus-visible:ring-primary/40 h-11 px-4 text-sm"
+  >
+    Upgrade to Pro
+  </Link>
+  ```
+  (Exact copy of `Button.tsx`'s `primary`/`md` cva output — keep the two in
+  sync by hand since there's no shared export today; if a third page needs
+  a button-styled `Link`, that's the trigger to add a
+  `buttonVariants()`-style exported class-builder to `components/ui/Button.tsx`
+  rather than a third copy-paste.)
+- `aria-disabled="true"` + `inert` on the wrapped content, `pointer-events-
+  none select-none` — all unchanged, already correct (page spec §7).
+
+### 2.5 Empty state ("Not enough data yet")
+
+*File: `components/pro/EmptyProStats.tsx`.*
+
+- Wrap the existing centered content (icon-in-circle + heading + body) in a
+  `Card` (`className="py-14"` to keep the current generous vertical
+  padding) rather than leaving it as a bare, borderless block — with the
+  KPI grid / chart stack it replaces both being sets of `Card`s, a bordered
+  panel reads as a more deliberate, "designed" empty state than content
+  floating directly on `bg-bg`, and costs nothing extra.
+- Icon circle: `bg-neutral-100` (was `bg-gray-50`) wrapping the `TrendingUp`
+  icon at `text-neutral-300` (was `text-gray-300`). **Note:** this is a
+  raw neutral-scale step, not a semantic token — deliberately, per
+  `DESIGN_SYSTEM.md`'s own carve-out language ("Use the semantic tokens...
+  *rather than* reaching for a raw `neutral-*` step" is a preference, not an
+  absolute ban, and there's no semantic token for "faint decorative icon
+  tint"; `text-muted` at neutral-500 would read too dark/prominent for a
+  purely decorative glyph here). Heading `text-text` (was `text-gray-900`),
+  body `text-muted` (was `text-gray-500`).
+
+### 2.6 Error + retry (per-widget)
+
+Unchanged structurally (one widget failing doesn't blank the whole
+dashboard — page spec intent, already correct). Restyle only: message
+`text-muted` (was `text-gray-500`), retry link `text-primary hover:underline
+focus-visible:ring-2 focus-visible:ring-primary` — already token-correct,
+no change needed (this one was already using `text-primary`, not a raw hex,
+in the current implementation).
 
 ---
 
-## 6. States
+## 3. Micro-interactions & motion summary
+
+| Interaction | Primitive / technique |
+|---|---|
+| Sidebar nav item hover | Plain Tailwind `transition-colors duration-100` (per `DESIGN_SYSTEM.md`: simple hover/tap feedback doesn't need a motion wrapper) |
+| Range `Tabs` hover/focus/keyboard | Built into `Tabs` — roving tabindex, `focus-visible:ring-2 ring-primary` |
+| Page `<h1>` on mount | `FadeIn` (`delay={0}`) |
+| KPI grid entrance + stagger | `Stagger` (`gap={0.08}` default) wrapping the 6 `KpiCard`s (or the grid as one child — §2.2 developer's-call note) |
+| Chart panels + Top listings table entrance/scroll-reveal | `Stagger` wrapping the 4 panels + table (5 children) |
+| Mobile drawer open/close | Plain Tailwind `transition-opacity` (overlay) / `transition-transform` (panel), controlled by `drawerOpen` boolean — not a `components/motion` primitive (§1 rationale) |
+| Table row hover | `hover:bg-neutral-100 transition-colors` |
+| Loading skeletons | `Skeleton` primitive (`animate-pulse` baked in) |
+| Tooltip (Conversion rate, CTR) | `Tooltip` primitive, hover/focus-triggered |
+| Reduced motion | Automatic via every `components/motion/*` wrapper's `useReducedMotion()` — no page-specific handling needed, and don't reintroduce the old manual `motion-reduce:` class the bespoke `components/pro/FadeIn.tsx` had (delete that file, §2.2) |
+
+---
+
+## 4. States (unchanged from the shipped behavior — restyle only)
 
 | State | What renders |
 |---|---|
-| **Loading** | Skeleton KPI cards (`OverviewCards.tsx` pattern) / skeleton chart panels (`h-72 bg-gray-100 animate-pulse rounded-xl`) |
-| **Loaded (Pro or Premium)** | Full live widgets, no distinction needed for this task's scope (Premium-only extras are out of scope, §0) |
-| **Free tier** | Every KPI card and every chart panel individually wrapped in `<UpgradeOverlay locked>` (D7) — **not** a single page-level overlay, so the layout shape (grid, panel sizes) stays identical to the Pro view, just each widget shows blurred placeholder content behind the scrim. `GET /api/pro/overview` / `GET /api/pro/analytics` return `403 { error: "tier_insufficient" }` for these callers — the client renders the overlay from that response, it does not fetch-then-hide real data. |
-| **Empty (new Pro agent, zero stats)** | `EmptyProStats` ("Not enough data yet — listings start collecting statistics after they're published") in place of the KPI grid / chart panels; only shown when the API returns a genuinely empty series/zeroed KPIs for a Pro/Premium caller (distinct from the 403 locked state) |
-| **Error (API fail)** | Per-widget "Couldn't load" + `[Try again]`, not a page-level error — matches `FavoritesGrid.tsx`'s retry convention; one widget failing shouldn't blank the whole dashboard |
+| **Loading** | `Skeleton`-based KPI cards / chart panels (§2.2, §2.3) |
+| **Loaded (Pro or Premium)** | Full live widgets — no visual distinction between the two tiers beyond the topbar's `Badge` color (Premium-only extras are out of scope, §0) |
+| **Free tier** | Every KPI card / chart panel individually wrapped in `<UpgradeOverlay locked>` (§2.4) — `GET /api/pro/overview` / `GET /api/pro/analytics` return `403 { error: "tier_insufficient" }`; the client renders the overlay from that response, never fetch-then-hide |
+| **Empty (new Pro agent, zero stats)** | `EmptyProStats` (§2.5), shown only when the API returns a genuinely empty series/zeroed KPIs for a Pro/Premium caller — distinct from the 403 locked state |
+| **Error (per-widget)** | §2.6 |
 
 ---
 
-## 7. Accessibility — concrete values
+## 5. Responsive (unchanged breakpoints, tokens only)
 
-- `ProSidebar`'s `<nav>`: `aria-label="Pro dashboard"`, active item
-  `aria-current="page"` (page spec §7, exact wording).
-- Range segmented control: each option is a plain `<button
-  aria-pressed={range === opt.value}>` (mirrors `FilterBar.tsx`'s deal-type
-  toggle `aria-pressed` usage) — no `role="radiogroup"` needed for a
-  3-option button group, consistent with the existing `FilterBar` precedent.
-- KPI trend: icon + colored `+12%`/`-3%` text together, never color alone
-  (D4) — additionally set `aria-label` on the trend `<span>` summarizing
-  direction in words, e.g. `aria-label="Up 12% versus previous period"`, so
-  a screen reader doesn't have to infer meaning from a bare "+12%".
-- Charts (Recharts): each chart panel needs a `<table class="sr-only">`
-  fallback with the same series data (date, value columns) plus
-  `aria-label="Views over time chart"` on the chart's wrapping `<div
-  role="img">` — per page spec §7. Recharts renders an SVG with no
-  inherent text alternative, so this sr-only table is not optional.
-- Locked overlay: `aria-disabled="true"` on the wrapped widget's content
-  container (not just the overlay div) + the CTA is a real, focusable
-  `<Link>` with descriptive text ("Upgrade to Pro to unlock analytics"),
-  never blur-only (page spec §7, matches D7).
-- Empty state icon: `aria-hidden="true"` (decorative), meaning carried by
-  the adjacent text.
-- Contrast: all pairs reused here (`text-green-600`/`text-red-500` on
-  white, `bg-violet-100`/`text-violet-700`, `bg-amber-100`/`text-amber-700`)
-  are already shipped elsewhere in this app and were audited there — no new
-  pairs introduced.
-- Touch targets: sidebar items `h-10` (40px) is below the 44px guidance in
-  the generic spec's §7 — bump to `h-11` for the mobile drawer variant
-  specifically (desktop `h-10` is fine, mouse-only); range-control options
-  are `h-7` (28px) inside a `p-1` wrapper, giving effectively ~36px hit
-  area — acceptable for a 3-option low-stakes control matching
-  `StatsModal.tsx`'s existing, shipped precedent, but note this if a
-  stricter 44px audit is required later.
+- **≥1024px (lg).** Sidebar `w-60` sticky; KPI grid 6-col; chart panels
+  full-width, stacked `space-y-4`.
+- **<1024px.** Sidebar → hamburger drawer (§2.1); KPI grid stays
+  `grid-cols-2` down to the smallest width tested (page spec §3.1); chart
+  panels remain full-width (`ResponsiveContainer` handles the resize, no
+  horizontal scroll needed at `h-72`/`h-56`); `TopListingsTable`'s `Card`
+  wrapper keeps `overflow-x-auto` with `min-w-[560px]` on the inner
+  `<table>` for horizontal scroll on narrow phones.
 
 ---
 
-## 8. i18n
+## 6. Accessibility (unchanged requirements, confirms nothing regresses)
 
-No prior art requires this page to be translated (contrast `docs/design/17-pricing-handoff.md`
-D1, which is the *only* prior page wiring real `next-intl` copy so far) —
-this is an authenticated, internal tool page, not indexable marketing
-content. Follow the same default every other authenticated page in this
-repo uses (`DashboardSidebar.tsx`, `StatsModal.tsx`, `FavoritesGrid.tsx` —
-all hardcoded English): **ship this page's copy as hardcoded English
-strings**, no `messages/*.json` namespace needed. Flag to reviewer if
-product wants this translated later; it's a bigger, separate lift (per D1's
-precedent).
+Every item below was already correct in the shipped implementation and
+stays correct after the token/primitive migration — restyling doesn't touch
+markup semantics:
+
+- `ProSidebar`'s `<nav aria-label="Pro dashboard">`, active item
+  `aria-current="page"`.
+- `Tabs`' native roving-tabindex + `aria-selected` (an upgrade over the old
+  hand-rolled `aria-pressed` buttons — real tab-list keyboard semantics for
+  free, §2.1).
+- KPI trend: icon + colored text + `aria-label` summarizing direction in
+  words — color token changes (`text-success`/`text-danger`/`text-muted`)
+  don't change the contrast story: `--color-success`/`--color-danger` are
+  new tokens introduced by the design-system foundation and were audited
+  there for 4.5:1 contrast on `bg-surface`; no new audit needed here.
+- Charts: `role="img"` + `aria-label` per panel + `<table class="sr-only">`
+  fallback (page spec §7) — unchanged.
+- `UpgradeOverlay`: `aria-disabled="true"` + `inert` on content, real
+  focusable `<Link>` CTA (never blur-only) — unchanged.
+- Touch targets: mobile drawer nav items `h-11` (44px); desktop `h-10`
+  (mouse-only, fine); `Tabs` options — check the rendered height against the
+  44px guidance now that `Tabs` (not the old bespoke `h-7` segmented
+  control) owns this control; if `Tabs`' own height is below 44px, that's a
+  primitive-level fix, not a page-specific override.
 
 ---
 
-## 9. SEO & meta
-
-Per page spec §8 and the task's acceptance criteria: `noindex`. Set on the
-new layout, mirroring `app/[locale]/messages/layout.tsx`'s exact
-`metadata` export:
+## 7. SEO & meta (unchanged)
 
 ```ts
+// app/[locale]/pro/dashboard/layout.tsx — already correct, no change
 export const metadata: Metadata = {
   title: 'Pro dashboard | RE Platform',
   robots: { index: false, follow: false },
@@ -429,45 +495,60 @@ export const metadata: Metadata = {
 
 ---
 
-## 10. Developer handoff checklist
+## 8. Developer handoff checklist (restyle pass — file-by-file)
 
-Design-complete; the following is implementation (out of this document's
-scope):
-
-- [ ] `app/[locale]/pro/dashboard/layout.tsx` — session check (redirect →
-      `/auth/login?next=/pro/dashboard`), read `profiles.tier` once (D2),
-      add `/pro/dashboard` to `PROTECTED_PATHS` (`lib/auth/protectedPaths.ts`)
-      **or** rely on the in-layout `redirect()` alone (pick one — check
-      whether adding to `PROTECTED_PATHS` double-redirects harmlessly or
-      conflicts; `messages/layout.tsx`'s comment implies both can coexist as
-      defense-in-depth, that's the safer default).
-- [ ] `GET /api/pro/overview`, `GET /api/pro/analytics` — zod-validate
-      `range` (`z.enum(['7d','30d','90d'])`) and `metric` where applicable;
-      session check → tier check (`403 { error: 'tier_insufficient' }` for
-      `free`) → **before** any data query runs; every DB query scoped to
-      `.eq('owner_id', user.id)` (no cross-tenant leakage — mirror
-      `app/api/dashboard/overview/route.ts`'s parallel-query shape).
-- [ ] `recharts` — add to `package.json` dependencies (not yet present);
-      use `ResponsiveContainer` inside the fixed `h-72` panel so charts
-      resize with the sidebar/drawer breakpoint changes.
-- [ ] `store/proDashboardStore.ts` — Zustand store for `range`, mirrors
-      `currencyStore.ts` (D3).
-- [ ] Tests: route-handler tests for both endpoints (unauthenticated → 401,
-      free tier → 403 `tier_insufficient`, invalid `range`/`metric` → 422,
-      Pro/Premium + valid params → 200 with the exact response shape from
-      the page spec §5 "API contracts"), plus at least one
-      component/rendering test (e.g. `KpiCard` trend icon/color/aria-label
-      per direction, or `UpgradeOverlay` rendering `aria-disabled` + the
-      `/pro` link).
-- [ ] No `console.log`, no `any`/`@ts-ignore`, no secrets in client code —
-      per root `CLAUDE.md`.
+- [ ] `components/pro/ProDashboardShell.tsx` — token classes for the aside/
+      drawer/overlay/trigger button (§2.1).
+- [ ] `components/pro/ProSidebar.tsx` — inactive-item token classes (§2.1).
+- [ ] `components/pro/ProTopbar.tsx` — swap the hand-rolled segmented
+      control for `Tabs` (§2.1); swap `TierBadge`'s render for `Badge`
+      (§2.1) or fold `TierBadge.tsx` into a two-line wrapper around `Badge`.
+- [ ] `components/pro/TierBadge.tsx` — delete the `TIER_STYLES` map, render
+      `Badge variant={tier === 'premium' ? 'accent' : 'primary'}` (§2.1).
+- [ ] `components/pro/KpiCard.tsx` — swap the outer `<div>` for `Card`,
+      trend colors → `text-success`/`text-danger`/`text-muted` (§2.2).
+- [ ] `components/pro/OverviewKpis.tsx` — swap `components/pro/FadeIn`
+      usage for `Stagger`; skeleton `<div>`s → `Skeleton`; add the
+      Conversion-rate `Tooltip` (§2.2).
+- [ ] `components/pro/AnalyticsCharts.tsx` — swap `ChartPanel`'s outer
+      `<div>` for `Card`; `CartesianGrid`'s `stroke="#E5E7EB"` →
+      `stroke="var(--color-border)"`; swap `FadeIn`/stagger loop for
+      `Stagger`; skeleton panels → `Skeleton` (§2.3).
+- [ ] `components/pro/TopListingsTable.tsx` — swap the outer `<div>` for
+      `Card`, token text/border/hover classes, add the CTR `Tooltip`
+      (§2.3).
+- [ ] `components/pro/UpgradeOverlay.tsx` — token scrim/copy classes,
+      replicate `Button` `primary`/`md` classes on the `<Link>` CTA (§2.4).
+- [ ] `components/pro/EmptyProStats.tsx` — wrap in `Card`, token icon/text
+      classes (§2.5).
+- [ ] `components/pro/FadeIn.tsx` — **delete** once `Stagger` covers both
+      Overview and Analytics entrances (§2.2).
+- [ ] `app/[locale]/pro/dashboard/page.tsx` /
+      `app/[locale]/pro/dashboard/analytics/page.tsx` — `<h1>` token class +
+      `FadeIn` wrap (§2.2, §2.3).
+- [ ] No change needed: `app/api/pro/overview/route.ts`,
+      `app/api/pro/analytics/route.ts`, `lib/pro-dashboard/*`,
+      `store/proDashboardStore.ts`, `app/[locale]/pro/dashboard/layout.tsx`
+      (auth/tier guard), existing tests in `__tests__/proOverviewRoute.test.ts`
+      / `__tests__/proDashboardComponents.test.tsx` — this is a
+      presentation-layer restyle; if any of those tests assert on the exact
+      class strings being replaced above, update the assertions to match,
+      but don't touch the logic they're testing.
+- [ ] After the restyle, this branch should be rebased onto (or merged
+      with) `main` past `8a7171e` so `components/ui/*` and
+      `components/motion/*` actually exist on this branch to import from —
+      they don't yet (§0).
 
 ---
 
-## 11. Explicitly out of scope — flag in review if present
+## 9. Explicitly out of scope — flag in review if present
 
 Per §0: Leads inbox, Promoted listings manager, Bulk CSV upload, Team
 management, Billing panel, Stripe/payment-provider integration, Supabase
 Realtime, Traffic-sources pie chart, `[Export CSV]`, any sidebar nav item or
-route for the sections above. If any of these show up in the diff, it's
-scope creep against this task.
+route for the sections above. Also out of scope for *this* document: adding
+a `buttonVariants()` export to `components/ui/Button.tsx`, adding a
+`Drawer` primitive to `components/ui/`, adding a `className` passthrough to
+`Stagger`, and backporting the `Badge`-based tier colors into
+`AgentHeader.tsx` — all flagged above as follow-ups for whoever owns the
+shared design system, not this page's task.
