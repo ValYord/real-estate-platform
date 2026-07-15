@@ -5,7 +5,7 @@ import { MOCK_AGENT_LISTINGS } from '@/lib/agent/mockData'
 import type { AgentListingsResponse } from '@/lib/agent/types'
 import type { PropertyListItem } from '@/lib/search/types'
 
-type Params = { id: string }
+type Params = { slug: string }
 
 const PAGE_SIZE = 12
 
@@ -29,7 +29,7 @@ function applyMockFilters(
 }
 
 /**
- * GET /api/agents/[id]/listings?deal=sale|rent|all&sort=new|price_asc|price_desc&page=1
+ * GET /api/agents/[slug]/listings?deal=sale|rent|all&sort=new|price_asc|price_desc&page=1
  *
  * Returns the agent's active listings, reusing the PropertyCard shape from
  * the /search page. Public — no auth required.
@@ -38,7 +38,8 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<Params> },
 ): Promise<NextResponse> {
-  const { id } = await params
+  // The route segment carries the agent's owner id (the caller passes agent.id).
+  const { slug: ownerId } = await params
   const { searchParams } = new URL(request.url)
 
   let query: ReturnType<typeof agentListingsQuerySchema.parse>
@@ -71,7 +72,7 @@ export async function GET(
            property_media(url, sort_order)`,
           { count: 'exact' },
         )
-        .eq('owner_id', id)
+        .eq('owner_id', ownerId)
         .eq('status', 'active')
 
       if (query.deal !== 'all') {

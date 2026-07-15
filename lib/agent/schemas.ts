@@ -8,7 +8,7 @@ import { z } from 'zod'
 /** Accepts a generic E.164 phone number (matches lib/property/schemas.ts). */
 const E164_PHONE = /^\+[1-9]\d{6,14}$/
 
-// ── POST /api/agents/[id]/reviews ───────────────────────────────────────────
+// ── POST /api/agents/[slug]/reviews ─────────────────────────────────────────
 
 export const agentReviewSchema = z.object({
   rating: z.number().int().min(1, 'Rating is required').max(5),
@@ -24,7 +24,7 @@ export const agentReviewsQuerySchema = z.object({
 
 export type AgentReviewsQueryInput = z.infer<typeof agentReviewsQuerySchema>
 
-// ── GET /api/agents/[id]/listings ───────────────────────────────────────────
+// ── GET /api/agents/[slug]/listings ─────────────────────────────────────────
 
 export const agentListingsQuerySchema = z.object({
   deal: z.enum(['all', 'sale', 'rent']).default('all'),
@@ -63,7 +63,7 @@ export const agentLeadSchema = z.object({
 
 export type AgentLeadInput = z.infer<typeof agentLeadSchema>
 
-// ── POST /api/agents/[id]/reviews/[reviewId]/reply ──────────────────────────
+// ── POST /api/agents/[slug]/reviews/[reviewId]/reply ────────────────────────
 
 export const agentReviewReplySchema = z.object({
   reply: z.string().min(1, 'Reply cannot be empty').max(1000),

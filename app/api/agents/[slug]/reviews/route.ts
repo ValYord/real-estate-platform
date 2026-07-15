@@ -4,7 +4,7 @@ import { agentReviewSchema, agentReviewsQuerySchema } from '@/lib/agent/schemas'
 import { MOCK_AGENT_REVIEWS, getMockReviewSummary } from '@/lib/agent/mockData'
 import type { AgentReview, AgentReviewsResponse, ReviewBreakdown } from '@/lib/agent/types'
 
-type Params = { id: string }
+type Params = { slug: string }
 
 const PAGE_SIZE = 10
 
@@ -63,7 +63,7 @@ function sortItems(items: AgentReview[], sort: 'newest' | 'highest' | 'lowest'):
 }
 
 /**
- * GET /api/agents/[id]/reviews?sort=newest|highest|lowest&page=1
+ * GET /api/agents/[slug]/reviews?sort=newest|highest|lowest&page=1
  *
  * Public — no auth required to read reviews. `viewerHasReviewed` reflects the
  * current session (null/false for guests).
@@ -72,7 +72,8 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<Params> },
 ): Promise<NextResponse> {
-  const { id } = await params
+  // The route segment carries the agent's id (the caller passes agent.id).
+  const { slug: agentId } = await params
   const { searchParams } = new URL(request.url)
 
   let query: ReturnType<typeof agentReviewsQuerySchema.parse>
@@ -99,7 +100,7 @@ export async function GET(
       const { data, error } = await admin
         .from('agent_reviews')
         .select('id, agent_id, author_id, rating, text, reply, replied_at, created_at, author:profiles!agent_reviews_author_id_fkey(id, full_name, avatar_url)')
-        .eq('agent_id', id)
+        .eq('agent_id', agentId)
         .order('created_at', { ascending: false })
 
       if (!error && data) {
@@ -157,7 +158,7 @@ export async function GET(
 }
 
 /**
- * POST /api/agents/[id]/reviews
+ * POST /api/agents/[slug]/reviews
  *
  * Body: { rating: 1-5, text: 10-1000 chars }.
  * Auth: required (401). Self-review blocked (422). One review per
@@ -167,7 +168,8 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<Params> },
 ): Promise<NextResponse> {
-  const { id } = await params
+  // The route segment carries the agent's id (the caller passes agent.id).
+  const { slug: agentId } = await params
 
   let body: unknown
   try {
@@ -208,14 +210,14 @@ export async function POST(
       return NextResponse.json({ error: 'auth_required' }, { status: 401 })
     }
 
-    if (user.id === id) {
+    if (user.id === agentId) {
       return NextResponse.json({ error: 'self_review_forbidden' }, { status: 422 })
     }
 
     const insertResult = await supabase
       .from('agent_reviews')
       .insert({
-        agent_id: id,
+        agent_id: agentId,
         author_id: user.id,
         rating: input.rating,
         text: input.text,

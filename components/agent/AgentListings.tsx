@@ -37,7 +37,7 @@ async function fetchListings(
 
 /**
  * Active listings grid — tabs [All]/[For sale]/[For rent] + sort, client-side
- * fetch via GET /api/agents/[id]/listings. Reuses <PropertyCard> from search.
+ * fetch via GET /api/agents/[slug]/listings. Reuses <PropertyCard> from search.
  * docs/en/pages/10-agent-profile.md §3.5.
  */
 export default function AgentListings({ agentId }: AgentListingsProps) {
