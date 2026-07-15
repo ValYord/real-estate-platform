@@ -16,7 +16,7 @@ const TEXT_MAX = 1000
 
 /**
  * "Write a review" modal — star rating (radiogroup) + textarea → POST
- * /api/agents/[id]/reviews. docs/en/pages/10-agent-profile.md §3.6.
+ * /api/agents/[slug]/reviews. docs/en/pages/10-agent-profile.md §3.6.
  */
 export default function WriteReviewModal({ agentId, onClose, onPublished }: WriteReviewModalProps) {
   const [rating, setRating] = useState(0)

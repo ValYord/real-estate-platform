@@ -1,5 +1,5 @@
 /**
- * Tests for POST /api/agents/[id]/reviews — review submission validation,
+ * Tests for POST /api/agents/[slug]/reviews — review submission validation,
  * duplicate-review guard (409), self-review guard (422), auth guard (401),
  * and the 201 happy path. docs/en/pages/10-agent-profile.md §5.
  */
@@ -34,8 +34,8 @@ function makeJsonRequest(body: unknown): import('next/server').NextRequest {
   return { json: () => Promise.resolve(body) } as unknown as import('next/server').NextRequest
 }
 
-function makeParams(id: string): { params: Promise<{ id: string }> } {
-  return { params: Promise.resolve({ id }) }
+function makeParams(id: string): { params: Promise<{ slug: string }> } {
+  return { params: Promise.resolve({ slug: id }) }
 }
 
 function buildServerClient(opts: {
@@ -68,9 +68,9 @@ function buildServerClient(opts: {
 
 const VALID_BODY = { rating: 5, text: 'Very professional, helped quickly.' }
 
-describe('POST /api/agents/[id]/reviews', () => {
+describe('POST /api/agents/[slug]/reviews', () => {
   it('returns 422 for an invalid body (rating out of range)', async () => {
-    const { POST } = await import('../app/api/agents/[id]/reviews/route')
+    const { POST } = await import('../app/api/agents/[slug]/reviews/route')
     const res = await POST(makeJsonRequest({ rating: 9, text: 'Too short?' }), makeParams(AGENT_ID))
     expect(res.status).toBe(422)
     const body = await res.json()
@@ -78,7 +78,7 @@ describe('POST /api/agents/[id]/reviews', () => {
   })
 
   it('returns 422 for review text under 10 characters', async () => {
-    const { POST } = await import('../app/api/agents/[id]/reviews/route')
+    const { POST } = await import('../app/api/agents/[slug]/reviews/route')
     const res = await POST(makeJsonRequest({ rating: 5, text: 'short' }), makeParams(AGENT_ID))
     expect(res.status).toBe(422)
   })
@@ -88,7 +88,7 @@ describe('POST /api/agents/[id]/reviews', () => {
     vi.mocked(createServerClient).mockResolvedValueOnce(
       buildServerClient({ userId: null }) as unknown as Awaited<ReturnType<typeof createServerClient>>,
     )
-    const { POST } = await import('../app/api/agents/[id]/reviews/route')
+    const { POST } = await import('../app/api/agents/[slug]/reviews/route')
     const res = await POST(makeJsonRequest(VALID_BODY), makeParams(AGENT_ID))
     expect(res.status).toBe(401)
     const body = await res.json()
@@ -100,7 +100,7 @@ describe('POST /api/agents/[id]/reviews', () => {
     vi.mocked(createServerClient).mockResolvedValueOnce(
       buildServerClient({ userId: AGENT_ID }) as unknown as Awaited<ReturnType<typeof createServerClient>>,
     )
-    const { POST } = await import('../app/api/agents/[id]/reviews/route')
+    const { POST } = await import('../app/api/agents/[slug]/reviews/route')
     const res = await POST(makeJsonRequest(VALID_BODY), makeParams(AGENT_ID))
     expect(res.status).toBe(422)
     const body = await res.json()
@@ -114,7 +114,7 @@ describe('POST /api/agents/[id]/reviews', () => {
         ReturnType<typeof createServerClient>
       >,
     )
-    const { POST } = await import('../app/api/agents/[id]/reviews/route')
+    const { POST } = await import('../app/api/agents/[slug]/reviews/route')
     const res = await POST(makeJsonRequest(VALID_BODY), makeParams(AGENT_ID))
     expect(res.status).toBe(409)
     const body = await res.json()
@@ -128,7 +128,7 @@ describe('POST /api/agents/[id]/reviews', () => {
         ReturnType<typeof createServerClient>
       >,
     )
-    const { POST } = await import('../app/api/agents/[id]/reviews/route')
+    const { POST } = await import('../app/api/agents/[slug]/reviews/route')
     const res = await POST(makeJsonRequest(VALID_BODY), makeParams(AGENT_ID))
     expect(res.status).toBe(422)
     const body = await res.json()
@@ -142,7 +142,7 @@ describe('POST /api/agents/[id]/reviews', () => {
         ReturnType<typeof createServerClient>
       >,
     )
-    const { POST } = await import('../app/api/agents/[id]/reviews/route')
+    const { POST } = await import('../app/api/agents/[slug]/reviews/route')
     const res = await POST(makeJsonRequest(VALID_BODY), makeParams(AGENT_ID))
     expect(res.status).toBe(201)
     const body = await res.json()

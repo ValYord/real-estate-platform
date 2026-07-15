@@ -5,7 +5,9 @@
       "Bash(npx next *)",
       "Bash(echo \"REAL_EXIT_CODE=$?\")",
       "Bash(npx tsc *)",
-      "Bash(npx vitest *)"
+      "Bash(npx vitest *)",
+      "Bash(git add *)",
+      "Bash(git commit *)"
     ]
   }
 }

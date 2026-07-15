@@ -33,3 +33,31 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      # Runtime smoke test. `next build` succeeds even when two dynamic route
+      # segments collide at the same path level (e.g. [id] vs [slug]) — the
+      # crash only surfaces at runtime, 500-ing every request. Start the built
+      # server and assert a handful of routes are non-5xx so that class of bug
+      # fails CI instead of shipping. See __tests__/routeSegmentCollision.test.ts.
+      - name: Smoke test (next start)
+        run: |
+          npx next start -p 3210 &
+          SERVER_PID=$!
+          trap "kill $SERVER_PID 2>/dev/null || true" EXIT
+
+          # Wait for the server to accept connections (up to ~30s).
+          for i in $(seq 1 30); do
+            if curl -sf -o /dev/null "http://localhost:3210/en"; then break; fi
+            sleep 1
+          done
+
+          FAILED=0
+          for path in /en /en/about /en/faq /en/terms /hy /ru /api/agents/anna-hakobyan/listings; do
+            CODE=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:3210${path}")
+            echo "${CODE}  ${path}"
+            if [ "$CODE" -ge 500 ]; then FAILED=1; fi
+          done
+          if [ "$FAILED" -ne 0 ]; then
+            echo "::error::One or more routes returned a 5xx from next start"
+            exit 1
+          fi
