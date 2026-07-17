@@ -53,6 +53,14 @@ export type ContactSubject = 'general' | 'support' | 'partnership' | 'complaint'
 export type ContactMessageStatus = 'new' | 'read' | 'archived'
 /** Page 14 — Mortgage Rates Hub MVP. Added in 0013_mortgage_rates.sql. */
 export type MortgageLoanType = 'primary' | 'secondary' | 'new_construction' | 'refinance' | 'government'
+/** Page 19 — Landlord Tools MVP. Added in 0014_landlord_rentals.sql. */
+export type RentalUnitType = 'apartment' | 'house' | 'studio' | 'commercial' | 'other'
+export type RentalUnitStatus = 'occupied' | 'vacant' | 'listed'
+export type RentalPaymentStatus = 'paid' | 'pending' | 'overdue'
+/** Page 19 — Landlord Tools: Screening + Lease. Added in 0015_landlord_screening_lease.sql. */
+export type TenantApplicationStatus = 'new' | 'reviewing' | 'approved' | 'rejected'
+export type LeaseDealType = 'long_term' | 'short_term'
+export type LeaseStatus = 'draft' | 'sent' | 'signed'
 
 // ---------------------------------------------------------------------------
 // Database shape (mirrors the Supabase generated-types structure so
@@ -1186,6 +1194,250 @@ export interface Database {
             foreignKeyName: 'preapproval_leads_user_id_fkey'
             columns: ['user_id']
             referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+
+      // ── rental_units ─────────────────────────────────────────────────────
+      // Page 19 — Landlord Tools MVP (Manage Rentals). Owner-scoped (RLS
+      // owner_id = auth.uid()). Tenant/Payments fields are MVP-denormalized
+      // onto this row rather than backed by separate `leases`/`rent_payments`
+      // tables — see 0014_landlord_rentals.sql header note. Added in
+      // 0014_landlord_rentals.sql.
+      rental_units: {
+        Row: {
+          id: string
+          owner_id: string
+          address: string
+          type: RentalUnitType
+          area_m2: number | null
+          rent: number
+          currency: Currency
+          status: RentalUnitStatus
+          photo_url: string | null
+          tenant_name: string | null
+          tenant_contact: string | null
+          lease_end: string | null
+          payment_status: RentalPaymentStatus | null
+          next_payment_due: string | null
+          /** Bearer token for the public `/apply/[token]` link. Added in 0015_landlord_screening_lease.sql. */
+          apply_token: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          owner_id: string
+          address: string
+          type: RentalUnitType
+          area_m2?: number | null
+          rent: number
+          currency: Currency
+          status?: RentalUnitStatus
+          photo_url?: string | null
+          tenant_name?: string | null
+          tenant_contact?: string | null
+          lease_end?: string | null
+          payment_status?: RentalPaymentStatus | null
+          next_payment_due?: string | null
+          apply_token?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          owner_id?: string
+          address?: string
+          type?: RentalUnitType
+          area_m2?: number | null
+          rent?: number
+          currency?: Currency
+          status?: RentalUnitStatus
+          photo_url?: string | null
+          tenant_name?: string | null
+          tenant_contact?: string | null
+          lease_end?: string | null
+          payment_status?: RentalPaymentStatus | null
+          next_payment_due?: string | null
+          apply_token?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'rental_units_owner_id_fkey'
+            columns: ['owner_id']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+
+      // ── tenant_applications ─────────────────────────────────────────────
+      // Page 19 — Landlord Tools: Screening. Owner-scoped through the owning
+      // `rental_units` row (RLS subquery, no direct owner_id column — see
+      // 0015_landlord_screening_lease.sql). Added in 0015_landlord_screening_lease.sql.
+      tenant_applications: {
+        Row: {
+          id: string
+          unit_id: string
+          applicant_name: string
+          contact: string
+          employment: string | null
+          income: number | null
+          residence: string | null
+          references_info: string | null
+          declaration: string | null
+          consent: boolean
+          status: TenantApplicationStatus
+          notes: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          unit_id: string
+          applicant_name: string
+          contact: string
+          employment?: string | null
+          income?: number | null
+          residence?: string | null
+          references_info?: string | null
+          declaration?: string | null
+          consent: boolean
+          status?: TenantApplicationStatus
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          unit_id?: string
+          applicant_name?: string
+          contact?: string
+          employment?: string | null
+          income?: number | null
+          residence?: string | null
+          references_info?: string | null
+          declaration?: string | null
+          consent?: boolean
+          status?: TenantApplicationStatus
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'tenant_applications_unit_id_fkey'
+            columns: ['unit_id']
+            referencedRelation: 'rental_units'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+
+      // ── lease_templates ──────────────────────────────────────────────────
+      // Page 19 — Landlord Tools: Lease generation. Public read-only
+      // reference data, service-role-write only (mirrors partner_banks /
+      // mortgage_rates — 0013_mortgage_rates.sql). Added in
+      // 0015_landlord_screening_lease.sql.
+      lease_templates: {
+        Row: {
+          id: string
+          country: string
+          lang: Locale
+          deal_type: LeaseDealType
+          name: string
+          body: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          country: string
+          lang: Locale
+          deal_type: LeaseDealType
+          name: string
+          body: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          country?: string
+          lang?: Locale
+          deal_type?: LeaseDealType
+          name?: string
+          body?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+
+      // ── leases ───────────────────────────────────────────────────────────
+      // Page 19 — Landlord Tools: Lease generation. Owner-scoped (RLS
+      // owner_id = auth.uid()), same shape as rental_units. Added in
+      // 0015_landlord_screening_lease.sql.
+      leases: {
+        Row: {
+          id: string
+          owner_id: string
+          unit_id: string
+          template_id: string | null
+          application_id: string | null
+          /** Narrowed to LeaseFieldsInput (lib/landlord/schemas.ts) at the read boundary. */
+          fields: Json
+          pdf_url: string | null
+          status: LeaseStatus
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          owner_id: string
+          unit_id: string
+          template_id?: string | null
+          application_id?: string | null
+          fields: Json
+          pdf_url?: string | null
+          status?: LeaseStatus
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          owner_id?: string
+          unit_id?: string
+          template_id?: string | null
+          application_id?: string | null
+          fields?: Json
+          pdf_url?: string | null
+          status?: LeaseStatus
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'leases_owner_id_fkey'
+            columns: ['owner_id']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'leases_unit_id_fkey'
+            columns: ['unit_id']
+            referencedRelation: 'rental_units'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'leases_template_id_fkey'
+            columns: ['template_id']
+            referencedRelation: 'lease_templates'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'leases_application_id_fkey'
+            columns: ['application_id']
+            referencedRelation: 'tenant_applications'
             referencedColumns: ['id']
           },
         ]

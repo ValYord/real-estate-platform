@@ -115,6 +115,46 @@ describe('isProtectedPath()', () => {
       expect(isProtectedPath('/hy/admin')).toBe(false)
       expect(isProtectedPath('/en/admin/moderation')).toBe(false)
     })
+
+    // /landlord (Page 19 hub) is an SSR, indexable marketing landing page —
+    // only its login-gated sub-tools (starting with /landlord/rentals) are
+    // protected (docs/en/pages/19-landlord.md §0).
+    it('allows /[locale]/landlord (hub is public marketing)', () => {
+      expect(isProtectedPath('/hy/landlord')).toBe(false)
+      expect(isProtectedPath('/en/landlord')).toBe(false)
+    })
+  })
+
+  describe('landlord sub-tool routes require authentication', () => {
+    it('protects /[locale]/landlord/rentals', () => {
+      expect(isProtectedPath('/hy/landlord/rentals')).toBe(true)
+    })
+
+    it('protects /[locale]/landlord/rentals sub-paths (unit detail)', () => {
+      expect(isProtectedPath('/en/landlord/rentals/abc-123')).toBe(true)
+    })
+
+    // Page 19 — Screening + Lease Generation MVP (docs/en/pages/
+    // 19-landlord.md §3.3/§3.4): both new sub-tool dashboards are
+    // login-gated, same as /landlord/rentals.
+    it('protects /[locale]/landlord/screening', () => {
+      expect(isProtectedPath('/hy/landlord/screening')).toBe(true)
+      expect(isProtectedPath('/en/landlord/screening')).toBe(true)
+    })
+
+    it('protects /[locale]/landlord/lease', () => {
+      expect(isProtectedPath('/hy/landlord/lease')).toBe(true)
+      expect(isProtectedPath('/en/landlord/lease')).toBe(true)
+    })
+
+    // /apply/[token] is the public, unauthenticated tenant-facing
+    // application form the screening tool generates a link to — it must
+    // stay reachable without a session even though every other landlord
+    // route above is login-gated (docs/en/pages/19-landlord.md §3.3).
+    it('does not protect /[locale]/apply/[token] (public tenant application form)', () => {
+      expect(isProtectedPath('/en/apply/abc123')).toBe(false)
+      expect(isProtectedPath('/hy/apply/abc123')).toBe(false)
+    })
   })
 })
 

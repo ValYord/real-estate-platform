@@ -154,7 +154,7 @@ export default function Header() {
           scrolled ? 'bg-white shadow-sm' : 'bg-transparent',
         )}
       >
-        <div className="max-w-7xl mx-auto px-4 h-full flex items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-4 h-full flex items-center justify-between gap-3">
 
           {/* Left: Logo */}
           <Link
@@ -172,13 +172,13 @@ export default function Header() {
             {NAV_ITEMS.map((item) => (
               <div
                 key={item.key}
-                className="relative"
+                className="relative flex-shrink-0"
                 onMouseEnter={() => openDropdown(item.key)}
                 onMouseLeave={closeDropdown}
               >
                 <button
                   className={cn(
-                    'flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150',
+                    'flex items-center gap-1 whitespace-nowrap px-2 py-2 text-sm font-medium rounded-md transition-colors duration-150',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
                     scrolled
                       ? 'text-gray-700 hover:text-primary hover:bg-gray-100'
@@ -258,43 +258,48 @@ export default function Header() {
               className={cn('w-px h-5 mx-1', scrolled ? 'bg-gray-200' : 'bg-white/20')}
             />
 
-            {/* Language switcher */}
-            <div
-              role="group"
-              aria-label={tHeader('language')}
-              className={cn(
-                'flex items-center rounded-lg overflow-hidden border text-xs font-medium',
-                scrolled ? 'border-gray-200' : 'border-white/30',
-              )}
-            >
-              {LOCALES.map((loc) => (
-                <button
-                  key={loc}
-                  onClick={() => handleLocaleSwitch(loc)}
-                  aria-pressed={locale === loc}
-                  aria-label={`Switch language to ${loc.toUpperCase()}`}
-                  className={cn(
-                    'px-2 py-1.5 transition-colors duration-100',
-                    'focus-visible:outline-none focus-visible:ring-inset focus-visible:ring-2 focus-visible:ring-primary',
-                    locale === loc
-                      ? 'bg-primary text-white'
-                      : scrolled
-                        ? 'text-gray-600 hover:bg-gray-100'
-                        : 'text-white/80 hover:bg-white/10',
-                  )}
-                >
-                  {loc.toUpperCase()}
-                </button>
-              ))}
-            </div>
+            {/* Language + currency switchers — grouped with breathing room on
+                either side so they don't read as a single cramped cluster
+                against the notifications separator and the CTA button. */}
+            <div className="flex items-center gap-2.5 ml-1">
+              {/* Language switcher */}
+              <div
+                role="group"
+                aria-label={tHeader('language')}
+                className={cn(
+                  'flex items-center rounded-lg overflow-hidden border text-xs font-medium',
+                  scrolled ? 'border-gray-200' : 'border-white/30',
+                )}
+              >
+                {LOCALES.map((loc) => (
+                  <button
+                    key={loc}
+                    onClick={() => handleLocaleSwitch(loc)}
+                    aria-pressed={locale === loc}
+                    aria-label={`Switch language to ${loc.toUpperCase()}`}
+                    className={cn(
+                      'px-1.5 py-1.5 transition-colors duration-100',
+                      'focus-visible:outline-none focus-visible:ring-inset focus-visible:ring-2 focus-visible:ring-primary',
+                      locale === loc
+                        ? 'bg-primary text-white'
+                        : scrolled
+                          ? 'text-gray-600 hover:bg-gray-100'
+                          : 'text-white/80 hover:bg-white/10',
+                    )}
+                  >
+                    {loc.toUpperCase()}
+                  </button>
+                ))}
+              </div>
 
-            {/* Currency switcher */}
-            <CurrencySwitcher variant="header" scrolled={scrolled} />
+              {/* Currency switcher */}
+              <CurrencySwitcher variant="header" scrolled={scrolled} />
+            </div>
 
             {/* Post a property */}
             <Link
               href="/sell/new"
-              className="ml-1 px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+              className="ml-2 px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             >
               {tHeader('postProperty')}
             </Link>
