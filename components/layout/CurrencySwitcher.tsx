@@ -37,8 +37,8 @@ export default function CurrencySwitcher({
               'px-3 py-1.5 text-sm rounded-lg border font-medium transition-colors',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
               currency === cur
-                ? 'bg-primary text-white border-primary'
-                : 'text-gray-600 border-gray-200 hover:bg-gray-50',
+                ? 'bg-primary text-primary-fg border-primary'
+                : 'text-muted border-border hover:bg-neutral-50',
             )}
           >
             {cur}
@@ -54,7 +54,7 @@ export default function CurrencySwitcher({
       aria-label="Currency"
       className={cn(
         'flex items-center rounded-lg overflow-hidden border text-xs font-medium',
-        scrolled ? 'border-gray-200' : 'border-white/30',
+        scrolled ? 'border-border' : 'border-white/30',
       )}
     >
       {CURRENCIES.map((cur) => (
@@ -67,9 +67,9 @@ export default function CurrencySwitcher({
             'px-2 py-1.5 transition-colors duration-100',
             'focus-visible:outline-none focus-visible:ring-inset focus-visible:ring-2 focus-visible:ring-primary',
             currency === cur
-              ? 'bg-primary text-white'
+              ? 'bg-primary text-primary-fg'
               : scrolled
-                ? 'text-gray-600 hover:bg-gray-100'
+                ? 'text-muted hover:bg-neutral-100'
                 : 'text-white/80 hover:bg-white/10',
           )}
         >
