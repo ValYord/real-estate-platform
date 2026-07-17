@@ -64,7 +64,7 @@ export default function CurrencySwitcher({
           aria-pressed={currency === cur}
           aria-label={`Switch currency to ${cur}`}
           className={cn(
-            'px-2 py-1.5 transition-colors duration-100',
+            'px-1.5 py-1.5 transition-colors duration-100',
             'focus-visible:outline-none focus-visible:ring-inset focus-visible:ring-2 focus-visible:ring-primary',
             currency === cur
               ? 'bg-primary text-white'
