@@ -11,6 +11,13 @@ const PROTECTED_PATHS = [
   '/listing',
   '/settings',
   '/notifications',
+  // /landlord (the hub) is a public marketing landing page — only its
+  // login-gated sub-tools are protected (docs/en/pages/19-landlord.md §0).
+  // /apply/[token] (the public tenant application form) is intentionally
+  // NOT listed here — it must stay reachable by unauthenticated applicants.
+  '/landlord/rentals',
+  '/landlord/screening',
+  '/landlord/lease',
 ] as const
 
 /**

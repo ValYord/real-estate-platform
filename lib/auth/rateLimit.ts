@@ -76,4 +76,10 @@ export const LIMITS = {
   HOME_VALUE_ESTIMATE: { max: 20, windowMs: 60 * 60 * 1000 },
   /** 5 "Get pre-approved" submissions per hour per user (docs/design/14-mortgage-rates-handoff.md §2). */
   MORTGAGE_PREAPPROVAL: { max: 5, windowMs: 60 * 60 * 1000 },
+  /**
+   * 10 tenant-application submissions per hour per IP (docs/en/pages/
+   * 19-landlord.md §3.3) — the public `/apply/[token]` form has no session,
+   * same IP-keyed reasoning as HOME_VALUE_ESTIMATE above.
+   */
+  TENANT_APPLICATION: { max: 10, windowMs: 60 * 60 * 1000 },
 } as const
