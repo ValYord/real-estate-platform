@@ -17,7 +17,30 @@ interface AccordionProps {
   openIds: readonly string[]
   onToggle: (id: string) => void
   className?: string
+  /**
+   * Visual theme — 'light' (default) for white/`bg-surface` contexts, 'dark'
+   * for dark surfaces (e.g. the footer's `bg-neutral-900` background) where
+   * the light variant's near-black trigger text would be unreadable.
+   */
+  variant?: 'light' | 'dark'
 }
+
+const VARIANT_STYLES = {
+  light: {
+    divider: 'divide-border',
+    trigger: 'text-text hover:text-primary',
+    iconOpen: 'text-primary',
+    iconClosed: 'text-muted',
+    content: 'text-muted',
+  },
+  dark: {
+    divider: 'divide-white/10',
+    trigger: 'text-white hover:text-accent',
+    iconOpen: 'text-accent',
+    iconClosed: 'text-white/50',
+    content: 'text-white/70',
+  },
+} as const
 
 /**
  * Accessible, hand-rolled accordion (no external dependency — the project
@@ -28,8 +51,18 @@ interface AccordionProps {
  * - `aria-expanded` / `aria-controls` / `aria-labelledby` wire trigger ↔ panel.
  * - ↑/↓ move focus between triggers; Home/End jump to first/last.
  * - Enter/Space toggle — native `<button>` behavior, no extra handling needed.
+ * - Chevron icons come from `lucide-react`, which always renders explicit
+ *   `width`/`height` SVG attributes (not just CSS classes) — so they stay a
+ *   safe, bounded size even for a brief moment before stylesheets apply.
  */
-export default function Accordion({ items, openIds, onToggle, className }: AccordionProps) {
+export default function Accordion({
+  items,
+  openIds,
+  onToggle,
+  className,
+  variant = 'light',
+}: AccordionProps) {
+  const styles = VARIANT_STYLES[variant]
   const triggerRefs = useRef<Map<string, HTMLButtonElement>>(new Map())
 
   const focusTrigger = (index: number) => {
@@ -62,7 +95,7 @@ export default function Accordion({ items, openIds, onToggle, className }: Accor
   }
 
   return (
-    <div className={cn('divide-y divide-gray-200', className)}>
+    <div className={cn('divide-y', styles.divider, className)}>
       {items.map((item, index) => {
         const isOpen = openIds.includes(item.id)
         const triggerId = `accordion-trigger-${item.id}`
@@ -82,13 +115,22 @@ export default function Accordion({ items, openIds, onToggle, className }: Accor
                 aria-controls={panelId}
                 onClick={() => onToggle(item.id)}
                 onKeyDown={(event) => handleKeyDown(event, index)}
-                className="w-full flex items-center justify-between gap-4 py-4 font-medium text-left text-gray-900 hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
+                className={cn(
+                  'w-full flex items-center justify-between gap-4 py-4 font-medium text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded',
+                  styles.trigger,
+                )}
               >
                 <span>{item.trigger}</span>
                 {isOpen ? (
-                  <Minus className="w-4 h-4 flex-shrink-0 text-primary" aria-hidden="true" />
+                  <Minus
+                    className={cn('w-4 h-4 flex-shrink-0', styles.iconOpen)}
+                    aria-hidden="true"
+                  />
                 ) : (
-                  <Plus className="w-4 h-4 flex-shrink-0 text-gray-400" aria-hidden="true" />
+                  <Plus
+                    className={cn('w-4 h-4 flex-shrink-0', styles.iconClosed)}
+                    aria-hidden="true"
+                  />
                 )}
               </button>
             </h3>
@@ -97,7 +139,7 @@ export default function Accordion({ items, openIds, onToggle, className }: Accor
               role="region"
               aria-labelledby={triggerId}
               hidden={!isOpen}
-              className="pb-4 text-gray-600 leading-relaxed"
+              className={cn('pb-4 leading-relaxed', styles.content)}
             >
               {item.content}
             </div>

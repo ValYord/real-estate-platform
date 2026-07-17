@@ -208,7 +208,9 @@ wrapper.
 - **`SlideIn`** (`SlideIn.tsx`) — props: `direction?: 'up' | 'down' | 'left' | 'right'` (default
   `up`), `delay?: number`. Slides + fades in from the given direction, once, on scroll.
 - **`Stagger`** (`Stagger.tsx`) — props: `gap?: number` (default `0.08`, seconds between
-  children). Wraps each direct child in its own fade/lift animation, staggered by `gap`.
+  children), `className?: string` (layout classes for the outer container, e.g. `flex flex-wrap
+  gap-3` — needed since each direct child is wrapped in its own per-item `motion.div`). Wraps each
+  direct child in its own fade/lift animation, staggered by `gap`.
 - **`Reveal`** (`Reveal.tsx`) — no props beyond `children`. Ties opacity/position directly to
   scroll progress as the element crosses the viewport (`useScroll` + `useTransform`), rather than
   firing once.

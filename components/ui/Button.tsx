@@ -20,6 +20,14 @@ const button = cva(
   },
 )
 
+/**
+ * The underlying `cva` class builder, exported so call sites that need
+ * Button's visual language on a non-`<button>` element (e.g. a Next.js
+ * `<Link>` styled as a primary CTA) can reuse it via `cn(buttonVariants({...}), className)`
+ * instead of hand-rolling the same classes again.
+ */
+export const buttonVariants = button
+
 export interface ButtonProps
   extends ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof button> {
