@@ -7,7 +7,13 @@
       "Bash(npx tsc *)",
       "Bash(npx vitest *)",
       "Bash(git add *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(sqlite3 -header -column ~/agency-state/agency.db \"SELECT id,agent,action,substr\\(result,1,90\\) result FROM events WHERE task_id=35 ORDER BY id\")",
+      "Bash(sqlite3 ~/agency-state/agency.db \"SELECT title FROM tasks WHERE id=36\")",
+      "Bash(sqlite3 ~/agency-state/agency.db \"SELECT substr\\(description,1,160\\) FROM tasks WHERE id=36\")",
+      "Bash(cd ~/agency && sed -n '1,75p' src/agency/cli.py | grep -n \"add_parser\\\\|add_argument\\\\|deliver\\\\|target\\\\|budget\\\\|max.step\\\\|set_defaults\\\\|def \" )",
+      "Bash(gh pr *)",
+      "Bash(sqlite3 -header -column ~/agency-state/agency.db \"SELECT task_id,agent,action,created_at FROM events ORDER BY id DESC LIMIT 8\")"
     ]
   }
 }

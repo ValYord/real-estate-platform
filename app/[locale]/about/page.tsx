@@ -7,6 +7,12 @@ import Breadcrumbs from '@/components/property/Breadcrumbs'
 import JsonLd from '@/components/static/JsonLd'
 import { buildStaticMetadata } from '@/lib/seo/metadata'
 import { breadcrumbListJsonLd, organizationJsonLd } from '@/lib/seo/jsonLd'
+import Card, { CardBody } from '@/components/ui/Card'
+import { buttonVariants } from '@/components/ui/Button'
+import FadeIn from '@/components/motion/FadeIn'
+import SlideIn from '@/components/motion/SlideIn'
+import Stagger from '@/components/motion/Stagger'
+import Reveal from '@/components/motion/Reveal'
 
 type PageParams = { locale: string }
 
@@ -41,83 +47,96 @@ export default async function AboutPage({ params }: { params: Promise<PageParams
   const breadcrumbItems = [{ label: tCommon('home'), href: '/' }, { label: t('breadcrumb') }]
 
   return (
-    <main className="max-w-5xl mx-auto px-4 py-6 sm:py-8">
+    <main className="max-w-[760px] mx-auto px-4 py-8 sm:py-12">
       <JsonLd data={organizationJsonLd(locale)} />
       <JsonLd data={breadcrumbListJsonLd(breadcrumbItems, locale)} />
       <Breadcrumbs items={breadcrumbItems} />
 
       {/* Hero */}
-      <header className="mt-4 max-w-[760px]">
-        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">{t('heroTitle')}</h1>
-        <p className="mt-3 text-lg text-gray-600">{t('heroTagline')}</p>
-      </header>
+      <FadeIn>
+        <header className="mt-6">
+          <h1 className="text-2xl lg:text-3xl font-bold text-text">{t('heroTitle')}</h1>
+          <p className="mt-3 text-lg text-muted">{t('heroTagline')}</p>
+        </header>
+      </FadeIn>
 
       {/* Our story */}
-      <section className="mt-10 max-w-[760px] border-t border-gray-200 pt-6 space-y-4">
-        <h2 className="text-xl font-semibold text-gray-900">{t('storyHeading')}</h2>
-        {storyParagraphs.map((paragraph, index) => (
-          <p key={index} className="text-gray-700 leading-relaxed">
-            {paragraph}
-          </p>
-        ))}
-      </section>
+      <SlideIn>
+        <section className="mt-12 border-t border-border pt-8 space-y-4">
+          <h2 className="text-xl font-semibold text-text">{t('storyHeading')}</h2>
+          {storyParagraphs.map((paragraph, index) => (
+            <p key={index} className="text-text leading-relaxed">
+              {paragraph}
+            </p>
+          ))}
+        </section>
+      </SlideIn>
 
       {/* Mission & values */}
-      <section className="mt-10 border-t border-gray-200 pt-6">
-        <h2 className="text-xl font-semibold text-gray-900">{t('missionHeading')}</h2>
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+      <section className="mt-12 border-t border-border pt-8">
+        <h2 className="text-xl font-semibold text-text">{t('missionHeading')}</h2>
+        <Stagger
+          className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6"
+          margin="0px 0px 2000px 0px"
+        >
           {values.map((value, index) => {
             const Icon = VALUE_ICONS[index % VALUE_ICONS.length]
             return (
-              <div key={value.title} className="flex gap-3 items-start">
-                <Icon className="w-10 h-10 text-primary flex-shrink-0" aria-hidden="true" />
-                <div>
-                  <h3 className="font-semibold text-gray-900">{value.title}</h3>
-                  <p className="text-sm text-gray-600 mt-1">{value.body}</p>
-                </div>
-              </div>
+              <Card key={value.title}>
+                <CardBody className="flex gap-3 items-start">
+                  <Icon className="w-10 h-10 text-primary flex-shrink-0" aria-hidden="true" />
+                  <div>
+                    <h3 className="font-semibold text-text">{value.title}</h3>
+                    <p className="text-sm text-muted mt-1">{value.body}</p>
+                  </div>
+                </CardBody>
+              </Card>
             )
           })}
-        </div>
+        </Stagger>
       </section>
 
       {/* Statistics */}
-      <section className="mt-10 border-t border-gray-200 pt-6">
-        <h2 className="text-xl font-semibold text-gray-900">{t('statsHeading')}</h2>
-        <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-6 text-center sm:text-left">
+      <section className="mt-12 border-t border-border pt-8">
+        <h2 className="text-xl font-semibold text-text">{t('statsHeading')}</h2>
+        <Stagger
+          className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-6"
+          margin="0px 0px 2000px 0px"
+        >
           {stats.map((stat) => (
-            <div key={stat.label}>
-              <p className="text-3xl font-bold text-primary">{stat.value}</p>
-              <p className="text-sm text-gray-500 mt-1">{stat.label}</p>
-            </div>
+            <Card key={stat.label}>
+              <CardBody className="text-center sm:text-left">
+                <p className="text-3xl font-bold text-primary">{stat.value}</p>
+                <p className="text-sm text-muted mt-1">{stat.label}</p>
+              </CardBody>
+            </Card>
           ))}
-        </div>
+        </Stagger>
       </section>
 
       {/* CTA */}
-      <section className="mt-10 border-t border-gray-200 pt-6 pb-4">
-        <h2 className="text-xl font-semibold text-gray-900">{t('ctaHeading')}</h2>
-        <div className="mt-4 flex flex-wrap gap-3">
-          <Link
-            href="/sell/new"
-            className="h-12 px-6 rounded-lg bg-primary text-white font-medium flex items-center hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-          >
-            {t('ctaListLabel')}
-          </Link>
-          <Link
-            href="/search"
-            className="h-12 px-6 rounded-lg border border-gray-300 text-gray-700 font-medium flex items-center hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-          >
-            {t('ctaSearchLabel')}
-          </Link>
-          <Link
-            href="/contact"
-            className="h-12 px-6 rounded-lg border border-gray-300 text-gray-700 font-medium flex items-center hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-          >
-            {t('ctaContactLabel')}
-          </Link>
-        </div>
-      </section>
+      <Reveal>
+        <section className="mt-12 border-t border-border pt-8 pb-4">
+          <h2 className="text-xl font-semibold text-text">{t('ctaHeading')}</h2>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Link href="/sell/new" className={buttonVariants({ size: 'lg' })}>
+              {t('ctaListLabel')}
+            </Link>
+            <Link
+              href="/search"
+              className={buttonVariants({ variant: 'secondary', size: 'lg' })}
+            >
+              {t('ctaSearchLabel')}
+            </Link>
+            <Link
+              href="/contact"
+              className={buttonVariants({ variant: 'secondary', size: 'lg' })}
+            >
+              {t('ctaContactLabel')}
+            </Link>
+          </div>
+        </section>
+      </Reveal>
     </main>
   )
 }
