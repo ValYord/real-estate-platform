@@ -25,8 +25,29 @@ export function useUnreadNotifications() {
   const [userId, setUserId] = useState<string | null | undefined>(undefined)
 
   useEffect(() => {
-    const supabase = createClient()
-    supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null))
+    // Guarded: this hook is mounted once in the global `<Header>`, so a
+    // thrown/rejected auth call here (e.g. an unreachable Supabase project,
+    // or a misconfigured env in a given deployment) must never bubble up as
+    // an uncaught error — that would take down every page's header via
+    // React's nearest error boundary instead of just leaving the guest
+    // treated as signed-out.
+    let supabase: ReturnType<typeof createClient>
+    try {
+      supabase = createClient()
+    } catch (err) {
+      console.error('Failed to create Supabase client', err)
+      setUserId(null)
+      return
+    }
+
+    supabase.auth
+      .getUser()
+      .then(({ data }) => setUserId(data.user?.id ?? null))
+      .catch((err) => {
+        console.error('Failed to load the current user', err)
+        setUserId(null)
+      })
+
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -46,7 +67,13 @@ export function useUnreadNotifications() {
   // "Badge is realtime" / §4 "New realtime → Badge +1").
   useEffect(() => {
     if (!userId) return
-    const supabase = createClient()
+    let supabase: ReturnType<typeof createClient>
+    try {
+      supabase = createClient()
+    } catch (err) {
+      console.error('Failed to create Supabase client for the realtime subscription', err)
+      return
+    }
 
     const channel = supabase
       .channel(`notifications:${userId}`)

@@ -9,6 +9,10 @@ import { buildStaticMetadata } from '@/lib/seo/metadata'
 import { breadcrumbListJsonLd } from '@/lib/seo/jsonLd'
 import HelpPageClient from '@/components/help/HelpPageClient'
 import type { SearchableArticle } from '@/lib/faq/filter'
+import Card from '@/components/ui/Card'
+import { buttonVariants } from '@/components/ui/Button'
+import FadeIn from '@/components/motion/FadeIn'
+import SlideIn from '@/components/motion/SlideIn'
 
 type PageParams = { locale: string }
 
@@ -53,52 +57,55 @@ export default async function HelpPage({ params }: { params: Promise<PageParams>
       <JsonLd data={breadcrumbListJsonLd(breadcrumbItems, locale)} />
       <Breadcrumbs items={breadcrumbItems} />
 
-      <header className="mt-4">
-        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">{t('title')}</h1>
-        <p className="mt-2 text-gray-600">{t('subtitle')}</p>
-      </header>
+      <FadeIn>
+        <header className="mt-4">
+          <h1 className="text-2xl lg:text-3xl font-semibold text-text">{t('title')}</h1>
+          <p className="mt-2 text-muted">{t('subtitle')}</p>
+        </header>
+      </FadeIn>
 
       <HelpPageClient popularArticles={popularArticles} />
 
       {/* Categories */}
-      <section className="mt-10 border-t border-gray-200 pt-6">
-        <h2 className="text-xl font-semibold text-gray-900">{t('categoriesHeading')}</h2>
+      <section className="mt-10 border-t border-border pt-6">
+        <FadeIn>
+          <h2 className="text-xl font-semibold text-text">{t('categoriesHeading')}</h2>
+        </FadeIn>
         <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {categories.map((category, index) => {
             const Icon = CATEGORY_ICONS[index % CATEGORY_ICONS.length]
             return (
-              <Link
-                key={category.id}
-                href={category.href}
-                className="block p-5 rounded-xl border border-gray-200 hover:border-primary hover:shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-              >
-                <Icon className="w-8 h-8 text-primary" aria-hidden="true" />
-                <h3 className="mt-3 font-semibold text-gray-900">{category.title}</h3>
-                <p className="text-sm text-gray-500 mt-1">{category.description}</p>
-              </Link>
+              <SlideIn key={category.id} direction="up" delay={index * 0.05}>
+                <Link
+                  href={category.href}
+                  className="block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                >
+                  <Card variant="interactive" className="h-full p-5">
+                    <Icon className="w-8 h-8 text-primary" aria-hidden="true" />
+                    <h3 className="mt-3 font-semibold text-text">{category.title}</h3>
+                    <p className="text-sm text-muted mt-1">{category.description}</p>
+                  </Card>
+                </Link>
+              </SlideIn>
             )
           })}
         </div>
       </section>
 
       {/* CTA */}
-      <section className="mt-10 border-t border-gray-200 pt-6 pb-4 text-center">
-        <p className="font-medium text-gray-900">{t('stillNeedHelp')}</p>
-        <div className="mt-3 flex justify-center gap-3">
-          <Link
-            href="/contact"
-            className="h-11 px-4 rounded-lg bg-primary text-white font-medium flex items-center hover:bg-primary/90 transition-colors"
-          >
-            {t('ctaContact')}
-          </Link>
-          <Link
-            href="/faq"
-            className="h-11 px-4 rounded-lg border border-gray-300 text-gray-700 font-medium flex items-center hover:bg-gray-50 transition-colors"
-          >
-            {t('ctaFaq')}
-          </Link>
-        </div>
-      </section>
+      <FadeIn>
+        <section className="mt-10 border-t border-border pt-6 pb-4 text-center">
+          <p className="font-medium text-text">{t('stillNeedHelp')}</p>
+          <div className="mt-3 flex justify-center gap-3">
+            <Link href="/contact" className={buttonVariants({ size: 'md' })}>
+              {t('ctaContact')}
+            </Link>
+            <Link href="/faq" className={buttonVariants({ variant: 'secondary', size: 'md' })}>
+              {t('ctaFaq')}
+            </Link>
+          </div>
+        </section>
+      </FadeIn>
     </main>
   )
 }

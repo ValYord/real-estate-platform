@@ -6,6 +6,7 @@ import type { ReactNode } from 'react'
 import Header from './Header'
 import Footer from './Footer'
 import SignOutToast from './SignOutToast'
+import { LOCALES } from '@/lib/locale'
 
 /**
  * Renders the mega-menu Header + Footer for every page EXCEPT auth pages.
@@ -33,6 +34,12 @@ export default function ConditionalChrome({ children }: { children: ReactNode })
   // AdminLayout's server-side 403 branch must be the entire response body for
   // a non-admin (no public chrome wrapped around it either).
   const isAdminPage = /\/admin(\/|$)/.test(pathname)
+  // Home (`/en`, `/hy`, `/ru`) is the only page with a full-bleed hero image
+  // behind the header (docs/en/pages/01-home.md §3.1) — every other route
+  // renders the header on a plain light page background, so it must start
+  // solid/opaque there instead of transparent-until-scroll (which otherwise
+  // leaves the white logo/nav text invisible on a white page).
+  const isHomePage = new RegExp(`^/(${LOCALES.join('|')})/?$`).test(pathname)
 
   if (isAuthPage || isWizardPage || isAdminPage) return <>{children}</>
 
@@ -50,7 +57,7 @@ export default function ConditionalChrome({ children }: { children: ReactNode })
 
   return (
     <>
-      <Header />
+      <Header transparent={isHomePage} />
       {children}
       <Footer />
       <Suspense>
