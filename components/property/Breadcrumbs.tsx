@@ -27,13 +27,13 @@ export default function Breadcrumbs({ items, className }: BreadcrumbsProps) {
         {backItem?.href ? (
           <Link
             href={backItem.href}
-            className="flex items-center gap-1 text-sm text-gray-600 hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
+            className="flex items-center gap-1 text-sm text-muted hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
           >
             <ChevronLeft className="w-4 h-4" aria-hidden="true" />
             {backItem.label}
           </Link>
         ) : (
-          <span className="flex items-center gap-1 text-sm text-gray-600">
+          <span className="flex items-center gap-1 text-sm text-muted">
             <ChevronLeft className="w-4 h-4" aria-hidden="true" />
             {backItem?.label}
           </span>
@@ -42,7 +42,7 @@ export default function Breadcrumbs({ items, className }: BreadcrumbsProps) {
 
       {/* Desktop: full trail */}
       <ol
-        className="hidden md:flex items-center gap-1 text-sm text-gray-500 flex-wrap"
+        className="hidden md:flex items-center gap-1 text-sm text-muted flex-wrap"
         itemScope
         itemType="https://schema.org/BreadcrumbList"
       >
@@ -59,7 +59,7 @@ export default function Breadcrumbs({ items, className }: BreadcrumbsProps) {
               <meta itemProp="position" content={String(index + 1)} />
               {isLast ? (
                 <span
-                  className="text-gray-700 font-medium"
+                  className="text-text font-medium"
                   aria-current="page"
                   itemProp="name"
                 >
@@ -75,7 +75,7 @@ export default function Breadcrumbs({ items, className }: BreadcrumbsProps) {
                     <span itemProp="name">{item.label}</span>
                   </Link>
                   <ChevronRight
-                    className="w-3.5 h-3.5 text-gray-300 flex-shrink-0"
+                    className="w-3.5 h-3.5 text-neutral-300 flex-shrink-0"
                     aria-hidden="true"
                   />
                 </>
@@ -83,7 +83,7 @@ export default function Breadcrumbs({ items, className }: BreadcrumbsProps) {
                 <>
                   <span itemProp="name">{item.label}</span>
                   <ChevronRight
-                    className="w-3.5 h-3.5 text-gray-300 flex-shrink-0"
+                    className="w-3.5 h-3.5 text-neutral-300 flex-shrink-0"
                     aria-hidden="true"
                   />
                 </>
