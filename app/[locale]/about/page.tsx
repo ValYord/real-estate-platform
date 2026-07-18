@@ -47,14 +47,14 @@ export default async function AboutPage({ params }: { params: Promise<PageParams
   const breadcrumbItems = [{ label: tCommon('home'), href: '/' }, { label: t('breadcrumb') }]
 
   return (
-    <main className="max-w-5xl mx-auto px-4 py-8 sm:py-12">
+    <main className="max-w-[760px] mx-auto px-4 py-8 sm:py-12">
       <JsonLd data={organizationJsonLd(locale)} />
       <JsonLd data={breadcrumbListJsonLd(breadcrumbItems, locale)} />
       <Breadcrumbs items={breadcrumbItems} />
 
       {/* Hero */}
       <FadeIn>
-        <header className="mt-6 max-w-[760px]">
+        <header className="mt-6">
           <h1 className="text-2xl lg:text-3xl font-bold text-text">{t('heroTitle')}</h1>
           <p className="mt-3 text-lg text-muted">{t('heroTagline')}</p>
         </header>
@@ -62,7 +62,7 @@ export default async function AboutPage({ params }: { params: Promise<PageParams
 
       {/* Our story */}
       <SlideIn>
-        <section className="mt-12 max-w-[760px] border-t border-border pt-8 space-y-4">
+        <section className="mt-12 border-t border-border pt-8 space-y-4">
           <h2 className="text-xl font-semibold text-text">{t('storyHeading')}</h2>
           {storyParagraphs.map((paragraph, index) => (
             <p key={index} className="text-text leading-relaxed">
@@ -75,7 +75,10 @@ export default async function AboutPage({ params }: { params: Promise<PageParams
       {/* Mission & values */}
       <section className="mt-12 border-t border-border pt-8">
         <h2 className="text-xl font-semibold text-text">{t('missionHeading')}</h2>
-        <Stagger className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Stagger
+          className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6"
+          margin="0px 0px 2000px 0px"
+        >
           {values.map((value, index) => {
             const Icon = VALUE_ICONS[index % VALUE_ICONS.length]
             return (
@@ -96,7 +99,10 @@ export default async function AboutPage({ params }: { params: Promise<PageParams
       {/* Statistics */}
       <section className="mt-12 border-t border-border pt-8">
         <h2 className="text-xl font-semibold text-text">{t('statsHeading')}</h2>
-        <Stagger className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <Stagger
+          className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-6"
+          margin="0px 0px 2000px 0px"
+        >
           {stats.map((stat) => (
             <Card key={stat.label}>
               <CardBody className="text-center sm:text-left">
