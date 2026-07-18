@@ -20,3 +20,9 @@ agency.db
 # Next.js build artifacts — regenerated on every build, must not be committed
 next-env.d.ts
 *.tsbuildinfo
+
+# Agency infra files written into the workspace — must never land in a task PR
+# (.claude/settings.local.json is a local Claude Code file; KNOWN_MISTAKES.md is the
+# agency learning log the coding agents read from the workspace)
+.claude/settings.local.json
+KNOWN_MISTAKES.md
