@@ -85,7 +85,19 @@ const NAV_ITEMS: NavItemConfig[] = [
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-export default function Header() {
+export interface HeaderProps {
+  /**
+   * When true, the header starts transparent (white text/icons) over a dark
+   * hero and switches to a solid white bar once the page scrolls past 64px —
+   * the Home page treatment (docs/en/pages/01-home.md §3.1). Every other page
+   * has no hero to sit on top of, so the header must default to solid/opaque
+   * (dark text on white) from the start, or its white-on-white content is
+   * effectively invisible until the user scrolls.
+   */
+  transparent?: boolean
+}
+
+export default function Header({ transparent = false }: HeaderProps) {
   const tNav = useTranslations('nav')
   const tHeader = useTranslations('header')
 
@@ -94,6 +106,10 @@ export default function Header() {
   const pathname = usePathname()
 
   const [scrolled, setScrolled] = useState(false)
+  // Whether the header should render its solid (white bg, dark text) look.
+  // Non-transparent pages are always solid; transparent (Home) pages become
+  // solid only once scrolled past the hero.
+  const solid = !transparent || scrolled
   const [mobileOpen, setMobileOpen] = useState(false)
   const [openMenu, setOpenMenu] = useState<string | null>(null)
   const menuTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -151,7 +167,7 @@ export default function Header() {
       <header
         className={cn(
           'sticky top-0 z-50 w-full h-16 transition-colors duration-200',
-          scrolled ? 'bg-white shadow-sm' : 'bg-transparent',
+          solid ? 'bg-white shadow-sm' : 'bg-transparent',
         )}
       >
         <div className="max-w-7xl mx-auto px-4 h-full flex items-center justify-between gap-4">
@@ -161,7 +177,7 @@ export default function Header() {
             href="/"
             className={cn(
               'flex-shrink-0 text-xl font-bold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded',
-              scrolled ? 'text-primary' : 'text-white',
+              solid ? 'text-primary' : 'text-white',
             )}
           >
             {tHeader('logo')}
@@ -180,11 +196,11 @@ export default function Header() {
                   className={cn(
                     'flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
-                    scrolled
+                    solid
                       ? 'text-gray-700 hover:text-primary hover:bg-gray-100'
                       : 'text-white/90 hover:text-white hover:bg-white/10',
                     openMenu === item.key &&
-                      (scrolled ? 'text-primary bg-gray-100' : 'text-white bg-white/10'),
+                      (solid ? 'text-primary bg-gray-100' : 'text-white bg-white/10'),
                   )}
                   aria-haspopup="true"
                   aria-expanded={openMenu === item.key}
@@ -234,7 +250,7 @@ export default function Header() {
               aria-label={tHeader('favorites')}
               className={cn(
                 'p-2 rounded-lg transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
-                scrolled
+                solid
                   ? 'text-gray-600 hover:text-primary hover:bg-gray-100'
                   : 'text-white/80 hover:text-white hover:bg-white/10',
               )}
@@ -245,7 +261,7 @@ export default function Header() {
             {/* Notifications — guests don't see the bell (doc "Roles") */}
             {userId && (
               <NotificationBellDesktop
-                scrolled={scrolled}
+                scrolled={solid}
                 unreadCount={unreadCount}
                 onMarkAllRead={markAllReadOptimistic}
                 onItemRead={markOneReadOptimistic}
@@ -255,7 +271,7 @@ export default function Header() {
             {/* Separator */}
             <div
               aria-hidden="true"
-              className={cn('w-px h-5 mx-1', scrolled ? 'bg-gray-200' : 'bg-white/20')}
+              className={cn('w-px h-5 mx-1', solid ? 'bg-gray-200' : 'bg-white/20')}
             />
 
             {/* Language switcher */}
@@ -264,7 +280,7 @@ export default function Header() {
               aria-label={tHeader('language')}
               className={cn(
                 'flex items-center rounded-lg overflow-hidden border text-xs font-medium',
-                scrolled ? 'border-gray-200' : 'border-white/30',
+                solid ? 'border-gray-200' : 'border-white/30',
               )}
             >
               {LOCALES.map((loc) => (
@@ -278,7 +294,7 @@ export default function Header() {
                     'focus-visible:outline-none focus-visible:ring-inset focus-visible:ring-2 focus-visible:ring-primary',
                     locale === loc
                       ? 'bg-primary text-white'
-                      : scrolled
+                      : solid
                         ? 'text-gray-600 hover:bg-gray-100'
                         : 'text-white/80 hover:bg-white/10',
                   )}
@@ -289,7 +305,7 @@ export default function Header() {
             </div>
 
             {/* Currency switcher */}
-            <CurrencySwitcher variant="header" scrolled={scrolled} />
+            <CurrencySwitcher variant="header" scrolled={solid} />
 
             {/* Post a property */}
             <Link
@@ -305,7 +321,7 @@ export default function Header() {
               className={cn(
                 'px-4 py-2 text-sm font-medium rounded-lg border transition-colors duration-150',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-                scrolled
+                solid
                   ? 'text-gray-700 border-gray-300 hover:bg-gray-50'
                   : 'text-white border-white/40 hover:bg-white/10',
               )}
@@ -319,7 +335,7 @@ export default function Header() {
             className={cn(
               'lg:hidden p-2 rounded-lg transition-colors duration-150',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
-              scrolled
+              solid
                 ? 'text-gray-700 hover:bg-gray-100'
                 : 'text-white hover:bg-white/10',
             )}

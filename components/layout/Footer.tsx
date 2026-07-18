@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { ChevronDown } from 'lucide-react'
 
 type FooterLink = { label: string; href: string }
 type FooterColumn = { heading: string; links: FooterLink[] }
@@ -108,20 +109,16 @@ export default function Footer() {
                 <span className="text-sm font-semibold text-white uppercase tracking-wider">
                   {col.heading}
                 </span>
-                {/* Chevron icon — rotates when <details> is open */}
-                <svg
+                {/* Chevron icon — rotates when <details> is open. Uses the
+                    shared lucide-react icon (like the rest of the header/nav)
+                    rather than a hand-rolled <svg> so it always ships with an
+                    explicit intrinsic width/height and can't blow up to its
+                    unconstrained default size if the Tailwind size utility
+                    fails to apply for any reason. */}
+                <ChevronDown
                   aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="w-4 h-4 text-gray-400 transition-transform duration-200 group-open:rotate-180"
-                >
-                  <polyline points="6 9 12 15 18 9" />
-                </svg>
+                  className="w-4 h-4 shrink-0 text-gray-400 transition-transform duration-200 group-open:rotate-180"
+                />
               </summary>
               <ul className="pb-4 space-y-3">
                 {col.links.map((link) => (
